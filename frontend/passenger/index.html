@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXORA V1 — Passenger Smart Commuter Portal</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/passenger/passenger.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="passenger-nav">
+        <div class="nav-logo">
+            <span>📱</span>
+            <span>NEXORA PASSENGER</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 0.8rem; color: #60a5fa;" id="paxCode">PAX-001</span>
+            <span style="font-size: 0.8rem; color: var(--text-dim);" id="paxName">Passenger</span>
+            <a href="/" class="btn-sm" style="text-decoration: none;">Portals</a>
+            <button class="btn-sm btn-danger" onclick="logout()">Sign Out</button>
+        </div>
+    </header>
+
+    <main class="pax-container">
+        <!-- Active SOS Incident Tracker (Shown only when an emergency is live) -->
+        <div class="active-emergency-tracker" id="activeSOSContainer" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <strong style="color: #ff6b6b; font-size: 0.9rem;">🚨 ACTIVE EMERGENCY: <span id="activeSOSId">SOS-000001</span></strong>
+                <span class="status-pill active" id="activeSOSStatus">ACTIVE</span>
+            </div>
+            <div style="font-size: 0.8rem; margin-top: 6px;" id="activeSOSAddress">Gandhipuram Central</div>
+            <div style="font-size: 0.75rem; color: #fca5a5; margin-top: 4px;" id="activeSOSDetail">Alert broadcasted. Scanning for nearby emergency responders...</div>
+
+            <!-- Visual 4-Step Lifecycle -->
+            <div class="tracker-step-bar">
+                <div class="tracker-step active" id="step1">
+                    <div class="tracker-dot"></div>
+                    <span>1. Alerted</span>
+                </div>
+                <div class="tracker-step" id="step2">
+                    <div class="tracker-dot"></div>
+                    <span>2. Accepted</span>
+                </div>
+                <div class="tracker-step" id="step3">
+                    <div class="tracker-dot"></div>
+                    <span>3. En Route</span>
+                </div>
+                <div class="tracker-step" id="step4">
+                    <div class="tracker-dot"></div>
+                    <span>4. Safe</span>
+                </div>
+            </div>
+
+            <button type="button" class="btn-sm" style="background: rgba(239, 68, 68, 0.3); border-color: var(--danger); width: 100%;" onclick="cancelEmergencySOS()">
+                Cancel Emergency (False Alarm)
+            </button>
+        </div>
+
+        <!-- STRICT 2-STEP EMERGENCY SOS TRIGGER CARD -->
+        <div class="app-card" style="border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.05);">
+            <div class="sos-trigger-box">
+                <button type="button" class="btn-sos-main disabled" id="btnSOSMain">
+                    ⚠️ GPS REQUIRED FOR EMERGENCY SOS
+                </button>
+                <div class="sos-helper-text" id="sosHelper">
+                    Your GPS coordinates must be acquired before emergency dispatch can be activated.
+                </div>
+            </div>
+        </div>
+
+        <!-- Location Management Card -->
+        <div class="app-card">
+            <div class="gps-bar">
+                <div class="gps-indicator inactive" id="gpsIndicator">
+                    <span>⚪</span> GPS Inactive
+                </div>
+                <button class="btn-sm" onclick="requestDeviceLocation()">📍 Device GPS Fix</button>
+            </div>
+
+            <!-- Quick Landmark Presets for Testing -->
+            <div style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px;">
+                <button class="btn-sm" onclick="setPresetLocation('gandhipuram')">Gandhipuram</button>
+                <button class="btn-sm" onclick="setPresetLocation('lakshmimills')">Lakshmi Mills</button>
+                <button class="btn-sm" onclick="setPresetLocation('peelamedu')">Peelamedu</button>
+                <button class="btn-sm" onclick="setPresetLocation('airport')">Airport</button>
+                <button class="btn-sm" onclick="setPresetLocation('junction')">Junction</button>
+            </div>
+        </div>
+
+        <!-- Interactive Map -->
+        <div class="app-card" style="padding: 10px;">
+            <div id="passengerMap"></div>
+        </div>
+
+        <!-- Nearby Buses & Predictive ETAs -->
+        <div class="app-card">
+            <div style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px;">
+                🚍 Nearby Buses & Real-Time Arrival
+            </div>
+            <div id="nearbyBusesList">
+                <div style="font-size: 0.8rem; color: var(--text-dim);">Scanning for active buses...</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 2-Step Emergency Confirmation Modal -->
+    <div class="modal-overlay" id="sosModalOverlay">
+        <div class="modal-box">
+            <div class="modal-icon">🚨</div>
+            <h2 class="modal-title">CONFIRM EMERGENCY DISPATCH</h2>
+            <p class="modal-desc">
+                You are about to transmit an immediate high-priority SOS emergency alert to nearby responders within 1.0 km and central fleet command.
+            </p>
+
+            <div class="modal-location-badge">
+                <strong>📍 Transmitting Coordinates:</strong><br>
+                <span id="modalCoords">11.01680, 76.95580</span><br>
+                <small style="color: var(--text-dim);">Reverse-geocoded human street address will be computed and dispatched automatically.</small>
+            </div>
+
+            <button type="button" class="btn-confirm-sos" id="btnConfirmSOS" onclick="triggerEmergencySOS()" disabled>
+                Confirm Immediate Emergency (3s)
+            </button>
+            <button type="button" class="btn-cancel-modal" onclick="closeSOSConfirmationModal()">
+                Dismiss / Not an Emergency
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/auth.js"></script>
+    <script src="/passenger/passenger.js"></script>
+</body>
+</html>

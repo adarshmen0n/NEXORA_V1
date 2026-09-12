@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXORA V1 — Transit Pilot & Driver Cockpit</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/driver/driver.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="driver-nav">
+        <div class="driver-brand">
+            <span>🚍</span>
+            <span>NEXORA DRIVER COCKPIT</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="font-size: 0.85rem;">
+                <span id="driverCode" style="color: #60a5fa; font-weight: bold;">DRV-001</span> • 
+                <span id="driverName">Driver</span>
+            </div>
+            <a href="/" class="btn-sm" style="text-decoration: none;">Portals</a>
+            <button class="btn-sm btn-danger" onclick="logout()">Sign Out</button>
+        </div>
+    </header>
+
+    <main class="cockpit-container">
+        <!-- Vehicle & Route Setup Card -->
+        <div class="cockpit-card">
+            <div class="card-title">⚙️ Vehicle & Route Assignment</div>
+            
+            <div class="control-row">
+                <div>
+                    <label style="display: block; font-size: 0.8rem; color: var(--text-dim); margin-bottom: 6px;">Select Assigned Bus</label>
+                    <select id="selectBus" class="input-select">
+                        <option value="BUS-001">BUS-001 (TN 38 BX 1001)</option>
+                        <option value="BUS-002">BUS-002 (TN 38 BX 1002)</option>
+                        <option value="BUS-003">BUS-003 (TN 38 BX 1003)</option>
+                        <option value="BUS-004">BUS-004 (TN 38 BX 1004)</option>
+                        <option value="BUS-005">BUS-005 (TN 38 BX 1005)</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.8rem; color: var(--text-dim); margin-bottom: 6px;">Select Assigned Route</label>
+                    <select id="selectRoute" class="input-select" onchange="onRouteSelected()">
+                        <!-- Routes populated dynamically -->
+                    </select>
+                </div>
+            </div>
+
+            <button type="button" class="btn-trip btn-start" id="btnTripAction" onclick="toggleTrip()">
+                ▶ START NEW TRIP
+            </button>
+        </div>
+
+        <!-- Telemetry & Transmitter Status -->
+        <div class="cockpit-card">
+            <div class="card-title">📡 Real-Time GPS Telemetry Readout</div>
+
+            <div class="gps-switch">
+                <div>
+                    <div style="font-weight: 600; font-size: 0.9rem;">GPS Broadcaster Status</div>
+                    <div style="font-size: 0.75rem; color: var(--text-dim);">Sends coordinate fixes every 2.5s to central dispatcher</div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span class="gps-badge offline" id="tripStatusIndicator">BUS IDLE</span>
+                    <span class="gps-badge offline" id="gpsStatus">OFFLINE</span>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 14px; display: flex; align-items: center; gap: 8px; font-size: 0.85rem;">
+                <input type="checkbox" id="chkSimulationMode" checked style="width: 18px; height: 18px; cursor: pointer;">
+                <label for="chkSimulationMode" style="cursor: pointer; color: #93c5fd;">
+                    Indoor Route Simulator Mode (Interpolates fixes along Coimbatore corridor if physical GPS is unavailable)
+                </label>
+            </div>
+
+            <div class="telemetry-grid">
+                <div class="telemetry-box">
+                    <div class="telemetry-val" id="telSpeed">0.0 km/h</div>
+                    <div class="telemetry-lbl">Current Speed</div>
+                </div>
+                <div class="telemetry-box">
+                    <div class="telemetry-val" id="telCoords" style="font-size: 1rem; line-height: 1.6;">— , —</div>
+                    <div class="telemetry-lbl">GPS Coordinates</div>
+                </div>
+                <div class="telemetry-box">
+                    <div class="telemetry-val" id="telAccuracy">± 0m</div>
+                    <div class="telemetry-lbl">GPS Accuracy</div>
+                </div>
+                <div class="telemetry-box">
+                    <div class="telemetry-val" id="telFixes">0</div>
+                    <div class="telemetry-lbl">Updates Sent</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cockpit Map -->
+        <div class="cockpit-card" style="padding: 10px;">
+            <div id="driverMap"></div>
+        </div>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/auth.js"></script>
+    <script src="/driver/driver.js"></script>
+</body>
+</html>

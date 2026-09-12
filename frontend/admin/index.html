@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXORA V1 — Admin & Fleet Central Dispatch</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/admin/admin.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <header class="navbar">
+        <div class="nav-brand">
+            <span class="brand-badge">CENTRAL DISPATCH</span>
+            <span class="nav-title">NEXORA V1 COMMAND</span>
+        </div>
+
+        <div class="nav-user">
+            <div class="user-badge">
+                <span class="role-pill" id="adminCode">ADM-001</span>
+                <span id="adminName">Admin</span>
+            </div>
+            <a href="/" class="btn-sm" style="text-decoration: none;">Portals</a>
+            <button class="btn-sm btn-danger" onclick="logout()">Sign Out</button>
+        </div>
+    </header>
+
+    <!-- Main 3-Column Command Workspace -->
+    <div class="dashboard-grid">
+        <!-- Column 1: Fleet & Controls -->
+        <aside class="sidebar-left">
+            <div class="panel-section">
+                <div class="section-header">
+                    <span class="section-title">📊 Fleet Overview</span>
+                </div>
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="kpiTotalBuses">5</div>
+                        <div class="kpi-label">Fleet Buses</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value success" id="kpiActiveBuses">0</div>
+                        <div class="kpi-label">Active Buses</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="kpiActiveTrips">0</div>
+                        <div class="kpi-label">Active Trips</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="kpiActiveSOS">0</div>
+                        <div class="kpi-label">Active SOS</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Switcher (Fleet / Users) -->
+            <div class="admin-tab-bar">
+                <button class="admin-tab active" id="tabBtnFleet" onclick="switchAdminView('fleet')">Fleet Live List</button>
+                <button class="admin-tab" id="tabBtnUsers" onclick="switchAdminView('users')">User Roster</button>
+            </div>
+
+            <!-- Fleet Section -->
+            <div class="panel-section" id="fleetPanelSection">
+                <div class="section-header">
+                    <span class="section-title">🚍 Fleet Roster (5 Buses)</span>
+                    <button class="btn-sm" onclick="loadFleet()">↻ Refresh</button>
+                </div>
+                <div id="fleetList">
+                    <!-- Dynamic Bus List -->
+                </div>
+            </div>
+
+            <!-- Users Section (Hidden by default) -->
+            <div class="panel-section" id="usersPanelSection" style="display: none;">
+                <div class="section-header">
+                    <span class="section-title">👥 System Users</span>
+                    <button class="btn-sm" onclick="loadUsers()">↻</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <!-- Dynamic User Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Column 2: Live Geographic Map -->
+        <main class="map-container-wrapper">
+            <div class="map-floating-bar">
+                <button class="btn-sm" onclick="fitAllBuses()">🎯 Fit All Buses</button>
+                <button class="btn-sm" onclick="loadRoutes()">🗺️ Re-align Routes</button>
+                <button class="btn-sm" onclick="loadDashboardMetrics()">⚡ Sync Telemetry</button>
+            </div>
+            <div id="adminMap"></div>
+        </main>
+
+        <!-- Column 3: SOS Command Center & Audit Stream -->
+        <aside class="sidebar-right">
+            <!-- Emergency Incidents Section -->
+            <div class="panel-section" style="background: rgba(239, 68, 68, 0.05);">
+                <div class="section-header">
+                    <span class="section-title" style="color: #f87171;">🚨 Live Emergency Incidents</span>
+                    <button class="btn-sm btn-danger" onclick="loadActiveSOS()">↻</button>
+                </div>
+                <div id="sosIncidentsList">
+                    <!-- Dynamic Active SOS Cards -->
+                </div>
+            </div>
+
+            <!-- System Audit Trail Section -->
+            <div class="panel-section" style="flex: 1; display: flex; flex-direction: column;">
+                <div class="section-header">
+                    <span class="section-title">📡 Real-Time Telemetry Feed</span>
+                </div>
+                <div class="log-stream" id="logStream" style="flex: 1;">
+                    <div class="log-entry">NEXORA Admin Command Center loaded.</div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Leaflet & App Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/auth.js"></script>
+    <script src="/admin/admin.js"></script>
+</body>
+</html>

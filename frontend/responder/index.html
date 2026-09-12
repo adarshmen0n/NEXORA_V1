@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXORA V1 — Tactical Emergency Responder Console</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/responder/responder.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="responder-nav">
+        <div class="brand-responder">
+            <span>🚨</span>
+            <span>NEXORA QUICK RESPONSE UNIT</span>
+            <span class="badge-unit">SECTOR 1</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="font-size: 0.85rem;">
+                <span id="responderCode" style="color: #f87171; font-weight: bold;">RSP-001</span> • 
+                <span id="responderName">Responder</span>
+            </div>
+            <a href="/" class="btn-sm" style="text-decoration: none;">Portals</a>
+            <button class="btn-sm btn-danger" onclick="logout()">Sign Out</button>
+        </div>
+    </header>
+
+    <main class="responder-container">
+        <!-- Live Tactical Beacon Status Bar -->
+        <div class="beacon-bar">
+            <div class="beacon-status">
+                <div class="beacon-ping"></div>
+                <div>
+                    <strong style="font-size: 0.95rem;">Tactical Responder Beacon ACTIVE</strong>
+                    <div style="font-size: 0.75rem; color: var(--text-dim);">
+                        Geofenced Emergency Radius: <span style="color: #f87171; font-weight: bold;">1.0 km</span> • 
+                        Current Fix: <span id="beaconCoords">11.01800, 76.96000</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preset Tactical Relocation Buttons for Testing Proximity -->
+            <div style="display: flex; gap: 6px;">
+                <button class="btn-sm" onclick="setResponderPreset(11.0180, 76.9600, 'Near Gandhipuram (400m from Stand)')">Base: Gandhipuram</button>
+                <button class="btn-sm" onclick="setResponderPreset(11.0255, 76.9960, 'Peelamedu Tech Park')">Peelamedu Post</button>
+                <button class="btn-sm" onclick="setResponderPreset(11.0020, 76.9630, 'Railway Junction Area')">Junction Post</button>
+            </div>
+        </div>
+
+        <!-- Tactical Map -->
+        <div class="app-card" style="padding: 10px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px;">
+            <div id="responderMap"></div>
+        </div>
+
+        <!-- Live Emergency Incident Feed -->
+        <div>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                <span style="font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #f87171;">
+                    🚨 Priority Emergency Dispatches
+                </span>
+                <button class="btn-sm" onclick="loadActiveAlerts()">↻ Refresh</button>
+            </div>
+            <div id="activeIncidentsList">
+                <div style="text-align: center; color: var(--text-dim); padding: 16px;">Scanning radar...</div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/auth.js"></script>
+    <script src="/responder/responder.js"></script>
+</body>
+</html>

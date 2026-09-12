@@ -1,0 +1,532 @@
+/* =========================================================
+   NEXORA V1 — Unified Mobile & Desktop Design System
+   Next-generation Explainable Route Optimization & Retrieval Assistant
+   ========================================================= */
+
+:root {
+  --bg-main: #0a0e17;
+  --bg-panel: #111827;
+  --bg-card: #1a233a;
+  --bg-card-hover: #222e4d;
+  --border: #283756;
+  --border-focus: #3b82f6;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --success: #10b981;
+  --danger: #ef4444;
+  --danger-bright: #ff3333;
+  --warning: #f59e0b;
+  --accent: #06b6d4;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  --radius: 12px;
+  --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg-main);
+  color: var(--text-main);
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Header Navbar */
+.app-header {
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-logo {
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #ffffff 40%, #60a5fa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand-badge {
+  background: rgba(37, 99, 235, 0.2);
+  border: 1px solid rgba(37, 99, 235, 0.5);
+  color: #93c5fd;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.role-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+}
+.role-tag.admin { color: #c084fc; border-color: #9333ea; }
+.role-tag.driver { color: #86efac; border-color: #10b981; }
+.role-tag.passenger { color: #93c5fd; border-color: #3b82f6; }
+.role-tag.responder { color: #fca5a5; border-color: #ef4444; }
+
+.btn-nav {
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-nav:hover {
+  background: var(--bg-card);
+  border-color: var(--border-focus);
+}
+
+/* Container */
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Views Management */
+.view-panel {
+  display: none;
+  animation: fadeIn 0.2s ease-in-out;
+}
+.view-panel.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Card System */
+.card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.card-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 18px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-decoration: none;
+}
+
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: var(--primary-hover); }
+
+.btn-success { background: var(--success); color: white; }
+.btn-success:hover { background: #059669; }
+
+.btn-danger { background: var(--danger); color: white; }
+.btn-danger:hover { background: #dc2626; }
+
+.btn-outline {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+}
+.btn-outline:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-focus);
+}
+
+/* Credentials Table on Gateway */
+.credentials-banner {
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.3);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.credentials-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.cred-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+.cred-card strong { display: block; margin-bottom: 2px; }
+.cred-card code { color: #60a5fa; font-family: monospace; font-size: 0.8rem; }
+
+/* 1-Tap Quick Enter Buttons */
+.roles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.role-select-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.role-select-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-focus);
+}
+.role-select-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 4px;
+}
+.role-select-card.admin::before { background: #a855f7; }
+.role-select-card.driver::before { background: #10b981; }
+.role-select-card.passenger::before { background: #3b82f6; }
+.role-select-card.responder::before { background: #ef4444; }
+
+.role-icon { font-size: 2.2rem; margin-bottom: 12px; }
+.role-select-card h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 6px; }
+.role-select-card p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 18px; flex-grow: 1; }
+
+/* Telemetry Readout Grid */
+.telemetry-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.telemetry-metric {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+}
+.telemetry-metric .val {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #60a5fa;
+  line-height: 1.2;
+}
+.telemetry-metric .lbl {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+/* Map Elements */
+.map-box {
+  width: 100%;
+  height: 380px;
+  border-radius: var(--radius);
+  background: #111;
+  border: 1px solid var(--border);
+  z-index: 1;
+}
+
+/* GPS Status Pill */
+.gps-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.gps-pill.live {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--success);
+  border: 1px solid var(--success);
+}
+.gps-pill.acquiring {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--warning);
+  border: 1px solid var(--warning);
+}
+.gps-pill.error {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}
+
+/* STRICT EMERGENCY SOS BUTTON */
+.sos-box {
+  text-align: center;
+  padding: 20px;
+  background: rgba(239, 68, 68, 0.05);
+  border: 2px dashed rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+}
+
+.btn-sos {
+  width: 100%;
+  padding: 18px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+}
+
+.btn-sos.disabled {
+  background: #1f2838;
+  color: #64748b;
+  cursor: not-allowed;
+  border: 1px dashed #334155;
+  box-shadow: none;
+}
+
+.btn-sos.armed {
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+  color: white;
+  border: 2px solid #f87171;
+  box-shadow: 0 0 25px rgba(239, 68, 68, 0.5);
+  animation: armedPulse 1.5s infinite;
+}
+
+@keyframes armedPulse {
+  0% { transform: scale(1); box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+  50% { transform: scale(1.02); box-shadow: 0 0 30px rgba(239, 68, 68, 0.8); }
+  100% { transform: scale(1); box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+}
+
+/* Modal 2-Step Confirmation */
+.modal-backdrop {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(6px);
+  z-index: 99999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.modal-backdrop.open { display: flex; }
+
+.modal-dialog {
+  background: #1c1316;
+  border: 2px solid var(--danger);
+  border-radius: 16px;
+  max-width: 440px;
+  width: 100%;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 0 40px rgba(239, 68, 68, 0.6);
+}
+
+.modal-dialog.auth-modal {
+  background: var(--bg-panel);
+  border: 1px solid #3b82f6;
+  box-shadow: 0 0 35px rgba(59, 130, 246, 0.35);
+  color: var(--text-main);
+}
+
+/* Active Emergency Tracker */
+.active-sos-card {
+  background: rgba(239, 68, 68, 0.12);
+  border: 2px solid var(--danger);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.step-tracker {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 16px 0;
+}
+.step-tracker .step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+}
+.step-tracker .dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #334155;
+  margin-bottom: 4px;
+}
+.step-tracker .step.active .dot { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
+.step-tracker .step.done .dot { background: var(--success); }
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .app-header { padding: 10px 14px; }
+  .app-container { padding: 10px; }
+  .map-box { height: 280px; }
+}
+
+/* POI Filter Bar */
+.poi-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 6px 10px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  scrollbar-width: thin;
+}
+.poi-filter-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.poi-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.poi-btn:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-main);
+  border-color: var(--border-focus);
+}
+.poi-btn.active {
+  background: #2563eb;
+  color: white;
+  border-color: #3b82f6;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+}
+
+/* Leaflet Layer Control Dark Theme */
+.leaflet-control-layers {
+  background: rgba(15, 23, 42, 0.92) !important;
+  border: 1px solid #334155 !important;
+  border-radius: 8px !important;
+  color: #f1f5f9 !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 0.78rem !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5) !important;
+}
+.leaflet-control-layers-toggle {
+  background-color: #1e293b !important;
+  border-radius: 6px !important;
+}
+.leaflet-control-layers-expanded {
+  padding: 10px 14px !important;
+}
+.leaflet-control-layers label {
+  margin-bottom: 4px;
+  cursor: pointer;
+}
+.leaflet-popup-content-wrapper {
+  background: #ffffff !important;
+  border-radius: 10px !important;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5) !important;
+}
+.leaflet-popup-tip {
+  background: #ffffff !important;
+}

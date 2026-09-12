@@ -1,0 +1,384 @@
+/* Admin Dashboard Stylesheet */
+:root {
+  --bg-dark: #090d16;
+  --bg-panel: #111827;
+  --bg-card: #1f293d;
+  --border: #2e3d5b;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --text-main: #f8fafc;
+  --text-dim: #94a3b8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Top Navbar */
+.navbar {
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-badge {
+  background: #3b82f6;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+
+.nav-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.nav-user {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-card);
+  padding: 6px 14px;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+
+.role-pill {
+  background: #8b5cf6;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-main);
+  transition: all 0.15s ease;
+}
+.btn-sm:hover { background: var(--border); }
+.btn-sm.btn-danger:hover { background: var(--danger); border-color: var(--danger); }
+
+/* Main Dashboard Workspace */
+.dashboard-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 340px 1fr 380px;
+  overflow: hidden;
+}
+
+/* Sidebar Left: Metrics & Fleet */
+.sidebar-left {
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* Center: Map Area */
+.map-container-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+}
+
+#adminMap {
+  width: 100%;
+  flex: 1;
+  background: #111;
+}
+
+.map-floating-bar {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 1000;
+  display: flex;
+  gap: 8px;
+  background: rgba(17, 24, 39, 0.9);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+/* Sidebar Right: Incident Center & Logs */
+.sidebar-right {
+  background: var(--bg-panel);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* Section Containers */
+.panel-section {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* KPI Cards Strip */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.kpi-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.kpi-value.danger { color: var(--danger); }
+.kpi-value.success { color: var(--success); }
+
+.kpi-label {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Fleet List */
+.fleet-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.fleet-item:hover {
+  border-color: var(--primary);
+  transform: translateX(2px);
+}
+
+.fleet-item-info strong {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.fleet-item-info small {
+  color: var(--text-dim);
+  font-size: 0.75rem;
+}
+
+.status-pill {
+  padding: 3px 8px;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+.status-pill.active { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
+.status-pill.idle { background: rgba(148, 163, 184, 0.2); color: var(--text-dim); border: 1px solid var(--border); }
+
+/* Emergency Incidents List */
+.emergency-card {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+  animation: pulse-danger 2s infinite;
+}
+
+@keyframes pulse-danger {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.emergency-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.emergency-code {
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: #f87171;
+}
+
+.emergency-address {
+  font-size: 0.8rem;
+  color: var(--text-main);
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.emergency-meta {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+/* Event Logs Stream */
+.log-stream {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.75rem;
+  color: #cbd5e1;
+  max-height: 200px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.log-entry {
+  padding: 4px 6px;
+  background: var(--bg-card);
+  border-radius: 4px;
+  border-left: 2px solid var(--primary);
+}
+
+.log-entry.alert { border-left-color: var(--danger); color: #fca5a5; }
+.log-entry.trip { border-left-color: var(--success); color: #86efac; }
+
+/* Custom Map Markers */
+.bus-marker-icon {
+  background: #2563eb;
+  color: white;
+  border-radius: 8px;
+  border: 2px solid white;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+  text-align: center;
+}
+
+.sos-marker-icon {
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  box-shadow: 0 0 15px #ef4444;
+  animation: pulse-marker 1s infinite;
+}
+
+@keyframes pulse-marker {
+  0% { transform: scale(0.9); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(0.9); }
+}
+
+/* Tabs */
+.admin-tab-bar {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-panel);
+}
+
+.admin-tab {
+  flex: 1;
+  padding: 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.admin-tab.active {
+  color: var(--primary);
+  border-bottom: 2px solid var(--primary);
+}
+
+/* Tables */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+.data-table th, .data-table td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.data-table th {
+  color: var(--text-dim);
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}

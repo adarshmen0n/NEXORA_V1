@@ -1,0 +1,299 @@
+/* Passenger Web App Stylesheet */
+:root {
+  --bg-app: #0a0e17;
+  --panel: #131b2e;
+  --card: #1c263d;
+  --border: #283756;
+  --primary: #3b82f6;
+  --success: #10b981;
+  --danger: #ef4444;
+  --danger-bright: #ff3b3b;
+  --warning: #f59e0b;
+  --text-main: #f8fafc;
+  --text-dim: #94a3b8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg-app);
+  color: var(--text-main);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.passenger-nav {
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: -0.02em;
+}
+
+.pax-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 12px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.app-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* Map */
+#passengerMap {
+  height: 240px;
+  width: 100%;
+  border-radius: 10px;
+  background: #000;
+}
+
+/* GPS Status Strip */
+.gps-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--card);
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.gps-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.gps-indicator.active { color: var(--success); }
+.gps-indicator.inactive { color: var(--warning); }
+
+/* STRICT EMERGENCY SOS BUTTON SECTION */
+.sos-trigger-box {
+  text-align: center;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+
+.btn-sos-main {
+  width: 100%;
+  padding: 18px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-transform: uppercase;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Disabled state when GPS is not acquired */
+.btn-sos-main.disabled {
+  background: #252d3d;
+  color: #64748b;
+  cursor: not-allowed;
+  border: 1px dashed #3a4760;
+  box-shadow: none;
+}
+
+/* Armed state when GPS is active */
+.btn-sos-main.armed {
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+  color: white;
+  cursor: pointer;
+  border: 2px solid #f87171;
+  box-shadow: 0 0 25px rgba(239, 68, 68, 0.5);
+  animation: armed-glow 1.5s infinite;
+}
+
+@keyframes armed-glow {
+  0% { transform: scale(1); box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+  50% { transform: scale(1.02); box-shadow: 0 0 30px rgba(239, 68, 68, 0.8); }
+  100% { transform: scale(1); box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+}
+
+.sos-helper-text {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-top: 8px;
+}
+
+/* 2-Step Confirmation Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal-overlay.show {
+  display: flex;
+}
+
+.modal-box {
+  background: #1e1215;
+  border: 2px solid var(--danger);
+  border-radius: 16px;
+  max-width: 440px;
+  width: 100%;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 0 40px rgba(239, 68, 68, 0.6);
+  animation: modal-pop 0.25s ease-out;
+}
+
+@keyframes modal-pop {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modal-icon {
+  font-size: 3.5rem;
+  margin-bottom: 12px;
+}
+
+.modal-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #ff6b6b;
+  margin-bottom: 8px;
+}
+
+.modal-desc {
+  font-size: 0.85rem;
+  color: #fca5a5;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.modal-location-badge {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.btn-confirm-sos {
+  width: 100%;
+  padding: 16px;
+  background: var(--danger);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  cursor: pointer;
+  margin-bottom: 10px;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+}
+
+.btn-cancel-modal {
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+/* Active Emergency Incident Tracker Card */
+.active-emergency-tracker {
+  background: rgba(239, 68, 68, 0.15);
+  border: 2px solid var(--danger);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.tracker-step-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 14px 0;
+  position: relative;
+}
+
+.tracker-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  z-index: 2;
+}
+
+.tracker-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #334155;
+  margin-bottom: 4px;
+}
+.tracker-step.completed .tracker-dot { background: var(--success); }
+.tracker-step.active .tracker-dot { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
+
+/* Nearby Buses */
+.nearby-bus-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.bus-eta-badge {
+  text-align: right;
+}
+
+.eta-minutes {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #60a5fa;
+}
+
+.eta-dist {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NEXORA V1 — Smart Transit & Emergency Response Platform</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Persistent Sticky Header -->
+    <header class="app-header">
+        <div class="brand-wrapper">
+            <span class="brand-logo">NEXORA</span>
+            <span class="brand-badge">V1 OFFICIAL</span>
+            <span id="serverHealthBadge" style="font-size: 0.75rem; font-weight: 700; color: #10b981;">🟢 Online</span>
+        </div>
+
+        <div class="nav-actions">
+            <span id="activeRoleTag" class="role-tag">Gateway</span>
+            <span id="navUserLabel" style="font-size: 0.8rem; color: var(--text-muted); display: none;"></span>
+            <button type="button" class="btn-nav" id="btnSwitchRole" style="display: none;" onclick="switchRole()">🔄 Switch Role</button>
+            <button type="button" class="btn-nav" id="btnSignOut" style="display: none;" onclick="signOut()">Sign Out</button>
+        </div>
+    </header>
+
+    <main class="app-container">
+        <!-- ======================================================= -->
+        <!-- VIEW 1: GATEWAY & ROLE SELECTOR (PASSWORDS DISPLAYED)   -->
+        <!-- ======================================================= -->
+        <section id="viewGateway" class="view-panel active">
+            <div style="text-align: center; margin: 16px 0 24px;">
+                <h1 style="font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px;">
+                    NEXORA V1
+                </h1>
+                <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 600px; margin: 0 auto;">
+                    Next-generation Explainable Route Optimization & Retrieval Assistant.
+                    Unified Single App: Real-Time Mobile GPS Tracking & Geofenced Emergency Response.
+                </p>
+            </div>
+
+            <!-- Host Access Passwords Display Banner -->
+            <div class="credentials-banner">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <strong style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #93c5fd;">
+                        🔑 Server Access Accounts & Passwords (All Devices)
+                    </strong>
+                    <span style="font-size: 0.75rem; color: #60a5fa; font-weight: bold;">Password for all: Password123</span>
+                </div>
+                <div class="credentials-grid">
+                    <div class="cred-card">
+                        <strong>👑 Admin (Command Host)</strong>
+                        <code>admin@nexora.local</code>
+                    </div>
+                    <div class="cred-card">
+                        <strong>🚍 Driver (Bus Cockpit)</strong>
+                        <code>driver@nexora.local</code>
+                    </div>
+                    <div class="cred-card">
+                        <strong>📱 Passenger (Commuter)</strong>
+                        <code>passenger@nexora.local</code>
+                    </div>
+                    <div class="cred-card">
+                        <strong>🚨 Responder (Rescue Unit)</strong>
+                        <code>responder@nexora.local</code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role Selection & Authentication Cards -->
+            <div class="roles-grid">
+                <div class="role-select-card admin">
+                    <div class="role-icon">🖥️</div>
+                    <h3>Admin Command Center</h3>
+                    <p>Central Host operations map showing Bus, Passenger, and Responder simultaneously with incident control.</p>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Account: <code style="color: #93c5fd;">admin@nexora.local</code>
+                    </div>
+                    <button type="button" class="btn btn-outline" onclick="openRoleAuthModal('ADMIN', 'admin@nexora.local', 'Admin Command Center', '🖥️')">
+                        👑 Sign In as Admin &rarr;
+                    </button>
+                </div>
+
+                <div class="role-select-card driver">
+                    <div class="role-icon">🚍</div>
+                    <h3>Driver Cockpit</h3>
+                    <p>Mobile console for Bus BUS-001 with continuous real-phone hardware GPS broadcasting and trip controls.</p>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Account: <code style="color: #6ee7b7;">driver@nexora.local</code>
+                    </div>
+                    <button type="button" class="btn btn-outline" onclick="openRoleAuthModal('DRIVER', 'driver@nexora.local', 'Driver Cockpit', '🚍')">
+                        🚍 Sign In as Driver &rarr;
+                    </button>
+                </div>
+
+                <div class="role-select-card passenger">
+                    <div class="role-icon">📱</div>
+                    <h3>Passenger Web App</h3>
+                    <p>Live bus arrival radar, predictive ETAs, and strict 2-step GPS-verified Emergency SOS trigger.</p>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Account: <code style="color: #fbcfe8;">passenger@nexora.local</code>
+                    </div>
+                    <button type="button" class="btn btn-outline" onclick="openRoleAuthModal('PASSENGER', 'passenger@nexora.local', 'Passenger Web App', '📱')">
+                        📱 Sign In as Passenger &rarr;
+                    </button>
+                </div>
+
+                <div class="role-select-card responder">
+                    <div class="role-icon">🚨</div>
+                    <h3>Emergency Responder</h3>
+                    <p>Rescue beacon receiving alerts across whole Coimbatore city (35 km metropolitan radius) with exact reverse-geocoded street addresses and incident resolution.</p>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Account: <code style="color: #fca5a5;">responder@nexora.local</code>
+                    </div>
+                    <button type="button" class="btn btn-outline" onclick="openRoleAuthModal('RESPONDER', 'responder@nexora.local', 'Emergency Responder', '🚨')">
+                        🚨 Sign In as Responder &rarr;
+                    </button>
+                </div>
+            </div>
+
+            <!-- Manual Sign In / Custom Login Form -->
+            <div class="card" style="max-width: 440px; margin: 0 auto;">
+                <div class="card-title" style="margin-bottom: 12px;">Sign In with Custom Account</div>
+                <form onsubmit="handleFormLogin(event)">
+                    <div style="margin-bottom: 12px;">
+                        <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px;">Email</label>
+                        <input type="email" id="loginEmail" style="width: 100%; padding: 10px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; color: white;" required placeholder="passenger@nexora.local">
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px;">Password</label>
+                        <input type="password" id="loginPass" style="width: 100%; padding: 10px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; color: white;" required placeholder="Password123">
+                    </div>
+                    <div id="loginFormError" style="display: none; color: #f87171; font-size: 0.85rem; margin-bottom: 12px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 12px; border-radius: 6px;"></div>
+                    <button type="submit" id="loginFormBtn" class="btn btn-primary" style="width: 100%; padding: 12px;">Sign In</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ======================================================= -->
+        <!-- VIEW 2: DRIVER COCKPIT                                 -->
+        <!-- ======================================================= -->
+        <section id="viewDriver" class="view-panel">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🚍 Vehicle & Live Mobile GPS Transmitter</div>
+                    <span class="gps-pill acquiring" id="driverGpsPill"><span>🟡</span> Acquiring GPS...</span>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; background: var(--bg-card); padding: 10px 14px; border-radius: 8px;">
+                    <div>
+                        <strong style="font-size: 1.1rem; color: #60a5fa;">BUS-001</strong>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">TN 38 BX 1001 • Route 1 Corridor</div>
+                    </div>
+                    <div id="driverTripState" style="font-weight: 700; font-size: 0.85rem; color: #94a3b8;">BUS IDLE</div>
+                </div>
+
+                <!-- Digital Telemetry Gauges -->
+                <div class="telemetry-row">
+                    <div class="telemetry-metric">
+                        <div class="val" id="drvSpeed">0.0 km/h</div>
+                        <div class="lbl">Live Speed</div>
+                    </div>
+                    <div class="telemetry-metric">
+                        <div class="val" id="drvAccuracy">± 0m</div>
+                        <div class="lbl">GPS Accuracy</div>
+                    </div>
+                    <div class="telemetry-metric">
+                        <div class="val" id="drvLat" style="font-size: 0.95rem;">—</div>
+                        <div class="lbl">Latitude</div>
+                    </div>
+                    <div class="telemetry-metric">
+                        <div class="val" id="drvLng" style="font-size: 0.95rem;">—</div>
+                        <div class="lbl">Longitude</div>
+                    </div>
+                    <div class="telemetry-metric">
+                        <div class="val" id="drvFixCount">0</div>
+                        <div class="lbl">Fixes Sent</div>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-success" id="btnTripToggle" onclick="toggleTrip()">
+                    ▶ START TRIP
+                </button>
+            </div>
+
+            <!-- Driver Map -->
+            <div class="card" style="padding: 10px;">
+                <div class="poi-filter-bar">
+                    <span class="poi-filter-label">📍 Coimbatore Highlights:</span>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('driver', 'hospital', this)">🏥 Hospitals (11)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('driver', 'fire', this)">🚒 Fire Stations (6)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('driver', 'police', this)">🚓 Police (11)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('driver', 'school', this)">🎓 Schools (11)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('driver', 'landmark', this)">🏟️ Stadiums & Malls (11)</button>
+                </div>
+                <div id="driverMap" class="map-box"></div>
+            </div>
+        </section>
+
+        <!-- ======================================================= -->
+        <!-- VIEW 3: PASSENGER WEB APP (STRICT 2-STEP SOS)           -->
+        <!-- ======================================================= -->
+        <section id="viewPassenger" class="view-panel">
+            <!-- Active Emergency Incident Card (Visible when SOS is active) -->
+            <div class="active-sos-card" id="activeSOSCard" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <strong style="color: #f87171; font-size: 1rem;">🚨 ACTIVE EMERGENCY: <span id="sosTicketCode">SOS-000001</span></strong>
+                    <span style="font-size: 0.75rem; background: var(--danger); color: white; padding: 2px 8px; border-radius: 9999px; font-weight: bold;" id="sosTicketStatus">ACTIVE</span>
+                </div>
+                <div style="font-size: 0.9rem; margin-top: 6px; font-weight: 600;" id="sosTicketAddress">Resolving address...</div>
+                <div style="font-size: 0.8rem; color: #fca5a5; margin-top: 4px;" id="sosTicketDetail">Alert broadcasted. Scanning for nearby rescue units...</div>
+
+                <div class="step-tracker">
+                    <div class="step active" id="step1"><div class="dot"></div><span>1. Alerted</span></div>
+                    <div class="step" id="step2"><div class="dot"></div><span>2. Accepted</span></div>
+                    <div class="step" id="step3"><div class="dot"></div><span>3. En Route</span></div>
+                    <div class="step" id="step4"><div class="dot"></div><span>4. Safe</span></div>
+                </div>
+
+                <button type="button" class="btn btn-outline" style="border-color: var(--danger); color: #f87171; padding: 8px;" onclick="cancelEmergency()">
+                    Cancel Emergency (False Alarm)
+                </button>
+            </div>
+
+            <!-- STRICT EMERGENCY SOS BOX -->
+            <div class="sos-box">
+                <button type="button" class="btn-sos disabled" id="btnPassengerSOS">
+                    ⚠️ GPS REQUIRED FOR EMERGENCY SOS
+                </button>
+                <div id="sosHelperText" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">
+                    Real mobile GPS coordinates must be acquired before emergency dispatch can be activated.
+                </div>
+            </div>
+
+            <!-- Bus Radar & Arrival Information -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🚍 Approaching Bus Radar</div>
+                    <span class="gps-pill acquiring" id="paxGpsPill"><span>🟡</span> Acquiring GPS...</span>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+                    <div>
+                        <strong style="font-size: 1.1rem; color: #60a5fa;">BUS-001 (TN 38 BX 1001)</strong>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">Route 1 Corridor • Status: <span id="paxBusStatus" style="font-weight: 700; color: #10b981;">TRACKING</span></div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Your Coordinates: <span id="paxCoords">—</span></div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 1.6rem; font-weight: 800; color: #60a5fa;" id="paxEtaMinutes">-- min</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);" id="paxEtaDistance">-- km away</div>
+                    </div>
+                </div>
+
+                <div class="poi-filter-bar">
+                    <span class="poi-filter-label">📍 Safety & Key Landmarks:</span>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('passenger', 'hospital', this)">🏥 Hospitals (11)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('passenger', 'fire', this)">🚒 Fire Stations (6)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('passenger', 'police', this)">🚓 Police (11)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('passenger', 'school', this)">🎓 Schools (11)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('passenger', 'landmark', this)">🏟️ Stadiums & Malls (11)</button>
+                </div>
+                <div id="passengerMap" class="map-box"></div>
+            </div>
+        </section>
+
+        <!-- ======================================================= -->
+        <!-- VIEW 4: TACTICAL RESPONDER (35 KM METROPOLITAN RADAR)   -->
+        <!-- ======================================================= -->
+        <section id="viewResponder" class="view-panel">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🚨 Tactical Emergency Radar (Unit RSP-001)</div>
+                    <span class="gps-pill acquiring" id="respGpsPill"><span>🟡</span> Connecting Beacon...</span>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">
+                    Tactical Geofence: <strong style="color: #60a5fa;">Whole Coimbatore City (35.0 km radius)</strong> • 
+                    Beacon Fix: <span id="respCoords">—</span>
+                </div>
+                <div class="poi-filter-bar">
+                    <span class="poi-filter-label">🚨 Emergency POIs (35 km Radar):</span>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('responder', 'hospital', this)">🏥 Hospitals (11)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('responder', 'fire', this)">🚒 Fire Stations (6)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('responder', 'police', this)">🚓 Police (11)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('responder', 'school', this)">🎓 Schools (11)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('responder', 'landmark', this)">🏟️ Stadiums & Malls (11)</button>
+                </div>
+                <div id="responderMap" class="map-box"></div>
+            </div>
+
+            <!-- Live Emergency Dispatches Feed -->
+            <div class="card">
+                <div class="card-title" style="color: #f87171; margin-bottom: 12px;">🚨 Active Emergency Dispatches</div>
+                <div id="responderAlertsFeed">
+                    <div style="text-align: center; color: var(--text-dim); padding: 16px;">Scanning tactical radius...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================= -->
+        <!-- VIEW 5: ADMIN HOST COMMAND CENTER                      -->
+        <!-- ======================================================= -->
+        <section id="viewAdmin" class="view-panel">
+            <!-- City Fleet KPI Strip -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🖥️ Master City Transit & Incident Command</div>
+                    <button type="button" class="btn-nav" onclick="loadAdminDashboard()">↻ Refresh</button>
+                </div>
+                <div class="telemetry-row">
+                    <div class="telemetry-metric">
+                        <div class="val" id="admBusStatus" style="font-size: 1rem; color: #10b981;">ONLINE</div>
+                        <div class="lbl">BUS-001 Status</div>
+                    </div>
+                    <div class="telemetry-metric">
+                        <div class="val" id="admBusSpeed">0.0 km/h</div>
+                        <div class="lbl">Bus Speed</div>
+                    </div>
+                    <div class="telemetry-metric">
+                        <div class="val" id="admActiveSosCount" style="color: #ef4444;">0</div>
+                        <div class="lbl">Active SOS</div>
+                    </div>
+                </div>
+
+                <div class="poi-filter-bar">
+                    <span class="poi-filter-label">🏙️ Coimbatore City POI Overlays:</span>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('admin', 'hospital', this)">🏥 Hospitals (11)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('admin', 'fire', this)">🚒 Fire Stations (6)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('admin', 'police', this)">🚓 Police (11)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('admin', 'school', this)">🎓 Schools (11)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('admin', 'landmark', this)">🏟️ Stadiums & Malls (11)</button>
+                </div>
+                <!-- Master Map -->
+                <div id="adminMap" class="map-box"></div>
+            </div>
+
+            <!-- Emergency Incident Desk -->
+            <div class="card">
+                <div class="card-title" style="color: #f87171; margin-bottom: 12px;">🚨 City Emergency Dispatch Desk</div>
+                <div id="adminSosFeed">
+                    <div style="color: var(--text-dim); font-size: 0.85rem;">No active emergencies. System nominal.</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Dedicated Role Authentication Modal -->
+    <div class="modal-backdrop" id="roleAuthModal">
+        <div class="modal-dialog auth-modal" style="background: var(--bg-panel); border: 1px solid #3b82f6; box-shadow: 0 0 35px rgba(59, 130, 246, 0.35);">
+            <div style="font-size: 2.5rem; margin-bottom: 8px;" id="roleAuthIcon">🚍</div>
+            <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 4px;" id="roleAuthTitle">Driver Cockpit Login</h2>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">
+                Authentication required. Enter your credentials to continue.
+            </p>
+
+            <form id="roleAuthForm" onsubmit="submitRoleAuth(event)">
+                <div style="text-align: left; margin-bottom: 12px;">
+                    <label style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Account Email</label>
+                    <input type="email" id="roleAuthEmail" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 6px; color: white; font-family: monospace;" readonly>
+                </div>
+
+                <div style="text-align: left; margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <label style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Password</label>
+                        <button type="button" onclick="autofillRoleDemoPass()" style="background: none; border: none; color: #60a5fa; font-size: 0.75rem; cursor: pointer; text-decoration: underline;">Auto-fill Password123</button>
+                    </div>
+                    <div style="position: relative;">
+                        <input type="password" id="roleAuthPass" style="width: 100%; padding: 10px 40px 10px 10px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; color: white;" required placeholder="Enter password (Password123)">
+                        <button type="button" onclick="toggleRolePassVisibility()" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1rem;">👁️</button>
+                    </div>
+                </div>
+
+                <div id="roleAuthError" style="display: none; color: #f87171; font-size: 0.8rem; margin-bottom: 14px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 12px; border-radius: 6px; text-align: left;"></div>
+
+                <button type="submit" class="btn btn-primary" id="roleAuthSubmitBtn" style="width: 100%; padding: 12px; font-weight: 700; margin-bottom: 8px;">
+                    Sign In & Enter
+                </button>
+                <button type="button" class="btn btn-outline" onclick="closeRoleAuthModal()" style="width: 100%; padding: 10px;">
+                    Cancel
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2-Step Emergency Confirmation Modal -->
+    <div class="modal-backdrop" id="sosModal">
+        <div class="modal-dialog">
+            <div style="font-size: 3rem; margin-bottom: 8px;">🚨</div>
+            <h2 style="color: #f87171; font-size: 1.3rem; margin-bottom: 6px;">CONFIRM EMERGENCY DISPATCH</h2>
+            <p style="color: #fca5a5; font-size: 0.85rem; margin-bottom: 14px; line-height: 1.4;">
+                You are about to transmit a high-priority emergency SOS with your live mobile GPS coordinates to rescue units across the entire Coimbatore metropolitan area (35.0 km radius).
+            </p>
+            <div style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); padding: 10px; border-radius: 8px; font-size: 0.8rem; text-align: left; margin-bottom: 16px;">
+                <strong>📍 Transmitting Exact Phone Coordinates:</strong><br>
+                <span id="sosModalCoords">Acquiring...</span><br>
+                <small style="color: var(--text-muted);">Street address will be resolved automatically in real time.</small>
+            </div>
+            <button type="button" class="btn btn-danger" id="btnConfirmSOS" onclick="triggerConfirmedSOS()" disabled style="margin-bottom: 10px; padding: 14px;">
+                Confirm Emergency Dispatch (3s)
+            </button>
+            <button type="button" class="btn btn-outline" onclick="closeSOSModal()">
+                Dismiss / Not an Emergency
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/coimbatore_pois.js"></script>
+    <script src="/app.js"></script>
+</body>
+</html>
