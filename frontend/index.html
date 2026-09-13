@@ -18,23 +18,23 @@
                 <svg viewBox="0 0 64 64" fill="none" class="brand-svg">
                     <defs>
                         <linearGradient id="nexoraGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#10b981" />
-                            <stop offset="50%" stop-color="#2563eb" />
-                            <stop offset="100%" stop-color="#f59e0b" />
+                            <stop offset="0%" stop-color="#34d399" />
+                            <stop offset="50%" stop-color="#10b981" />
+                            <stop offset="100%" stop-color="#059669" />
                         </linearGradient>
                         <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
                             <feGaussianBlur stdDeviation="3" result="blur" />
                             <feComposite in="SourceGraphic" in2="blur" operator="over" />
                         </filter>
                     </defs>
-                    <circle cx="32" cy="32" r="30" stroke="url(#nexoraGrad)" stroke-width="2.5" stroke-dasharray="6 3" opacity="0.8" />
-                    <circle cx="32" cy="32" r="22" stroke="#10b981" stroke-width="1.5" opacity="0.4" />
-                    <rect x="18" y="16" width="28" height="32" rx="6" fill="#0f172a" stroke="url(#nexoraGrad)" stroke-width="2.5" />
-                    <rect x="22" y="20" width="20" height="10" rx="2" fill="#38bdf8" opacity="0.9" />
+                    <circle cx="32" cy="32" r="30" stroke="url(#nexoraGrad)" stroke-width="2.5" stroke-dasharray="6 3" opacity="0.85" />
+                    <circle cx="32" cy="32" r="22" stroke="#10b981" stroke-width="1.5" opacity="0.45" />
+                    <rect x="18" y="16" width="28" height="32" rx="6" fill="#092217" stroke="url(#nexoraGrad)" stroke-width="2.5" />
+                    <rect x="22" y="20" width="20" height="10" rx="2" fill="#34d399" opacity="0.9" />
                     <circle cx="23" cy="40" r="2.5" fill="#f59e0b" filter="url(#glow)" />
                     <circle cx="41" cy="40" r="2.5" fill="#f59e0b" filter="url(#glow)" />
-                    <line x1="28" y1="40" x2="36" y2="40" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" />
-                    <path d="M 10 32 A 22 22 0 0 1 54 32" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" opacity="0.6" />
+                    <line x1="28" y1="40" x2="36" y2="40" stroke="#a7f3d0" stroke-width="2" stroke-linecap="round" />
+                    <path d="M 10 32 A 22 22 0 0 1 54 32" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" opacity="0.6" />
                 </svg>
             </div>
             <div class="brand-text-block">
@@ -53,6 +53,13 @@
         </div>
 
         <div class="nav-actions">
+            <!-- Dynamic Theme Selector -->
+            <div class="theme-selector-wrap" title="Theme Mode">
+                <button type="button" class="theme-opt-btn active" data-theme="emerald" onclick="setDynamicTheme('emerald')">🌲 Emerald</button>
+                <button type="button" class="theme-opt-btn" data-theme="midnight-jade" onclick="setDynamicTheme('midnight-jade')">🍃 Jade</button>
+                <button type="button" class="theme-opt-btn" data-theme="forest-mint" onclick="setDynamicTheme('forest-mint')">🌿 Mint</button>
+            </div>
+
             <span id="activeRoleTag" class="role-tag">Gateway</span>
             <span id="navUserLabel" style="font-size: 0.8rem; color: var(--text-muted); display: none;"></span>
             <button type="button" class="btn-nav" id="btnSwitchRole" style="display: none;" onclick="switchRole()">🔄 Switch Role</button>
@@ -60,16 +67,36 @@
         </div>
     </header>
 
+    <!-- Live Municipal Transit Status Ticker -->
+    <div class="transit-ticker-bar">
+        <div class="ticker-label">COIMBATORE TRANSIT TICKER</div>
+        <div class="ticker-scroller">
+            <div class="ticker-item"><span class="ticker-dot"></span> 🚏 <strong>Gandhipuram Central:</strong> Normal Flow • 48 Departures/hr • Avinashi Flyover Clear</div>
+            <div class="ticker-item"><span class="ticker-dot"></span> 🚏 <strong>Ukkadam Terminus:</strong> Pollachi Highway Active • Connecting 14 Municipal Routes</div>
+            <div class="ticker-item"><span class="ticker-dot"></span> 🚏 <strong>Singanallur Hub:</strong> Trichy Corridor Active • Inter-City Expresses On Schedule</div>
+            <div class="ticker-item"><span class="ticker-dot"></span> 🚏 <strong>Saibaba Colony (MTP Rd):</strong> Nilgiris Services Operating Seamlessly</div>
+            <div class="ticker-item"><span class="ticker-dot"></span> 🚍 <strong>BUS-001 (TN 38 BX 1001):</strong> Live GPS Streaming • Speed ~32 km/h • Avinashi Road</div>
+            <div class="ticker-item"><span class="ticker-dot"></span> 🚨 <strong>Emergency Dispatch:</strong> 35.0 km Perimeter Armed • Zero Active Distress Beacons</div>
+            <!-- Duplicated items for seamless continuous ticker loop -->
+            <div class="ticker-item"><span class="ticker-dot"></span> 🚏 <strong>Gandhipuram Central:</strong> Normal Flow • 48 Departures/hr • Avinashi Flyover Clear</div>
+            <div class="ticker-item"><span class="ticker-dot"></span> 🚏 <strong>Ukkadam Terminus:</strong> Pollachi Highway Active • Connecting 14 Municipal Routes</div>
+            <div class="ticker-item"><span class="ticker-dot"></span> 🚏 <strong>Singanallur Hub:</strong> Trichy Corridor Active • Inter-City Expresses On Schedule</div>
+            <div class="ticker-item"><span class="ticker-dot"></span> 🚏 <strong>Saibaba Colony (MTP Rd):</strong> Nilgiris Services Operating Seamlessly</div>
+            <div class="ticker-item"><span class="ticker-dot"></span> 🚍 <strong>BUS-001 (TN 38 BX 1001):</strong> Live GPS Streaming • Speed ~32 km/h • Avinashi Road</div>
+            <div class="ticker-item"><span class="ticker-dot"></span> 🚨 <strong>Emergency Dispatch:</strong> 35.0 km Perimeter Armed • Zero Active Distress Beacons</div>
+        </div>
+    </div>
+
     <main class="app-container">
         <!-- ======================================================= -->
         <!-- VIEW 1: GATEWAY & ROLE SELECTOR                         -->
         <!-- ======================================================= -->
         <section id="viewGateway" class="view-panel active">
-            <!-- 1. HERO SECTION WITH DYNAMIC AMBIENT RUNNING VIDEO -->
+            <!-- 1. HERO SECTION WITH RUNNING BUS STAND & BUS RIDE VIDEO -->
             <div class="hero-section">
                 <video autoplay loop muted playsinline class="hero-video-bg" poster="https://upload.wikimedia.org/wikipedia/commons/b/b1/TNSTC_public_transit_bus_in_Coimbatore.jpg">
-                    <source src="https://upload.wikimedia.org/wikipedia/commons/c/c1/India%27s_Number_one_BRTS_Bus_Service_Hubli_to_Dharwad_Karnataka.webm" type="video/webm">
-                    <source src="https://upload.wikimedia.org/wikipedia/commons/6/6d/Moving_vehicles_in_Link_road%2C_Cuttack%2C_Odisha.webm" type="video/webm">
+                    <source src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Shivaji_Nagar_Bus_Station_Bangalore_-_St._Marys_Basilica_-_Cubbon_Park.webm" type="video/webm">
+                    <source src="https://upload.wikimedia.org/wikipedia/commons/6/68/KSRTC_Bus_Station_TUMAKURU%2C_Karnataka.webm" type="video/webm">
                 </video>
                 <div class="hero-overlay"></div>
 
@@ -163,7 +190,7 @@
                 <div class="map-floating-hud">
                     <div class="hud-metric">
                         <span class="label">🚍 Active Vehicle</span>
-                        <span class="value" style="color: #60a5fa;">BUS-001 (TN 38 BX 1001)</span>
+                        <span class="value" style="color: #34d399;">BUS-001 (TN 38 BX 1001)</span>
                     </div>
                     <div class="hud-metric">
                         <span class="label">📍 Live GPS Coordinates</span>
@@ -191,7 +218,7 @@
                 </div>
 
                 <!-- Front Page Map Container -->
-                <div id="homeMap" class="map-box" style="height: 480px; border-radius: 14px; border: 1px solid rgba(59, 130, 246, 0.3);"></div>
+                <div id="homeMap" class="map-box" style="height: 480px; border-radius: 14px; border: 1px solid rgba(16, 185, 129, 0.3);"></div>
             </div>
 
             <!-- 3. COIMBATORE BUS STANDS & TERMINALS NAVIGATOR -->
@@ -200,8 +227,15 @@
                     <span class="section-eyebrow">COIMBATORE TRANSIT HUBS</span>
                     <h2 class="section-title">Major Bus Stands &amp; Terminals of Coimbatore</h2>
                     <p class="section-subtitle">
-                        Coimbatore operates a multi-hub hub-and-spoke transit system. Explore each major bus terminal, destinations served, and click "Center on Map" to locate each terminal instantly.
+                        Coimbatore operates a multi-hub transit network. Use the search bar below or click "Center on Map" to navigate directly to any terminal.
                     </p>
+                </div>
+
+                <!-- Live Search Filter Input -->
+                <div class="search-filter-wrap">
+                    <span class="search-filter-icon">🔍</span>
+                    <input type="text" id="busStandSearchInput" class="search-filter-input" placeholder="Search Coimbatore bus stands, stops, or routes (e.g. Gandhipuram, Ukkadam, Ondipudur, Airport, Maruthamalai)..." oninput="filterBusStandsAndRoutes()">
+                    <div id="searchFilterStatus" style="display: none; font-size: 0.8rem; color: #a7f3d0; margin-top: 6px; text-align: center;"></div>
                 </div>
 
                 <div class="routes-grid">
@@ -415,10 +449,10 @@
                 <!-- Host Access Passwords Display Banner -->
                 <div class="credentials-banner">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                        <strong style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #93c5fd;">
+                        <strong style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #a7f3d0;">
                             🔑 Official Access Credentials (All Devices / Worldwide)
                         </strong>
-                        <span style="font-size: 0.78rem; color: #60a5fa; font-weight: bold; background: rgba(59, 130, 246, 0.2); padding: 3px 10px; border-radius: 6px;">
+                        <span style="font-size: 0.78rem; color: #34d399; font-weight: bold; background: rgba(16, 185, 129, 0.2); padding: 3px 10px; border-radius: 6px;">
                             Password for all: Password123
                         </span>
                     </div>
@@ -449,7 +483,7 @@
                         <h3>Admin Command Center</h3>
                         <p>Central Host operations map showing Bus, Passenger, and Responder simultaneously with incident control.</p>
                         <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
-                            Account: <code style="color: #93c5fd;">admin@nexora.local</code>
+                            Account: <code style="color: #a7f3d0;">admin@nexora.local</code>
                         </div>
                         <button type="button" class="btn btn-outline" onclick="openRoleAuthModal('ADMIN', 'admin@nexora.local', 'Admin Command Center', '🖥️')">
                             👑 Sign In as Admin &rarr;
@@ -599,29 +633,29 @@
 
             <!-- 7. DYNAMIC VIDEO SHOWCASE & MEDIA TOUR -->
             <div class="section-header">
-                <span class="section-eyebrow">INDIAN TRANSIT IN MOTION</span>
+                <span class="section-eyebrow">BUS STANDS &amp; RIDES IN MOTION</span>
                 <h2 class="section-title">Coimbatore &amp; Indian Transit Showcase</h2>
                 <p class="section-subtitle">
-                    Experience dynamic urban public bus transit in action — from dedicated bus rapid corridors to live traffic flow along city expressways.
+                    Experience dynamic public bus transit in action — from central bus stands and passenger platforms to live vehicle transit along city expressways.
                 </p>
             </div>
 
             <div class="video-showcase-card">
                 <div class="video-frame-wrap">
                     <video id="showcaseVideoPlayer" controls playsinline poster="https://upload.wikimedia.org/wikipedia/commons/b/b1/TNSTC_public_transit_bus_in_Coimbatore.jpg">
-                        <source src="https://upload.wikimedia.org/wikipedia/commons/c/c1/India%27s_Number_one_BRTS_Bus_Service_Hubli_to_Dharwad_Karnataka.webm" type="video/webm">
+                        <source src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Shivaji_Nagar_Bus_Station_Bangalore_-_St._Marys_Basilica_-_Cubbon_Park.webm" type="video/webm">
                         Your browser does not support HTML5 video.
                     </video>
                 </div>
                 <div class="video-tab-bar">
-                    <button type="button" class="video-tab-btn active" onclick="switchShowcaseVideo('https://upload.wikimedia.org/wikipedia/commons/c/c1/India%27s_Number_one_BRTS_Bus_Service_Hubli_to_Dharwad_Karnataka.webm', 'video/webm', this)">
-                        🚍 1. Indian Bus Rapid Transit Flow
+                    <button type="button" class="video-tab-btn active" onclick="switchShowcaseVideo('https://upload.wikimedia.org/wikipedia/commons/7/7c/Shivaji_Nagar_Bus_Station_Bangalore_-_St._Marys_Basilica_-_Cubbon_Park.webm', 'video/webm', this)">
+                        🚏 1. Bus Station &amp; Passenger Terminus Flow
+                    </button>
+                    <button type="button" class="video-tab-btn" onclick="switchShowcaseVideo('https://upload.wikimedia.org/wikipedia/commons/6/68/KSRTC_Bus_Station_TUMAKURU%2C_Karnataka.webm', 'video/webm', this)">
+                        🚍 2. Bus Stand Arrivals &amp; Platform Rides
                     </button>
                     <button type="button" class="video-tab-btn" onclick="switchShowcaseVideo('https://upload.wikimedia.org/wikipedia/commons/6/6d/Moving_vehicles_in_Link_road%2C_Cuttack%2C_Odisha.webm', 'video/webm', this)">
-                        🏙️ 2. City Road &amp; Transit Flow
-                    </button>
-                    <button type="button" class="video-tab-btn" onclick="switchShowcaseVideo('https://upload.wikimedia.org/wikipedia/commons/7/78/Alaskan_Way_Viaduct_timelapse.webm', 'video/webm', this)">
-                        🛣️ 3. Highway &amp; Flyover Transit
+                        🛣️ 3. City Highway &amp; Arterial Transit
                     </button>
                 </div>
             </div>
@@ -720,7 +754,7 @@
                 <div id="guide-admin" class="guide-tab-pane">
                     <div class="guide-card-content">
                         <div class="guide-info-box">
-                            <h3 style="color: #8b5cf6;">⚡ What Does the Admin Do?</h3>
+                            <h3 style="color: #34d399;">⚡ What Does the Admin Do?</h3>
                             <p>
                                 The Admin is the central city transit authority (Coimbatore City Municipal Corporation &amp; TNSTC Traffic Operations). The Admin oversees all city operations simultaneously.
                             </p>
@@ -769,7 +803,7 @@
                 <div id="guide-passenger" class="guide-tab-pane">
                     <div class="guide-card-content">
                         <div class="guide-info-box">
-                            <h3 style="color: #3b82f6;">🧭 What Does the Passenger Do?</h3>
+                            <h3 style="color: #60a5fa;">🧭 What Does the Passenger Do?</h3>
                             <p>
                                 The Passenger Web App is used by daily Coimbatore commuters waiting at bus stops or traveling on buses. It works directly in mobile browsers without downloading any app.
                             </p>
@@ -838,7 +872,7 @@
                                     <td>Pans map to Ukkadam Bus Stand (10.9875, 76.9615) connecting South routes (Pollachi/Palakkad).</td>
                                 </tr>
                                 <tr>
-                                    <td><span class="btn-preview-tag" style="background: rgba(37,99,235,0.2); color: #60a5fa;">🚍 Locate BUS-001</span></td>
+                                    <td><span class="btn-preview-tag" style="background: rgba(16,185,129,0.2); color: #6ee7b7;">🚍 Locate BUS-001</span></td>
                                     <td>Front Map Toolbar</td>
                                     <td>Locates the live moving bus coordinates and opens the real-time telemetry popup showing speed and road name.</td>
                                 </tr>
@@ -853,12 +887,12 @@
                                     <td>Locks onto BUS-001 and starts transmitting phone GPS coordinates every 2s via WebSocket.</td>
                                 </tr>
                                 <tr>
-                                    <td><span class="btn-preview-tag" style="background: rgba(139,92,246,0.2); color: #c084fc;">Resolve Incident</span></td>
+                                    <td><span class="btn-preview-tag" style="background: rgba(16,185,129,0.2); color: #6ee7b7;">Resolve Incident</span></td>
                                     <td>Admin Command</td>
                                     <td>Sends API POST to /api/sos/{id}/resolve and marks the emergency ticket safely closed.</td>
                                 </tr>
                                 <tr>
-                                    <td><span class="btn-preview-tag" style="background: rgba(59,130,246,0.2); color: #93c5fd;">🚏 Bus Stands (8)</span></td>
+                                    <td><span class="btn-preview-tag" style="background: rgba(16,185,129,0.2); color: #34d399;">🚏 Bus Stands (8)</span></td>
                                     <td>Map Filter Bar</td>
                                     <td>Toggles visibility of all 8 Coimbatore bus stand markers on the active Google roadmap.</td>
                                 </tr>
@@ -945,10 +979,10 @@
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; background: var(--bg-card); padding: 10px 14px; border-radius: 8px;">
                     <div>
-                        <strong style="font-size: 1.1rem; color: #60a5fa;">BUS-001</strong>
+                        <strong style="font-size: 1.1rem; color: #34d399;">BUS-001</strong>
                         <div style="font-size: 0.75rem; color: var(--text-muted);">TN 38 BX 1001 • Avinashi Transit Corridor</div>
                     </div>
-                    <div id="driverTripState" style="font-weight: 700; font-size: 0.85rem; color: #94a3b8;">BUS IDLE</div>
+                    <div id="driverTripState" style="font-weight: 700; font-size: 0.85rem; color: #a7f3d0;">BUS IDLE</div>
                 </div>
 
                 <!-- Digital Telemetry Gauges -->
@@ -1162,7 +1196,7 @@
 
     <!-- Dedicated Role Authentication Modal -->
     <div class="modal-backdrop" id="roleAuthModal">
-        <div class="modal-dialog auth-modal" id="roleAuthDialog" style="background: var(--bg-panel); border: 1px solid #3b82f6; box-shadow: 0 0 35px rgba(59, 130, 246, 0.35);">
+        <div class="modal-dialog auth-modal" id="roleAuthDialog" style="background: var(--bg-panel); border: 1px solid #10b981; box-shadow: 0 0 35px rgba(16, 185, 129, 0.35);">
             <div style="font-size: 2.5rem; margin-bottom: 8px;" id="roleAuthIcon">🚍</div>
             <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 4px;" id="roleAuthTitle">Driver Cockpit Login</h2>
             <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">
@@ -1181,7 +1215,7 @@
                 <div style="text-align: left; margin-bottom: 16px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                         <label style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Password</label>
-                        <button type="button" onclick="autofillRoleDemoPass()" style="background: none; border: none; color: #60a5fa; font-size: 0.75rem; cursor: pointer; text-decoration: underline;">Auto-fill Password123</button>
+                        <button type="button" onclick="autofillRoleDemoPass()" style="background: none; border: none; color: #34d399; font-size: 0.75rem; cursor: pointer; text-decoration: underline;">Auto-fill Password123</button>
                     </div>
                     <div style="position: relative;">
                         <input type="password" id="roleAuthPass" style="width: 100%; padding: 10px 40px 10px 10px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; color: white;" required placeholder="Enter password (Password123)">

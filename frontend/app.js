@@ -52,6 +52,10 @@ let sosTimer = null;
 // ==========================================
 
 document.addEventListener("DOMContentLoaded", async () => {
+    // Initialize Theme Preference
+    const storedTheme = localStorage.getItem("nexora_theme") || "emerald";
+    setDynamicTheme(storedTheme);
+
     checkServerHealth();
     initWebSocket();
     initHomeMap();
@@ -351,6 +355,52 @@ function initHomeMap() {
             maps.home.invalidateSize();
         }
     }, 150);
+}
+
+// Dynamic Theme Switcher Controller
+function setDynamicTheme(themeName) {
+    if (!themeName) themeName = "emerald";
+    document.documentElement.setAttribute("data-theme", themeName);
+    localStorage.setItem("nexora_theme", themeName);
+    document.querySelectorAll(".theme-opt-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.getAttribute("data-theme") === themeName);
+    });
+}
+
+// Live Bus Stand & Route Corridor Search Filter
+function filterBusStandsAndRoutes() {
+    const input = document.getElementById("busStandSearchInput");
+    const query = input ? input.value.toLowerCase().trim() : "";
+    
+    // Filter Bus Stand Cards
+    const standCards = document.querySelectorAll("#busStandsSection .route-card");
+    let visibleStands = 0;
+    standCards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        const matches = !query || text.includes(query);
+        card.style.display = matches ? "flex" : "none";
+        if (matches) visibleStands++;
+    });
+
+    // Filter Bus Route Cards
+    const routeCards = document.querySelectorAll("#routesSection .route-card");
+    let visibleRoutes = 0;
+    routeCards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        const matches = !query || text.includes(query);
+        card.style.display = matches ? "flex" : "none";
+        if (matches) visibleRoutes++;
+    });
+
+    const statusEl = document.getElementById("searchFilterStatus");
+    if (statusEl) {
+        if (query) {
+            statusEl.textContent = `Showing ${visibleStands} bus stands and ${visibleRoutes} routes matching "${query}"`;
+            statusEl.style.display = "block";
+        } else {
+            statusEl.style.display = "none";
+        }
+    }
 }
 
 // ==========================================
