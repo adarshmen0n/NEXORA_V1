@@ -13,8 +13,34 @@
 <body>
     <!-- Persistent Sticky Header -->
     <header class="app-header">
-        <div class="brand-wrapper">
-            <span class="brand-logo">NEXORA</span>
+        <div class="brand-logo-container">
+            <div class="logo-icon-glow">
+                <svg viewBox="0 0 64 64" fill="none" class="brand-svg">
+                    <defs>
+                        <linearGradient id="nexoraGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#38bdf8" />
+                            <stop offset="50%" stop-color="#2563eb" />
+                            <stop offset="100%" stop-color="#8b5cf6" />
+                        </linearGradient>
+                        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="3" result="blur" />
+                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                        </filter>
+                    </defs>
+                    <circle cx="32" cy="32" r="28" stroke="url(#nexoraGrad)" stroke-width="2.5" stroke-dasharray="4 2" opacity="0.8" />
+                    <circle cx="32" cy="32" r="20" stroke="#38bdf8" stroke-width="1.5" opacity="0.4" />
+                    <rect x="18" y="16" width="28" height="30" rx="6" fill="#1e293b" stroke="url(#nexoraGrad)" stroke-width="2.5" />
+                    <rect x="22" y="20" width="20" height="10" rx="2" fill="#38bdf8" opacity="0.85" />
+                    <circle cx="23" cy="38" r="2.5" fill="#facc15" filter="url(#glow)" />
+                    <circle cx="41" cy="38" r="2.5" fill="#facc15" filter="url(#glow)" />
+                    <line x1="28" y1="38" x2="36" y2="38" stroke="#64748b" stroke-width="2" stroke-linecap="round" />
+                    <path d="M 12 32 A 20 20 0 0 1 52 32" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" opacity="0.5" />
+                </svg>
+            </div>
+            <div class="brand-text-block">
+                <span class="brand-name">NEXORA</span>
+                <span class="brand-sub">TRANSIT &amp; EMERGENCY RADAR</span>
+            </div>
             <span class="brand-badge">V1 OFFICIAL</span>
             <span id="serverHealthBadge" style="font-size: 0.75rem; font-weight: 700; color: #10b981;">🟢 Online</span>
         </div>
@@ -32,97 +58,373 @@
         <!-- VIEW 1: GATEWAY & ROLE SELECTOR (PASSWORDS DISPLAYED)   -->
         <!-- ======================================================= -->
         <section id="viewGateway" class="view-panel active">
-            <div style="text-align: center; margin: 16px 0 24px;">
-                <h1 style="font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px;">
-                    NEXORA V1
-                </h1>
-                <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 600px; margin: 0 auto;">
-                    Next-generation Explainable Route Optimization & Retrieval Assistant.
-                    Unified Single App: Real-Time Mobile GPS Tracking & Geofenced Emergency Response.
+            <!-- 1. HERO SECTION WITH DYNAMIC AMBIENT RUNNING VIDEO -->
+            <div class="hero-section">
+                <video autoplay loop muted playsinline class="hero-video-bg" poster="https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=1200&q=80">
+                    <source src="https://upload.wikimedia.org/wikipedia/commons/7/78/Alaskan_Way_Viaduct_timelapse.webm" type="video/webm">
+                    <source src="https://vjs.zencdn.net/v/oceans.mp4" type="video/mp4">
+                </video>
+                <div class="hero-overlay"></div>
+
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <span>⚡</span>
+                        <span>AI-POWERED AUTONOMOUS TRANSIT &amp; RESCUE PLATFORM</span>
+                    </div>
+
+                    <h1 class="hero-title">
+                        Next-Generation Smart Transit &amp;<br>Emergency Response System
+                    </h1>
+
+                    <p class="hero-subtitle">
+                        NEXORA V1 bridges transit operators, bus drivers, daily commuters, and emergency rescue units across Coimbatore City. Powered by sub-second GNSS satellite telemetry, deep Google Maps vector roadmaps, and verified 2-step emergency dispatch.
+                    </p>
+
+                    <div class="hero-actions">
+                        <a href="#portalsSection" class="btn-hero-primary">
+                            <span>🚀</span> Launch Vehicle &amp; Rescue Portals
+                        </a>
+                        <a href="#radarSection" class="btn-hero-secondary">
+                            <span>🗺️</span> Explore Live City Radar
+                        </a>
+                    </div>
+
+                    <!-- Live KPI Counters Strip -->
+                    <div class="stats-strip">
+                        <div class="stat-pill">
+                            <div class="stat-num">35.0 km</div>
+                            <div class="stat-desc">Metropolitan Geofence</div>
+                        </div>
+                        <div class="stat-pill">
+                            <div class="stat-num">176</div>
+                            <div class="stat-desc">Corridor Waypoints</div>
+                        </div>
+                        <div class="stat-pill">
+                            <div class="stat-num">&lt; 1.0 s</div>
+                            <div class="stat-desc">Telemetry Latency</div>
+                        </div>
+                        <div class="stat-pill">
+                            <div class="stat-num">50+</div>
+                            <div class="stat-desc">Coimbatore POIs</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. FRONT-PAGE LIVE INTERACTIVE MAP RADAR -->
+            <div id="radarSection" class="front-map-card">
+                <div class="card-header" style="margin-bottom: 12px;">
+                    <div>
+                        <div class="card-title" style="font-size: 1.25rem;">🏙️ Live Coimbatore City Transit Radar (Preview)</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+                            Official Google Maps vector raster roadmap rendering all gullies, streets, apartments, and live bus movements in real time.
+                        </div>
+                    </div>
+                    <span class="gps-pill live" id="homeLiveBadge"><span>🟢</span> STREAMING LIVE (BUS-001)</span>
+                </div>
+
+                <!-- Floating Telemetry HUD -->
+                <div class="map-floating-hud">
+                    <div class="hud-metric">
+                        <span class="label">🚍 Active Vehicle</span>
+                        <span class="value" style="color: #60a5fa;">BUS-001 (TN 38 BX 1001)</span>
+                    </div>
+                    <div class="hud-metric">
+                        <span class="label">📍 Live GPS Coordinates</span>
+                        <span class="value" id="homeBusCoords">11.01684, 76.95583</span>
+                    </div>
+                    <div class="hud-metric">
+                        <span class="label">⚡ Current Transit Velocity</span>
+                        <span class="value" id="homeBusSpeed" style="color: #10b981;">32.0 km/h</span>
+                    </div>
+                    <div class="hud-metric">
+                        <span class="label">🛣️ Active Sector / Waypoint</span>
+                        <span class="value" id="homeBusRoad" style="color: #f59e0b;">Gandhipuram Central</span>
+                    </div>
+                </div>
+
+                <!-- POI Filter Overlays -->
+                <div class="poi-filter-bar">
+                    <span class="poi-filter-label">🏙️ Coimbatore City POI Overlays:</span>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('home', 'hospital', this)">🏥 Hospitals (11)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('home', 'fire', this)">🚒 Fire Stations (6)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('home', 'police', this)">🚓 Police (11)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('home', 'school', this)">🎓 Schools (11)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('home', 'landmark', this)">🏟️ Stadiums &amp; Malls (11)</button>
+                </div>
+
+                <!-- Front Page Map Container -->
+                <div id="homeMap" class="map-box" style="height: 480px; border-radius: 14px; border: 1px solid rgba(59, 130, 246, 0.3);"></div>
+            </div>
+
+            <!-- 3. ROLE PORTALS LAUNCHPAD & CREDENTIALS -->
+            <div id="portalsSection">
+                <div class="section-header">
+                    <span class="section-eyebrow">PORTAL ACCESS GATEWAY</span>
+                    <h2 class="section-title">Launch Transit &amp; Emergency Consoles</h2>
+                    <p class="section-subtitle">
+                        Select a portal below to enter with full role permissions. All accounts are pre-seeded with strict security authentication.
+                    </p>
+                </div>
+
+                <!-- Host Access Passwords Display Banner -->
+                <div class="credentials-banner">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                        <strong style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #93c5fd;">
+                            🔑 Master Access Credentials (All Devices / Worldwide)
+                        </strong>
+                        <span style="font-size: 0.78rem; color: #60a5fa; font-weight: bold; background: rgba(59, 130, 246, 0.2); padding: 3px 10px; border-radius: 6px;">
+                            Password for all: Password123
+                        </span>
+                    </div>
+                    <div class="credentials-grid">
+                        <div class="cred-card" onclick="openRoleAuthModal('ADMIN', 'admin@nexora.local', 'Admin Command Center', '🖥️')" style="cursor: pointer;">
+                            <strong>👑 Admin (Command Host)</strong>
+                            <code>admin@nexora.local</code>
+                        </div>
+                        <div class="cred-card" onclick="openRoleAuthModal('DRIVER', 'driver@nexora.local', 'Driver Cockpit', '🚍')" style="cursor: pointer;">
+                            <strong>🚍 Driver (Bus Cockpit)</strong>
+                            <code>driver@nexora.local</code>
+                        </div>
+                        <div class="cred-card" onclick="openRoleAuthModal('PASSENGER', 'passenger@nexora.local', 'Passenger Web App', '📱')" style="cursor: pointer;">
+                            <strong>📱 Passenger (Commuter)</strong>
+                            <code>passenger@nexora.local</code>
+                        </div>
+                        <div class="cred-card" onclick="openRoleAuthModal('RESPONDER', 'responder@nexora.local', 'Emergency Responder', '🚨')" style="cursor: pointer;">
+                            <strong>🚨 Responder (Rescue Unit)</strong>
+                            <code>responder@nexora.local</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Role Selection & Authentication Cards -->
+                <div class="roles-grid">
+                    <div class="role-select-card admin">
+                        <div class="role-icon">🖥️</div>
+                        <h3>Admin Command Center</h3>
+                        <p>Central Host operations map showing Bus, Passenger, and Responder simultaneously with incident control.</p>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                            Account: <code style="color: #93c5fd;">admin@nexora.local</code>
+                        </div>
+                        <button type="button" class="btn btn-outline" onclick="openRoleAuthModal('ADMIN', 'admin@nexora.local', 'Admin Command Center', '🖥️')">
+                            👑 Sign In as Admin &rarr;
+                        </button>
+                    </div>
+
+                    <div class="role-select-card driver">
+                        <div class="role-icon">🚍</div>
+                        <h3>Driver Cockpit</h3>
+                        <p>Mobile console for Bus BUS-001 with continuous real-phone hardware GPS broadcasting and trip controls.</p>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                            Account: <code style="color: #6ee7b7;">driver@nexora.local</code>
+                        </div>
+                        <button type="button" class="btn btn-outline" onclick="openRoleAuthModal('DRIVER', 'driver@nexora.local', 'Driver Cockpit', '🚍')">
+                            🚍 Sign In as Driver &rarr;
+                        </button>
+                    </div>
+
+                    <div class="role-select-card passenger">
+                        <div class="role-icon">📱</div>
+                        <h3>Passenger Web App</h3>
+                        <p>Live bus arrival radar, predictive ETAs, and strict 2-step GPS-verified Emergency SOS trigger.</p>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                            Account: <code style="color: #fbcfe8;">passenger@nexora.local</code>
+                        </div>
+                        <button type="button" class="btn btn-outline" onclick="openRoleAuthModal('PASSENGER', 'passenger@nexora.local', 'Passenger Web App', '📱')">
+                            📱 Sign In as Passenger &rarr;
+                        </button>
+                    </div>
+
+                    <div class="role-select-card responder">
+                        <div class="role-icon">🚨</div>
+                        <h3>Emergency Responder</h3>
+                        <p>Rescue beacon receiving alerts across whole Coimbatore city (35 km metropolitan radius) with exact reverse-geocoded street addresses.</p>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                            Account: <code style="color: #fca5a5;">responder@nexora.local</code>
+                        </div>
+                        <button type="button" class="btn btn-outline" onclick="openRoleAuthModal('RESPONDER', 'responder@nexora.local', 'Emergency Responder', '🚨')">
+                            🚨 Sign In as Responder &rarr;
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. WHAT HAPPENS IN EACH PART: DEEP-DIVE SYSTEM EXPLAINER -->
+            <div class="section-header">
+                <span class="section-eyebrow">SYSTEM ARCHITECTURE &amp; WORKFLOW</span>
+                <h2 class="section-title">How Each Component Operates</h2>
+                <p class="section-subtitle">
+                    Explore the technical breakdown of each subsystem — from hardware satellite coordinates to predictive arrival formulas and multi-stage rescue lifecycles.
                 </p>
             </div>
 
-            <!-- Host Access Passwords Display Banner -->
-            <div class="credentials-banner">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <strong style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #93c5fd;">
-                        🔑 Server Access Accounts & Passwords (All Devices)
-                    </strong>
-                    <span style="font-size: 0.75rem; color: #60a5fa; font-weight: bold;">Password for all: Password123</span>
+            <div class="story-grid">
+                <!-- Story 1: Driver Cockpit -->
+                <div class="story-card">
+                    <div class="story-image-wrap">
+                        <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=80" alt="Driver Cockpit Console" loading="lazy">
+                        <div class="story-badge-overlay">🚍 PART 1: DRIVER COCKPIT</div>
+                    </div>
+                    <div class="story-content">
+                        <span class="story-role-tag driver">🚍 Vehicle Controller &amp; Beacon</span>
+                        <h3>Real GNSS Hardware Satellite Telemetry</h3>
+                        <p>
+                            The driver cockpit communicates directly with the smartphone's internal GNSS sensor via high-accuracy HTML5 geolocation. Telemetry is streamed securely via WebSockets to our central FastAPI server every 2 seconds.
+                        </p>
+                        <ul class="story-steps-list">
+                            <li><span class="step-num">1</span> <strong>Trip Lifecycle Management:</strong> Driver taps "Start Trip" to lock onto Bus BUS-001 and initialize telemetry recording.</li>
+                            <li><span class="step-num">2</span> <strong>Continuous Satellite Ingest:</strong> Acquires latitude, longitude, transit speed, and heading with ±5m precision.</li>
+                            <li><span class="step-num">3</span> <strong>Autonomous Fallback Engine:</strong> In demo mode, our 176-waypoint Coimbatore corridor simulation keeps the bus active 24/7.</li>
+                        </ul>
+                        <button type="button" class="btn btn-outline" style="width: fit-content;" onclick="openRoleAuthModal('DRIVER', 'driver@nexora.local', 'Driver Cockpit', '🚍')">
+                            Open Driver Cockpit &rarr;
+                        </button>
+                    </div>
                 </div>
-                <div class="credentials-grid">
-                    <div class="cred-card">
-                        <strong>👑 Admin (Command Host)</strong>
-                        <code>admin@nexora.local</code>
+
+                <!-- Story 2: Passenger Radar -->
+                <div class="story-card reverse">
+                    <div class="story-image-wrap">
+                        <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80" alt="Commuter Passenger Mobility" loading="lazy">
+                        <div class="story-badge-overlay">📱 PART 2: COMMUTER RADAR</div>
                     </div>
-                    <div class="cred-card">
-                        <strong>🚍 Driver (Bus Cockpit)</strong>
-                        <code>driver@nexora.local</code>
+                    <div class="story-content">
+                        <span class="story-role-tag passenger">📱 Commuter Mobility &amp; SOS</span>
+                        <h3>Predictive Arrival ETA &amp; Strict 2-Step SOS</h3>
+                        <p>
+                            Commuters monitor the approaching bus on a Google Roadmap vector view with dynamic ETA calculations based on actual road distance and real vehicle velocity.
+                        </p>
+                        <ul class="story-steps-list">
+                            <li><span class="step-num">1</span> <strong>Live Haversine Radar:</strong> Recalculates distance and arrival minutes every 2 seconds as the bus progresses.</li>
+                            <li><span class="step-num">2</span> <strong>Zero-Tolerance Safety Lockout:</strong> Emergency SOS button remains disarmed until a genuine GPS satellite fix is locked.</li>
+                            <li><span class="step-num">3</span> <strong>3-Second Confirmation Barrier:</strong> Prevents accidental triggers; displays exact victim coordinates before broadcast.</li>
+                        </ul>
+                        <button type="button" class="btn btn-outline" style="width: fit-content;" onclick="openRoleAuthModal('PASSENGER', 'passenger@nexora.local', 'Passenger Web App', '📱')">
+                            Open Passenger Web App &rarr;
+                        </button>
                     </div>
-                    <div class="cred-card">
-                        <strong>📱 Passenger (Commuter)</strong>
-                        <code>passenger@nexora.local</code>
+                </div>
+
+                <!-- Story 3: Emergency Responder -->
+                <div class="story-card">
+                    <div class="story-image-wrap">
+                        <img src="https://images.unsplash.com/photo-1587745416684-47953f16f02f?auto=format&fit=crop&w=800&q=80" alt="Emergency Rescue Response" loading="lazy">
+                        <div class="story-badge-overlay">🚨 PART 3: RESCUE DISPATCH</div>
                     </div>
-                    <div class="cred-card">
-                        <strong>🚨 Responder (Rescue Unit)</strong>
-                        <code>responder@nexora.local</code>
+                    <div class="story-content">
+                        <span class="story-role-tag responder">🚨 Tactical Rescue Operations</span>
+                        <h3>Whole-City 35.0 km Emergency Radar</h3>
+                        <p>
+                            Emergency rescue units (police, ambulance, fire) receive instant distress dispatches across the entire Coimbatore metropolitan area (35 km radius) with audible alerts and automated street address geocoding.
+                        </p>
+                        <ul class="story-steps-list">
+                            <li><span class="step-num">1</span> <strong>Instant Audio Alarm:</strong> Synthesized dual-tone siren alerts responders immediately upon ticket generation.</li>
+                            <li><span class="step-num">2</span> <strong>Nominatim Street Geocoding:</strong> Resolves raw coordinates into human-readable Coimbatore street addresses in real time.</li>
+                            <li><span class="step-num">3</span> <strong>4-Stage Ticket Lifecycle:</strong> Track incidents through Alerted ➔ Acknowledged ➔ En Route ➔ Safe.</li>
+                        </ul>
+                        <button type="button" class="btn btn-outline" style="width: fit-content;" onclick="openRoleAuthModal('RESPONDER', 'responder@nexora.local', 'Emergency Responder', '🚨')">
+                            Open Responder Radar &rarr;
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Story 4: Master Admin Host -->
+                <div class="story-card reverse">
+                    <div class="story-image-wrap">
+                        <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80" alt="Master City Command Center" loading="lazy">
+                        <div class="story-badge-overlay">🖥️ PART 4: INCIDENT COMMAND</div>
+                    </div>
+                    <div class="story-content">
+                        <span class="story-role-tag admin">🖥️ Central Operations Command</span>
+                        <h3>Fleet Telemetry &amp; Metropolitan Incident Desk</h3>
+                        <p>
+                            City transit authorities oversee all active buses, commuter densities, and emergency incidents simultaneously on a unified operations dashboard with real-time incident resolution controls.
+                        </p>
+                        <ul class="story-steps-list">
+                            <li><span class="step-num">1</span> <strong>Real-Time Coordinates Ticker:</strong> Displays 5-decimal-place GPS telemetry, speed, and active transit sector.</li>
+                            <li><span class="step-num">2</span> <strong>City Incident Desk:</strong> Review open emergency tickets, victim phone numbers, and dispatch units with 1 click.</li>
+                            <li><span class="step-num">3</span> <strong>Autonomous Simulation Control:</strong> Pause or resume citywide bus movement simulation on the fly.</li>
+                        </ul>
+                        <button type="button" class="btn btn-outline" style="width: fit-content;" onclick="openRoleAuthModal('ADMIN', 'admin@nexora.local', 'Admin Command Center', '🖥️')">
+                            Open Admin Command Host &rarr;
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Role Selection & Authentication Cards -->
-            <div class="roles-grid">
-                <div class="role-select-card admin">
-                    <div class="role-icon">🖥️</div>
-                    <h3>Admin Command Center</h3>
-                    <p>Central Host operations map showing Bus, Passenger, and Responder simultaneously with incident control.</p>
-                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
-                        Account: <code style="color: #93c5fd;">admin@nexora.local</code>
-                    </div>
-                    <button type="button" class="btn btn-outline" onclick="openRoleAuthModal('ADMIN', 'admin@nexora.local', 'Admin Command Center', '🖥️')">
-                        👑 Sign In as Admin &rarr;
-                    </button>
-                </div>
+            <!-- 5. DYNAMIC VIDEO SHOWCASE & MEDIA TOUR -->
+            <div class="section-header">
+                <span class="section-eyebrow">DYNAMIC MEDIA SHOWCASE</span>
+                <h2 class="section-title">NEXORA in Motion</h2>
+                <p class="section-subtitle">
+                    Watch our smart transit platform in action — from real-time vehicle movement along city highways to instant incident dispatch.
+                </p>
+            </div>
 
-                <div class="role-select-card driver">
-                    <div class="role-icon">🚍</div>
-                    <h3>Driver Cockpit</h3>
-                    <p>Mobile console for Bus BUS-001 with continuous real-phone hardware GPS broadcasting and trip controls.</p>
-                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
-                        Account: <code style="color: #6ee7b7;">driver@nexora.local</code>
-                    </div>
-                    <button type="button" class="btn btn-outline" onclick="openRoleAuthModal('DRIVER', 'driver@nexora.local', 'Driver Cockpit', '🚍')">
-                        🚍 Sign In as Driver &rarr;
-                    </button>
+            <div class="video-showcase-card">
+                <div class="video-frame-wrap">
+                    <video id="showcaseVideo" controls playsinline poster="https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=1200&q=80">
+                        <source id="showcaseSource" src="https://upload.wikimedia.org/wikipedia/commons/7/78/Alaskan_Way_Viaduct_timelapse.webm" type="video/webm">
+                        Your browser does not support HTML5 video.
+                    </video>
                 </div>
-
-                <div class="role-select-card passenger">
-                    <div class="role-icon">📱</div>
-                    <h3>Passenger Web App</h3>
-                    <p>Live bus arrival radar, predictive ETAs, and strict 2-step GPS-verified Emergency SOS trigger.</p>
-                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
-                        Account: <code style="color: #fbcfe8;">passenger@nexora.local</code>
-                    </div>
-                    <button type="button" class="btn btn-outline" onclick="openRoleAuthModal('PASSENGER', 'passenger@nexora.local', 'Passenger Web App', '📱')">
-                        📱 Sign In as Passenger &rarr;
+                <div class="video-tab-bar">
+                    <button type="button" class="video-tab-btn active" onclick="switchShowcaseVideo('https://upload.wikimedia.org/wikipedia/commons/7/78/Alaskan_Way_Viaduct_timelapse.webm', 'video/webm', this)">
+                        🎬 1. City Corridor Transit Flow
                     </button>
-                </div>
-
-                <div class="role-select-card responder">
-                    <div class="role-icon">🚨</div>
-                    <h3>Emergency Responder</h3>
-                    <p>Rescue beacon receiving alerts across whole Coimbatore city (35 km metropolitan radius) with exact reverse-geocoded street addresses and incident resolution.</p>
-                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
-                        Account: <code style="color: #fca5a5;">responder@nexora.local</code>
-                    </div>
-                    <button type="button" class="btn btn-outline" onclick="openRoleAuthModal('RESPONDER', 'responder@nexora.local', 'Emergency Responder', '🚨')">
-                        🚨 Sign In as Responder &rarr;
+                    <button type="button" class="video-tab-btn" onclick="switchShowcaseVideo('https://upload.wikimedia.org/wikipedia/commons/c/c9/Bus_Ride_Through_Downtown_Seattle_%28Time-lapse%29.ogv', 'video/ogg', this)">
+                        🚍 2. Bus Ride Cockpit Perspective
+                    </button>
+                    <button type="button" class="video-tab-btn" onclick="switchShowcaseVideo('https://vjs.zencdn.net/v/oceans.mp4', 'video/mp4', this)">
+                        🌐 3. Global Telemetry Network
                     </button>
                 </div>
             </div>
 
-            <!-- Manual Sign In / Custom Login Form -->
-            <div class="card" style="max-width: 440px; margin: 0 auto;">
+            <!-- 6. ARCHITECTURE & TECHNOLOGY SPECIFICATIONS -->
+            <div class="section-header">
+                <span class="section-eyebrow">ENGINEERING SPECIFICATIONS</span>
+                <h2 class="section-title">Built with Production-Grade Architecture</h2>
+                <p class="section-subtitle">
+                    Engineered from the ground up for high reliability, zero-latency streaming, and offline-resilient operations.
+                </p>
+            </div>
+
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <div class="tech-icon">⚡</div>
+                    <h4>FastAPI &amp; Python 3.12</h4>
+                    <p>High-performance asynchronous REST API backend with automatic OpenAPI/Swagger documentation and Pydantic validation.</p>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon">🌐</div>
+                    <h4>Bi-Directional WebSockets</h4>
+                    <p>Native <code>/ws</code> endpoint streaming sub-second bus coordinates and instant emergency alerts to all connected screens.</p>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon">🗺️</div>
+                    <h4>Google Maps Vector Roadmap</h4>
+                    <p>High-resolution raster vector tiles with zoom up to level 21, displaying every street, gully, and apartment in Coimbatore.</p>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon">📍</div>
+                    <h4>OpenStreetMap Geocoding</h4>
+                    <p>Dynamic reverse-geocoding via Nominatim API converting raw latitude/longitude into human-readable Coimbatore street addresses.</p>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon">🗄️</div>
+                    <h4>Persistent Database Engine</h4>
+                    <p>Pre-seeded SQLite architecture with automated startup migration, auto-seeding, and PostgreSQL production compatibility.</p>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon">📐</div>
+                    <h4>Geodesic Haversine Math</h4>
+                    <p>High-precision spherical distance algorithms calculating exact road distance and predictive commuter arrival times dynamically.</p>
+                </div>
+            </div>
+
+            <!-- 7. MANUAL CUSTOM ACCOUNT SIGN IN -->
+            <div class="card" style="max-width: 460px; margin: 0 auto 40px;">
                 <div class="card-title" style="margin-bottom: 12px;">Sign In with Custom Account</div>
                 <form onsubmit="handleFormLogin(event)">
                     <div style="margin-bottom: 12px;">
@@ -134,7 +436,7 @@
                         <input type="password" id="loginPass" style="width: 100%; padding: 10px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; color: white;" required placeholder="Password123">
                     </div>
                     <div id="loginFormError" style="display: none; color: #f87171; font-size: 0.85rem; margin-bottom: 12px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 12px; border-radius: 6px;"></div>
-                    <button type="submit" id="loginFormBtn" class="btn btn-primary" style="width: 100%; padding: 12px;">Sign In</button>
+                    <button type="submit" id="loginFormBtn" class="btn btn-primary" style="width: 100%; padding: 12px;">Sign In &rarr;</button>
                 </form>
             </div>
         </section>
@@ -360,12 +662,15 @@
 
     <!-- Dedicated Role Authentication Modal -->
     <div class="modal-backdrop" id="roleAuthModal">
-        <div class="modal-dialog auth-modal" style="background: var(--bg-panel); border: 1px solid #3b82f6; box-shadow: 0 0 35px rgba(59, 130, 246, 0.35);">
+        <div class="modal-dialog auth-modal" id="roleAuthDialog" style="background: var(--bg-panel); border: 1px solid #3b82f6; box-shadow: 0 0 35px rgba(59, 130, 246, 0.35);">
             <div style="font-size: 2.5rem; margin-bottom: 8px;" id="roleAuthIcon">🚍</div>
             <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 4px;" id="roleAuthTitle">Driver Cockpit Login</h2>
-            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">
                 Authentication required. Enter your credentials to continue.
             </p>
+
+            <!-- Dynamic Role Architecture & Operation Explainer -->
+            <div id="roleAuthExplainer" style="margin-bottom: 14px; padding: 10px 12px; border-radius: 8px; font-size: 0.8rem; text-align: left; line-height: 1.45; border: 1px solid var(--border); background: var(--bg-card);"></div>
 
             <form id="roleAuthForm" onsubmit="submitRoleAuth(event)">
                 <div style="text-align: left; margin-bottom: 12px;">

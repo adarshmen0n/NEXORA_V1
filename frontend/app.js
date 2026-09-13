@@ -22,12 +22,14 @@ let currentTripId = null;
 
 // Leaflet Maps
 let maps = {
+    home: null,
     admin: null,
     driver: null,
     passenger: null,
     responder: null
 };
 let markers = {
+    homeBus: null,
     adminBus: null,
     adminPax: null,
     adminResp: null,
@@ -52,6 +54,7 @@ let sosTimer = null;
 document.addEventListener("DOMContentLoaded", async () => {
     checkServerHealth();
     initWebSocket();
+    initHomeMap();
 
     // Check existing stored session
     const storedToken = localStorage.getItem("nexora_token");
@@ -122,6 +125,8 @@ function openRoleAuthModal(role, email, roleTitle, icon) {
     const emailEl = document.getElementById("roleAuthEmail");
     const passEl = document.getElementById("roleAuthPass");
     const errEl = document.getElementById("roleAuthError");
+    const dialogEl = document.getElementById("roleAuthDialog");
+    const explainerEl = document.getElementById("roleAuthExplainer");
     
     if (iconEl) iconEl.textContent = icon || "🔒";
     if (titleEl) titleEl.textContent = `${roleTitle} Login`;
@@ -133,6 +138,45 @@ function openRoleAuthModal(role, email, roleTitle, icon) {
     if (errEl) {
         errEl.style.display = "none";
         errEl.textContent = "";
+    }
+
+    // Role-specific operational explanations & dynamic themes
+    const roleData = {
+        DRIVER: {
+            color: "#f59e0b",
+            glow: "rgba(245, 158, 11, 0.45)",
+            explainer: `<strong>🚍 What happens in Driver Cockpit:</strong><br>Activates your smartphone's real GPS sensor to stream live coordinates as <strong>BUS-001</strong>. Calculates real-time headway, dynamic speed, and arrival countdowns at every Coimbatore transit stop along the corridor.`
+        },
+        PASSENGER: {
+            color: "#3b82f6",
+            glow: "rgba(59, 130, 246, 0.45)",
+            explainer: `<strong>🧭 What happens in Passenger Radar:</strong><br>Connects to the live transit radar, calculates walking distance and precise bus arrival time (ETA) based on your real GPS location, and arms the 2-step Coimbatore citywide 35 km Emergency SOS dispatch.`
+        },
+        RESPONDER: {
+            color: "#ef4444",
+            glow: "rgba(239, 68, 68, 0.45)",
+            explainer: `<strong>🚨 What happens in Rescue Responder:</strong><br>Enables the emergency dispatch radar covering the entire <strong>35.0 km Coimbatore metropolitan radius</strong>. Automatically acquires active SOS distress beacons with victim contact info, exact geocoded streets, and 1-tap navigation.`
+        },
+        ADMIN: {
+            color: "#8b5cf6",
+            glow: "rgba(139, 92, 246, 0.45)",
+            explainer: `<strong>⚡ What happens in Admin Command Center:</strong><br>Provides comprehensive live oversight over all fleet vehicles, allows toggling autonomous transit simulation, monitors active emergency cases across Coimbatore, and provides 1-tap incident resolution.`
+        }
+    };
+
+    const info = roleData[role.toUpperCase()] || {
+        color: "#3b82f6",
+        glow: "rgba(59, 130, 246, 0.4)",
+        explainer: "Secure authenticated console access for authorized personnel."
+    };
+
+    if (dialogEl) {
+        dialogEl.style.borderColor = info.color;
+        dialogEl.style.boxShadow = `0 0 35px ${info.glow}`;
+    }
+    if (explainerEl) {
+        explainerEl.innerHTML = info.explainer;
+        explainerEl.style.borderColor = info.color;
     }
     
     const modal = document.getElementById("roleAuthModal");
@@ -279,6 +323,36 @@ function switchRole() {
     showRoleView("gateway");
 }
 
+// Front-page interactive showcase and live map controller
+function switchShowcaseVideo(videoUrl, videoType, btn) {
+    const player = document.getElementById("showcaseVideoPlayer");
+    if (!player) return;
+    try {
+        player.pause();
+        player.innerHTML = `<source src="${videoUrl}" type="${videoType}">Your browser does not support HTML5 video.`;
+        player.load();
+        player.play().catch(() => {});
+    } catch (e) {
+        console.warn("Showcase video switch error:", e);
+    }
+    document.querySelectorAll(".video-tab-btn").forEach(b => b.classList.remove("active"));
+    if (btn) btn.classList.add("active");
+}
+
+function initHomeMap() {
+    setTimeout(() => {
+        if (!maps.home) {
+            const container = document.getElementById("homeMap");
+            if (container) {
+                maps.home = setupMapWithGoogleTilesAndPOIs("homeMap", 13);
+            }
+        }
+        if (maps.home) {
+            maps.home.invalidateSize();
+        }
+    }, 150);
+}
+
 // ==========================================
 // 2. VIEW CONTROLLER (SPA NAVIGATION)
 // ==========================================
@@ -296,6 +370,7 @@ function showRoleView(role) {
         tag.className = "role-tag";
         document.getElementById("btnSwitchRole").style.display = "none";
         document.getElementById("btnSignOut").style.display = "none";
+        initHomeMap();
         return;
     }
 
@@ -1114,6 +1189,48 @@ function applyLiveBusUpdate(b) {
     const speed = typeof b.speed === "number" ? b.speed : 0.0;
     const road = b.road || b.location_name || "Avinashi Transit Corridor";
     const status = b.status || "ACTIVE";
+
+    // 0. Update Front Page Live Radar HUD & Home Map Bus Marker
+    const homeCoords = document.getElementById("homeBusCoords");
+    if (homeCoords) homeCoords.textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    const homeSpeed = document.getElementById("homeBusSpeed");
+    if (homeSpeed) homeSpeed.textContent = `${speed.toFixed(1)} km/h`;
+    const homeRoad = document.getElementById("homeBusRoad");
+    if (homeRoad) homeRoad.textContent = road;
+
+    if (maps.home) {
+        if (markers.homeBus) {
+            markers.homeBus.setLatLng([lat, lng]);
+            if (markers.homeBus.getPopup() && markers.homeBus.isPopupOpen()) {
+                markers.homeBus.setPopupContent(`
+                    <div style="font-size: 0.85rem; line-height: 1.4;">
+                        <strong style="color: #2563eb;">🚍 BUS-001 (TN 38 BX 1001)</strong><br>
+                        <strong>📍 Coordinates:</strong> ${lat.toFixed(5)}, ${lng.toFixed(5)}<br>
+                        <strong>⚡ Speed:</strong> ${speed.toFixed(1)} km/h<br>
+                        <strong>🛣️ Sector:</strong> ${road}<br>
+                        <strong>🟢 Status:</strong> ${status}
+                    </div>
+                `);
+            }
+        } else {
+            const icon = L.divIcon({
+                className: "home-bus-icon",
+                html: `<div style="background: #2563eb; color: white; padding: 4px 8px; border-radius: 6px; font-weight: bold; border: 2px solid white; box-shadow: 0 0 14px rgba(37,99,235,0.8); display: flex; align-items: center; gap: 4px;"><span>🚍</span> BUS-001 <span style="font-size: 9px; opacity: 0.9;">(${speed.toFixed(0)}km/h)</span></div>`,
+                iconSize: [95, 28],
+                iconAnchor: [47, 14]
+            });
+            markers.homeBus = L.marker([lat, lng], { icon }).addTo(maps.home);
+            markers.homeBus.bindPopup(`
+                <div style="font-size: 0.85rem; line-height: 1.4;">
+                    <strong style="color: #2563eb;">🚍 BUS-001 (TN 38 BX 1001)</strong><br>
+                    <strong>📍 Coordinates:</strong> ${lat.toFixed(5)}, ${lng.toFixed(5)}<br>
+                    <strong>⚡ Speed:</strong> ${speed.toFixed(1)} km/h<br>
+                    <strong>🛣️ Sector:</strong> ${road}<br>
+                    <strong>🟢 Status:</strong> ${status}
+                </div>
+            `);
+        }
+    }
 
     // 1. Update Admin Dashboard UI Telemetry Row
     const admCoords = document.getElementById("admBusCoords");
