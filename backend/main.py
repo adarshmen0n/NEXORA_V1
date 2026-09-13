@@ -13,7 +13,7 @@ import backend.models  # Register all models for metadata creation
 from backend.services.websocket_service import ws_manager
 
 # Routers
-from backend.routers import auth, buses, routes, tracking, sos, trips, notifications, admin, pois
+from backend.routers import auth, buses, routes, tracking, sos, trips, notifications, admin, pois, simulation
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("nexora.main")
@@ -46,6 +46,7 @@ app.include_router(trips.router)
 app.include_router(notifications.router)
 app.include_router(admin.router)
 app.include_router(pois.router)
+app.include_router(simulation.router)
 
 # Real-time WebSocket Endpoint
 @app.websocket("/ws")
@@ -107,6 +108,13 @@ async def startup_banner():
         seed_database()
     except Exception as e:
         logger.warning(f"Auto-seeding check: {e}")
+
+    # Start continuous city transit simulation for dynamic live tracking
+    try:
+        from backend.services.simulation_service import simulation_service
+        simulation_service.start()
+    except Exception as e:
+        logger.warning(f"Auto-simulation start: {e}")
 
     lan_ip = get_lan_ip()
     port = settings.PORT

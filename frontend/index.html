@@ -307,16 +307,28 @@
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">🖥️ Master City Transit & Incident Command</div>
-                    <button type="button" class="btn-nav" onclick="loadAdminDashboard()">↻ Refresh</button>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span id="admLiveBadge" class="gps-pill live" style="font-size: 0.75rem;"><span>🟢</span> LIVE TELEMETRY</span>
+                        <button type="button" class="btn-nav" id="btnSimToggle" onclick="toggleSimulationUI()">⏸ Pause Transit</button>
+                        <button type="button" class="btn-nav" onclick="loadAdminDashboard()">↻ Refresh</button>
+                    </div>
                 </div>
-                <div class="telemetry-row">
+                <div class="telemetry-row" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));">
                     <div class="telemetry-metric">
-                        <div class="val" id="admBusStatus" style="font-size: 1rem; color: #10b981;">ONLINE</div>
+                        <div class="val" id="admBusStatus" style="font-size: 1rem; color: #10b981;">ONLINE (LIVE)</div>
                         <div class="lbl">BUS-001 Status</div>
+                    </div>
+                    <div class="telemetry-metric">
+                        <div class="val" id="admBusCoords" style="font-size: 0.85rem; font-family: monospace; color: #38bdf8;">11.01684, 76.95583</div>
+                        <div class="lbl">📍 Live GPS Coordinates</div>
                     </div>
                     <div class="telemetry-metric">
                         <div class="val" id="admBusSpeed">0.0 km/h</div>
                         <div class="lbl">Bus Speed</div>
+                    </div>
+                    <div class="telemetry-metric">
+                        <div class="val" id="admBusRoad" style="font-size: 0.8rem; color: #f59e0b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Gandhipuram Central</div>
+                        <div class="lbl">Current Sector</div>
                     </div>
                     <div class="telemetry-metric">
                         <div class="val" id="admActiveSosCount" style="color: #ef4444;">0</div>

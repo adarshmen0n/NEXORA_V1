@@ -46,10 +46,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 4. Connect WebSocket
     initWebSocket();
 
-    // 5. Periodic polling fallback
-    setInterval(loadDashboardMetrics, 15000);
-    setInterval(loadFleet, 10000);
-    setInterval(loadActiveSOS, 10000);
+    // 5. Periodic polling fallback (2.5s dynamic sync)
+    setInterval(loadDashboardMetrics, 10000);
+    setInterval(loadFleet, 2500);
+    setInterval(loadActiveSOS, 8000);
 });
 
 function initMap() {
@@ -367,18 +367,31 @@ function addEventLog(msg, type = "normal") {
     stream.prepend(item);
 }
 
+let adminWsHeartbeat = null;
+
 function initWebSocket() {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws`;
+
+    if (socket) {
+        try { socket.close(); } catch(e) {}
+    }
 
     socket = new WebSocket(wsUrl);
 
     socket.onopen = () => {
         addEventLog("Live WebSocket telemetry pipe connected.", "normal");
+        if (adminWsHeartbeat) clearInterval(adminWsHeartbeat);
+        adminWsHeartbeat = setInterval(() => {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send("ping");
+            }
+        }, 15000);
     };
 
     socket.onmessage = (event) => {
         try {
+            if (event.data === "pong") return;
             const msg = JSON.parse(event.data);
             handleIncomingWsEvent(msg);
         } catch (e) {
@@ -387,8 +400,9 @@ function initWebSocket() {
     };
 
     socket.onclose = () => {
-        addEventLog("Telemetry pipe disconnected. Reconnecting in 3s...", "alert");
-        setTimeout(initWebSocket, 3000);
+        if (adminWsHeartbeat) clearInterval(adminWsHeartbeat);
+        addEventLog("Telemetry pipe disconnected. Reconnecting in 2.5s...", "alert");
+        setTimeout(initWebSocket, 2500);
     };
 }
 

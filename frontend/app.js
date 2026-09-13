@@ -987,28 +987,7 @@ function initAdminView() {
 
 async function loadAdminDashboard() {
     try {
-        // Load bus state
-        const busRes = await apiRequest("/api/buses/BUS-001");
-        if (busRes.ok) {
-            const bus = await busRes.json();
-            document.getElementById("admBusStatus").textContent = bus.status;
-            document.getElementById("admBusSpeed").textContent = `${bus.current_speed.toFixed(1)} km/h`;
-
-            if (bus.current_latitude && bus.current_longitude) {
-                if (markers.adminBus) {
-                    markers.adminBus.setLatLng([bus.current_latitude, bus.current_longitude]);
-                } else {
-                    const icon = L.divIcon({
-                        className: "admin-bus-icon",
-                        html: `<div style="background: #2563eb; color: white; padding: 4px 8px; border-radius: 6px; font-weight: bold; border: 2px solid white;">🚍 BUS-001</div>`,
-                        iconSize: [80, 26],
-                        iconAnchor: [40, 13]
-                    });
-                    markers.adminBus = L.marker([bus.current_latitude, bus.current_longitude], { icon }).addTo(maps.admin);
-                }
-                maps.admin.panTo([bus.current_latitude, bus.current_longitude]);
-            }
-        }
+        await pollBusTelemetry();
 
         // Load active emergencies
         const sosRes = await apiRequest("/api/sos/active");
@@ -1065,38 +1044,55 @@ async function adminResolve(sosId) {
 // 8. WEBSOCKET REAL-TIME BROADCAST LISTENER
 // ==========================================
 
+let wsHeartbeatInterval = null;
+
 function initWebSocket() {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws`;
 
+    if (socket) {
+        try { socket.close(); } catch(e) {}
+    }
+
     socket = new WebSocket(wsUrl);
+
+    socket.onopen = () => {
+        console.log("WebSocket connected to NEXORA telemetry stream.");
+        if (wsHeartbeatInterval) clearInterval(wsHeartbeatInterval);
+        wsHeartbeatInterval = setInterval(() => {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send("ping");
+            }
+        }, 15000);
+    };
 
     socket.onmessage = (e) => {
         try {
+            if (e.data === "pong") return;
             const msg = JSON.parse(e.data);
             handleWsMessage(msg);
         } catch (err) {}
     };
 
     socket.onclose = () => {
-        setTimeout(initWebSocket, 3000);
+        if (wsHeartbeatInterval) clearInterval(wsHeartbeatInterval);
+        setTimeout(initWebSocket, 2500);
+    };
+
+    socket.onerror = () => {
+        try { socket.close(); } catch(e) {}
     };
 }
 
 function handleWsMessage(msg) {
     if (msg.type === "BUS_LOCATION_UPDATE") {
-        if (currentUser && currentUser.role === "PASSENGER") {
-            updatePassengerETA();
-        } else if (currentUser && currentUser.role === "ADMIN") {
-            loadAdminDashboard();
-        }
+        applyLiveBusUpdate(msg.data);
     } else if (msg.type === "SOS_ALERT") {
         playAlertTone();
         if (currentUser && currentUser.role === "RESPONDER") {
             loadResponderAlerts();
-        } else if (currentUser && currentUser.role === "ADMIN") {
-            loadAdminDashboard();
         }
+        loadAdminDashboard();
     } else if (msg.type === "SOS_STATUS_UPDATE") {
         if (activeSOS && activeSOS.sos_id === msg.data.sos_id) {
             activeSOS.status = msg.data.status;
@@ -1104,9 +1100,140 @@ function handleWsMessage(msg) {
             renderActiveSOSTracker(activeSOS);
         }
         if (currentUser && currentUser.role === "RESPONDER") loadResponderAlerts();
-        if (currentUser && currentUser.role === "ADMIN") loadAdminDashboard();
+        loadAdminDashboard();
     }
 }
+
+// -------------------------------------------------------------
+// DYNAMIC LIVE BUS TELEMETRY & ANIMATION ENGINE
+// -------------------------------------------------------------
+function applyLiveBusUpdate(b) {
+    if (!b || typeof b.latitude !== "number" || typeof b.longitude !== "number") return;
+    const lat = b.latitude;
+    const lng = b.longitude;
+    const speed = typeof b.speed === "number" ? b.speed : 0.0;
+    const road = b.road || b.location_name || "Avinashi Transit Corridor";
+    const status = b.status || "ACTIVE";
+
+    // 1. Update Admin Dashboard UI Telemetry Row
+    const admCoords = document.getElementById("admBusCoords");
+    if (admCoords) admCoords.textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    const admSpeed = document.getElementById("admBusSpeed");
+    if (admSpeed) admSpeed.textContent = `${speed.toFixed(1)} km/h`;
+    const admStatus = document.getElementById("admBusStatus");
+    if (admStatus) admStatus.textContent = `${status} (LIVE)`;
+    const admRoad = document.getElementById("admBusRoad");
+    if (admRoad) admRoad.textContent = road;
+
+    // 2. Update Admin Map Bus Marker
+    if (maps.admin) {
+        if (markers.adminBus) {
+            markers.adminBus.setLatLng([lat, lng]);
+            if (markers.adminBus.getPopup() && markers.adminBus.isPopupOpen()) {
+                markers.adminBus.setPopupContent(`
+                    <div style="font-size: 0.85rem; line-height: 1.4;">
+                        <strong style="color: #2563eb;">🚍 BUS-001 (TN 38 BX 1001)</strong><br>
+                        <strong>📍 Coordinates:</strong> ${lat.toFixed(5)}, ${lng.toFixed(5)}<br>
+                        <strong>⚡ Speed:</strong> ${speed.toFixed(1)} km/h<br>
+                        <strong>🛣️ Sector:</strong> ${road}<br>
+                        <strong>🟢 Status:</strong> ${status}
+                    </div>
+                `);
+            }
+        } else {
+            const icon = L.divIcon({
+                className: "admin-bus-icon",
+                html: `<div style="background: #2563eb; color: white; padding: 4px 8px; border-radius: 6px; font-weight: bold; border: 2px solid white; box-shadow: 0 0 14px rgba(37,99,235,0.8); display: flex; align-items: center; gap: 4px;"><span>🚍</span> BUS-001 <span style="font-size: 9px; opacity: 0.9;">(${speed.toFixed(0)}km/h)</span></div>`,
+                iconSize: [95, 28],
+                iconAnchor: [47, 14]
+            });
+            markers.adminBus = L.marker([lat, lng], { icon }).addTo(maps.admin);
+            markers.adminBus.bindPopup(`
+                <div style="font-size: 0.85rem; line-height: 1.4;">
+                    <strong style="color: #2563eb;">🚍 BUS-001 (TN 38 BX 1001)</strong><br>
+                    <strong>📍 Coordinates:</strong> ${lat.toFixed(5)}, ${lng.toFixed(5)}<br>
+                    <strong>⚡ Speed:</strong> ${speed.toFixed(1)} km/h<br>
+                    <strong>🛣️ Sector:</strong> ${road}<br>
+                    <strong>🟢 Status:</strong> ${status}
+                </div>
+            `);
+        }
+    }
+
+    // 3. Update Passenger Map & Commuter Radar
+    if (maps.passenger) {
+        if (markers.passengerBus) {
+            markers.passengerBus.setLatLng([lat, lng]);
+        } else {
+            const icon = L.divIcon({
+                className: "custom-bus-pax-icon",
+                html: `<div style="background: #2563eb; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 10px; border: 1px solid white; box-shadow: 0 0 8px rgba(37,99,235,0.7);">🚍 BUS-001</div>`,
+                iconSize: [65, 22],
+                iconAnchor: [32, 11]
+            });
+            markers.passengerBus = L.marker([lat, lng], { icon }).addTo(maps.passenger);
+        }
+
+        // Compute Distance and ETA if commuter GPS is available
+        if (realLat && realLng) {
+            const distKm = computeHaversineKm(realLat, realLng, lat, lng);
+            const effSpeed = Math.max(speed, 20.0);
+            const etaMin = Math.max(1, Math.round((distKm / effSpeed) * 60));
+
+            const distEl = document.getElementById("paxEtaDistance");
+            if (distEl) distEl.textContent = `${distKm.toFixed(2)} km away`;
+            const minEl = document.getElementById("paxEtaMinutes");
+            if (minEl) minEl.textContent = `${etaMin} min`;
+        }
+        const paxStatus = document.getElementById("paxBusStatus");
+        if (paxStatus) paxStatus.textContent = `${status} (EN ROUTE)`;
+    }
+}
+
+// Continuous polling fallback (2.5s) to guarantee updates never stall even if WS drops
+async function pollBusTelemetry() {
+    try {
+        const res = await fetch(`${API_BASE}/api/buses/BUS-001`);
+        if (res.ok) {
+            const b = await res.json();
+            if (b.current_latitude && b.current_longitude) {
+                applyLiveBusUpdate({
+                    bus_id: b.bus_id,
+                    registration_number: b.registration_number,
+                    latitude: b.current_latitude,
+                    longitude: b.current_longitude,
+                    speed: b.current_speed,
+                    status: b.status
+                });
+            }
+        }
+    } catch (e) {}
+}
+
+setInterval(pollBusTelemetry, 2500);
+
+async function toggleSimulationUI() {
+    const btn = document.getElementById("btnSimToggle");
+    try {
+        if (btn) btn.disabled = true;
+        const res = await fetch(`${API_BASE}/api/simulation/toggle`, { method: "POST" });
+        const data = await res.json();
+        if (btn) {
+            btn.textContent = data.is_running ? "⏸ Pause Transit" : "▶ Resume Transit";
+            btn.style.color = data.is_running ? "#f59e0b" : "#10b981";
+        }
+        const badge = document.getElementById("admLiveBadge");
+        if (badge) {
+            badge.className = data.is_running ? "gps-pill live" : "gps-pill acquiring";
+            badge.innerHTML = data.is_running ? "<span>🟢</span> LIVE TELEMETRY" : "<span>🟡</span> TRANSIT PAUSED";
+        }
+    } catch (e) {
+        alert("Could not toggle transit: " + e.message);
+    } finally {
+        if (btn) btn.disabled = false;
+    }
+}
+
 
 function playAlertTone() {
     try {
