@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEXORA V1 — Smart Transit & Emergency Response Platform</title>
+    <title>NEXORA — Coimbatore Metropolitan Smart Transit & Emergency Radar | Tamil Nadu</title>
     <link rel="stylesheet" href="/style.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,31 +18,38 @@
                 <svg viewBox="0 0 64 64" fill="none" class="brand-svg">
                     <defs>
                         <linearGradient id="nexoraGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#38bdf8" />
+                            <stop offset="0%" stop-color="#10b981" />
                             <stop offset="50%" stop-color="#2563eb" />
-                            <stop offset="100%" stop-color="#8b5cf6" />
+                            <stop offset="100%" stop-color="#f59e0b" />
                         </linearGradient>
                         <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
                             <feGaussianBlur stdDeviation="3" result="blur" />
                             <feComposite in="SourceGraphic" in2="blur" operator="over" />
                         </filter>
                     </defs>
-                    <circle cx="32" cy="32" r="28" stroke="url(#nexoraGrad)" stroke-width="2.5" stroke-dasharray="4 2" opacity="0.8" />
-                    <circle cx="32" cy="32" r="20" stroke="#38bdf8" stroke-width="1.5" opacity="0.4" />
-                    <rect x="18" y="16" width="28" height="30" rx="6" fill="#1e293b" stroke="url(#nexoraGrad)" stroke-width="2.5" />
-                    <rect x="22" y="20" width="20" height="10" rx="2" fill="#38bdf8" opacity="0.85" />
-                    <circle cx="23" cy="38" r="2.5" fill="#facc15" filter="url(#glow)" />
-                    <circle cx="41" cy="38" r="2.5" fill="#facc15" filter="url(#glow)" />
-                    <line x1="28" y1="38" x2="36" y2="38" stroke="#64748b" stroke-width="2" stroke-linecap="round" />
-                    <path d="M 12 32 A 20 20 0 0 1 52 32" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" opacity="0.5" />
+                    <circle cx="32" cy="32" r="30" stroke="url(#nexoraGrad)" stroke-width="2.5" stroke-dasharray="6 3" opacity="0.8" />
+                    <circle cx="32" cy="32" r="22" stroke="#10b981" stroke-width="1.5" opacity="0.4" />
+                    <rect x="18" y="16" width="28" height="32" rx="6" fill="#0f172a" stroke="url(#nexoraGrad)" stroke-width="2.5" />
+                    <rect x="22" y="20" width="20" height="10" rx="2" fill="#38bdf8" opacity="0.9" />
+                    <circle cx="23" cy="40" r="2.5" fill="#f59e0b" filter="url(#glow)" />
+                    <circle cx="41" cy="40" r="2.5" fill="#f59e0b" filter="url(#glow)" />
+                    <line x1="28" y1="40" x2="36" y2="40" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" />
+                    <path d="M 10 32 A 22 22 0 0 1 54 32" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" opacity="0.6" />
                 </svg>
             </div>
             <div class="brand-text-block">
                 <span class="brand-name">NEXORA</span>
-                <span class="brand-sub">TRANSIT &amp; EMERGENCY RADAR</span>
+                <span class="brand-sub">COIMBATORE METROPOLITAN TRANSIT</span>
             </div>
-            <span class="brand-badge">V1 OFFICIAL</span>
-            <span id="serverHealthBadge" style="font-size: 0.75rem; font-weight: 700; color: #10b981;">🟢 Online</span>
+            <div class="tn-smart-city-badge">
+                <span class="flag-dots">
+                    <span class="flag-dot-saffron"></span>
+                    <span class="flag-dot-white"></span>
+                    <span class="flag-dot-green"></span>
+                </span>
+                <span>TNSTC COIMBATORE PROTOCOL</span>
+            </div>
+            <span id="serverHealthBadge" style="font-size: 0.75rem; font-weight: 700; color: #10b981;">🟢 Live</span>
         </div>
 
         <div class="nav-actions">
@@ -55,57 +62,63 @@
 
     <main class="app-container">
         <!-- ======================================================= -->
-        <!-- VIEW 1: GATEWAY & ROLE SELECTOR (PASSWORDS DISPLAYED)   -->
+        <!-- VIEW 1: GATEWAY & ROLE SELECTOR                         -->
         <!-- ======================================================= -->
         <section id="viewGateway" class="view-panel active">
             <!-- 1. HERO SECTION WITH DYNAMIC AMBIENT RUNNING VIDEO -->
             <div class="hero-section">
-                <video autoplay loop muted playsinline class="hero-video-bg" poster="https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=1200&q=80">
-                    <source src="https://upload.wikimedia.org/wikipedia/commons/7/78/Alaskan_Way_Viaduct_timelapse.webm" type="video/webm">
-                    <source src="https://vjs.zencdn.net/v/oceans.mp4" type="video/mp4">
+                <video autoplay loop muted playsinline class="hero-video-bg" poster="https://upload.wikimedia.org/wikipedia/commons/b/b1/TNSTC_public_transit_bus_in_Coimbatore.jpg">
+                    <source src="https://upload.wikimedia.org/wikipedia/commons/c/c1/India%27s_Number_one_BRTS_Bus_Service_Hubli_to_Dharwad_Karnataka.webm" type="video/webm">
+                    <source src="https://upload.wikimedia.org/wikipedia/commons/6/6d/Moving_vehicles_in_Link_road%2C_Cuttack%2C_Odisha.webm" type="video/webm">
                 </video>
                 <div class="hero-overlay"></div>
 
                 <div class="hero-content">
                     <div class="hero-badge">
-                        <span>⚡</span>
-                        <span>AI-POWERED AUTONOMOUS TRANSIT &amp; RESCUE PLATFORM</span>
+                        <span>🇮🇳</span>
+                        <span>TAMIL NADU SMART TRANSIT &amp; EMERGENCY RESPONSE INITIATIVE</span>
                     </div>
 
                     <h1 class="hero-title">
-                        Next-Generation Smart Transit &amp;<br>Emergency Response System
+                        Coimbatore Metropolitan Smart Transit &amp;<br>Emergency Response Radar
                     </h1>
 
                     <p class="hero-subtitle">
-                        NEXORA V1 bridges transit operators, bus drivers, daily commuters, and emergency rescue units across Coimbatore City. Powered by sub-second GNSS satellite telemetry, deep Google Maps vector roadmaps, and verified 2-step emergency dispatch.
+                        Official intelligent urban mobility system for Coimbatore City, monitored under Tamil Nadu State Transport Corporation (TNSTC) standards. Delivering live satellite bus telemetry along Avinashi Road, Trichy Road, Sathy Road, and Palakkad Highway with 35.0 km emergency response dispatch.
                     </p>
 
                     <div class="hero-actions">
-                        <a href="#portalsSection" class="btn-hero-primary">
-                            <span>🚀</span> Launch Vehicle &amp; Rescue Portals
-                        </a>
-                        <a href="#radarSection" class="btn-hero-secondary">
-                            <span>🗺️</span> Explore Live City Radar
-                        </a>
+                        <button type="button" class="btn-hero-primary" onclick="document.getElementById('radarSection').scrollIntoView({behavior:'smooth'})">
+                            <span>🗺️</span> Explore Coimbatore Radar
+                        </button>
+                        <button type="button" class="btn-hero-secondary" onclick="document.getElementById('busStandsSection').scrollIntoView({behavior:'smooth'})">
+                            <span>🚏</span> Bus Stands &amp; Terminals
+                        </button>
+                        <button type="button" class="btn-hero-secondary" onclick="document.getElementById('portalsSection').scrollIntoView({behavior:'smooth'})">
+                            <span>🚍</span> Launch Role Consoles
+                        </button>
+                        <button type="button" class="btn-hero-secondary" onclick="document.getElementById('guideSection').scrollIntoView({behavior:'smooth'})">
+                            <span>📖</span> System Manual &amp; Guides
+                        </button>
                     </div>
 
                     <!-- Live KPI Counters Strip -->
                     <div class="stats-strip">
                         <div class="stat-pill">
                             <div class="stat-num">35.0 km</div>
-                            <div class="stat-desc">Metropolitan Geofence</div>
+                            <div class="stat-desc">Coimbatore Metro Radius</div>
                         </div>
                         <div class="stat-pill">
                             <div class="stat-num">176</div>
-                            <div class="stat-desc">Corridor Waypoints</div>
+                            <div class="stat-desc">Monitored Corridor Waypoints</div>
                         </div>
                         <div class="stat-pill">
                             <div class="stat-num">&lt; 1.0 s</div>
-                            <div class="stat-desc">Telemetry Latency</div>
+                            <div class="stat-desc">Mobile Hardware GPS Sync</div>
                         </div>
                         <div class="stat-pill">
-                            <div class="stat-num">50+</div>
-                            <div class="stat-desc">Coimbatore POIs</div>
+                            <div class="stat-num">58+</div>
+                            <div class="stat-desc">Coimbatore City POIs</div>
                         </div>
                     </div>
                 </div>
@@ -115,12 +128,35 @@
             <div id="radarSection" class="front-map-card">
                 <div class="card-header" style="margin-bottom: 12px;">
                     <div>
-                        <div class="card-title" style="font-size: 1.25rem;">🏙️ Live Coimbatore City Transit Radar (Preview)</div>
+                        <div class="card-title" style="font-size: 1.25rem;">🏙️ Coimbatore Metropolitan Live Transit Radar</div>
                         <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
-                            Official Google Maps vector raster roadmap rendering all gullies, streets, apartments, and live bus movements in real time.
+                            Official Google Maps vector raster roadmap rendering all Coimbatore streets, bus stands, hospitals, police stations, and live bus movements.
                         </div>
                     </div>
                     <span class="gps-pill live" id="homeLiveBadge"><span>🟢</span> STREAMING LIVE (BUS-001)</span>
+                </div>
+
+                <!-- Bus Stand Quick-Jump Toolbar (100% Functional Buttons) -->
+                <div class="bus-stand-toolbar">
+                    <span class="bus-stand-toolbar-label">🚏 Quick Center on Bus Stand:</span>
+                    <button type="button" class="bus-stand-pill" onclick="panToBusStand(11.0168, 76.9678, 16, 'Gandhipuram Town Bus Stand', 'Primary intra-city town bus terminus connecting all Coimbatore localities and Gandhipuram flyover.')">
+                        📍 Gandhipuram Central
+                    </button>
+                    <button type="button" class="bus-stand-pill" onclick="panToBusStand(10.9875, 76.9615, 16, 'Ukkadam Bus Terminus', 'South corridor terminal connecting Pollachi, Palakkad, Valparai, and Anaimalai.')">
+                        📍 Ukkadam Terminus
+                    </button>
+                    <button type="button" class="bus-stand-pill" onclick="panToBusStand(10.9980, 77.0245, 16, 'Singanallur Bus Terminal', 'Trichy Road terminal serving Madurai, Trichy, Thanjavur, Karur, and Dindigul.')">
+                        📍 Singanallur Hub
+                    </button>
+                    <button type="button" class="bus-stand-pill" onclick="panToBusStand(11.0315, 76.9480, 16, 'Mettupalayam Road Bus Stand', 'Saibaba Colony terminus serving Nilgiris, Ooty, Coonoor, and Kotagiri.')">
+                        📍 Mettupalayam Rd Hub
+                    </button>
+                    <button type="button" class="bus-stand-pill" onclick="panToBusStand(11.0300, 77.0434, 16, 'Coimbatore International Airport (CJB)', 'Civil Aerodrome terminal corridor along Avinashi Road.')">
+                        ✈️ Airport Link
+                    </button>
+                    <button type="button" class="bus-stand-pill live-track" onclick="focusOnLiveBus()">
+                        🚍 Locate BUS-001 (Live)
+                    </button>
                 </div>
 
                 <!-- Floating Telemetry HUD -->
@@ -134,7 +170,7 @@
                         <span class="value" id="homeBusCoords">11.01684, 76.95583</span>
                     </div>
                     <div class="hud-metric">
-                        <span class="label">⚡ Current Transit Velocity</span>
+                        <span class="label">⚡ Current Velocity</span>
                         <span class="value" id="homeBusSpeed" style="color: #10b981;">32.0 km/h</span>
                     </div>
                     <div class="hud-metric">
@@ -143,13 +179,14 @@
                     </div>
                 </div>
 
-                <!-- POI Filter Overlays -->
+                <!-- POI Filter Overlays (100% Working Toggles) -->
                 <div class="poi-filter-bar">
-                    <span class="poi-filter-label">🏙️ Coimbatore City POI Overlays:</span>
-                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('home', 'hospital', this)">🏥 Hospitals (11)</button>
+                    <span class="poi-filter-label">🏙️ Coimbatore City Overlays:</span>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('home', 'bus_stand', this)">🚏 Bus Stands (8)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('home', 'hospital', this)">🏥 Hospitals (12)</button>
                     <button type="button" class="poi-btn active" onclick="toggleMapPOI('home', 'fire', this)">🚒 Fire Stations (6)</button>
                     <button type="button" class="poi-btn active" onclick="toggleMapPOI('home', 'police', this)">🚓 Police (11)</button>
-                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('home', 'school', this)">🎓 Schools (11)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('home', 'school', this)">🎓 Colleges &amp; Schools (11)</button>
                     <button type="button" class="poi-btn active" onclick="toggleMapPOI('home', 'landmark', this)">🏟️ Stadiums &amp; Malls (11)</button>
                 </div>
 
@@ -157,10 +194,218 @@
                 <div id="homeMap" class="map-box" style="height: 480px; border-radius: 14px; border: 1px solid rgba(59, 130, 246, 0.3);"></div>
             </div>
 
-            <!-- 3. ROLE PORTALS LAUNCHPAD & CREDENTIALS -->
+            <!-- 3. COIMBATORE BUS STANDS & TERMINALS NAVIGATOR -->
+            <div id="busStandsSection">
+                <div class="section-header">
+                    <span class="section-eyebrow">COIMBATORE TRANSIT HUBS</span>
+                    <h2 class="section-title">Major Bus Stands &amp; Terminals of Coimbatore</h2>
+                    <p class="section-subtitle">
+                        Coimbatore operates a multi-hub hub-and-spoke transit system. Explore each major bus terminal, destinations served, and click "Center on Map" to locate each terminal instantly.
+                    </p>
+                </div>
+
+                <div class="routes-grid">
+                    <!-- Stand 1: Gandhipuram Town Bus Stand -->
+                    <div class="route-card">
+                        <div>
+                            <div class="route-card-header">
+                                <span class="route-number-badge">🚏 GANDHIPURAM</span>
+                                <span class="route-type-tag">Primary Town Bus Hub</span>
+                            </div>
+                            <div class="route-title">Gandhipuram Town Bus Stand</div>
+                            <div class="route-path-trail">
+                                <strong>Corridors Served:</strong> Peelamedu, Singanallur, Ganapathy, Saravanampatti, Saibaba Colony, Perur, Vadavalli.<br>
+                                <strong>Location:</strong> Cross Cut Road, Gandhipuram (TNSTC Central Depot)<br>
+                                <strong>Enquiry:</strong> 0422 252 6112
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline" style="width: 100%; padding: 8px 12px; font-size: 0.8rem;" onclick="panToBusStand(11.0168, 76.9678, 17, 'Gandhipuram Town Bus Stand', 'Primary intra-city town bus terminus connecting all Coimbatore localities and Gandhipuram flyover.')">
+                            Center on Map 🗺️
+                        </button>
+                    </div>
+
+                    <!-- Stand 2: Gandhipuram Central / SETC -->
+                    <div class="route-card">
+                        <div>
+                            <div class="route-card-header">
+                                <span class="route-number-badge">🚏 SETC CENTRAL</span>
+                                <span class="route-type-tag">Inter-District Express</span>
+                            </div>
+                            <div class="route-title">Gandhipuram Central Bus Stand</div>
+                            <div class="route-path-trail">
+                                <strong>Destinations:</strong> Chennai, Bangalore, Salem, Erode, Tirupur, Dharmapuri, Hosur, Vellore.<br>
+                                <strong>Location:</strong> Dr. Nanjappa Road, Gandhipuram<br>
+                                <strong>Enquiry:</strong> 0422 252 1111 / SETC Online
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline" style="width: 100%; padding: 8px 12px; font-size: 0.8rem;" onclick="panToBusStand(11.0180, 76.9685, 17, 'Gandhipuram Central Bus Terminus (SETC)', 'Inter-district express bus terminus connecting Salem, Chennai, Bangalore, and Erode.')">
+                            Center on Map 🗺️
+                        </button>
+                    </div>
+
+                    <!-- Stand 3: Ukkadam Bus Terminus -->
+                    <div class="route-card">
+                        <div>
+                            <div class="route-card-header">
+                                <span class="route-number-badge">🚏 UKKADAM</span>
+                                <span class="route-type-tag">South Corridor Hub</span>
+                            </div>
+                            <div class="route-title">Ukkadam Bus Terminus</div>
+                            <div class="route-path-trail">
+                                <strong>Destinations:</strong> Pollachi, Palakkad, Anaimalai, Valparai, Kinathukadavu, Meenachipuram.<br>
+                                <strong>Location:</strong> Ukkadam Bypass, Periyakulam Lake front<br>
+                                <strong>Enquiry:</strong> 0422 239 8811
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline" style="width: 100%; padding: 8px 12px; font-size: 0.8rem;" onclick="panToBusStand(10.9875, 76.9615, 17, 'Ukkadam Bus Terminus', 'South corridor terminal connecting Pollachi, Palakkad, Valparai, and Anaimalai.')">
+                            Center on Map 🗺️
+                        </button>
+                    </div>
+
+                    <!-- Stand 4: Singanallur Bus Terminal -->
+                    <div class="route-card">
+                        <div>
+                            <div class="route-card-header">
+                                <span class="route-number-badge">🚏 SINGANALLUR</span>
+                                <span class="route-type-tag">Trichy Highway Hub</span>
+                            </div>
+                            <div class="route-title">Singanallur Bus Terminal</div>
+                            <div class="route-path-trail">
+                                <strong>Destinations:</strong> Madurai, Trichy, Thanjavur, Karur, Dindigul, Theni, Rameswaram.<br>
+                                <strong>Location:</strong> Trichy Road, Singanallur Lake area<br>
+                                <strong>Enquiry:</strong> 0422 257 6622
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline" style="width: 100%; padding: 8px 12px; font-size: 0.8rem;" onclick="panToBusStand(10.9980, 77.0245, 17, 'Singanallur Bus Terminal', 'Trichy Road terminal serving Madurai, Trichy, Thanjavur, Karur, and Dindigul.')">
+                            Center on Map 🗺️
+                        </button>
+                    </div>
+
+                    <!-- Stand 5: Mettupalayam Road Bus Stand -->
+                    <div class="route-card">
+                        <div>
+                            <div class="route-card-header">
+                                <span class="route-number-badge">🚏 SAIBABA COLONY</span>
+                                <span class="route-type-tag">Nilgiris Gateway</span>
+                            </div>
+                            <div class="route-title">Mettupalayam Road Bus Stand</div>
+                            <div class="route-path-trail">
+                                <strong>Destinations:</strong> Ooty, Coonoor, Kotagiri, Gudalur, Mettupalayam, Karamadai.<br>
+                                <strong>Location:</strong> Mettupalayam Main Road, Saibaba Colony<br>
+                                <strong>Enquiry:</strong> 0422 244 5511
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline" style="width: 100%; padding: 8px 12px; font-size: 0.8rem;" onclick="panToBusStand(11.0315, 76.9480, 17, 'Mettupalayam Road Bus Stand', 'Saibaba Colony terminus serving Nilgiris, Ooty, Coonoor, and Kotagiri.')">
+                            Center on Map 🗺️
+                        </button>
+                    </div>
+
+                    <!-- Stand 6: Gandhipuram Omni Bus Stand -->
+                    <div class="route-card">
+                        <div>
+                            <div class="route-card-header">
+                                <span class="route-number-badge">🚏 OMNI TERMINAL</span>
+                                <span class="route-type-tag">AC Sleeper Coaches</span>
+                            </div>
+                            <div class="route-title">Gandhipuram Omni Bus Stand</div>
+                            <div class="route-path-trail">
+                                <strong>Destinations:</strong> Inter-State luxury night coaches to Bangalore, Chennai, Trivandrum, Cochin, Hyderabad.<br>
+                                <strong>Location:</strong> Sathyamangalam Road, GP Signal<br>
+                                <strong>Enquiry:</strong> 0422 249 8899
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline" style="width: 100%; padding: 8px 12px; font-size: 0.8rem;" onclick="panToBusStand(11.0210, 76.9710, 17, 'Gandhipuram Omni Bus Stand', 'Inter-state luxury AC sleeper coach terminal on Sathyamangalam Road.')">
+                            Center on Map 🗺️
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. POPULAR COIMBATORE TOWN BUS ROUTES -->
+            <div id="routesSection">
+                <div class="section-header">
+                    <span class="section-eyebrow">COIMBATORE TOWN BUS NETWORK</span>
+                    <h2 class="section-title">Key Town Bus Routes &amp; Corridors</h2>
+                    <p class="section-subtitle">
+                        Every day thousands of commuters travel along these vital Coimbatore arterial transit lines. All routes are monitored in real time by NEXORA.
+                    </p>
+                </div>
+
+                <div class="routes-grid">
+                    <div class="route-card">
+                        <div>
+                            <div class="route-card-header">
+                                <span class="route-number-badge">🚍 ROUTE 1C</span>
+                                <span class="route-type-tag">Every 5 Mins</span>
+                            </div>
+                            <div class="route-title">Gandhipuram ⇄ Ondipudur</div>
+                            <div class="route-path-trail">
+                                <strong>Major Stops:</strong> Gandhipuram Central ➔ GKNM Hospital ➔ Lakshmi Mills ➔ Nava India ➔ Ramanathapuram ➔ Singanallur Bus Stand ➔ Ondipudur Depot.<br>
+                                <strong>Frequency:</strong> High-density corridor with continuous services.
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline" style="width: 100%; padding: 8px 12px; font-size: 0.8rem;" onclick="panToBusStand(11.0168, 76.9678, 14, 'Route 1C Corridor', 'Connecting Gandhipuram Central to Ondipudur via Trichy & Avinashi Road.')">
+                            Track Corridor 🎯
+                        </button>
+                    </div>
+
+                    <div class="route-card">
+                        <div>
+                            <div class="route-card-header">
+                                <span class="route-number-badge">🚍 ROUTE 70</span>
+                                <span class="route-type-tag">Every 8 Mins</span>
+                            </div>
+                            <div class="route-title">Gandhipuram ⇄ Maruthamalai</div>
+                            <div class="route-path-trail">
+                                <strong>Major Stops:</strong> Gandhipuram ➔ Saibaba Colony ➔ Ganga Hospital ➔ Vadavalli ➔ Bharathiar University ➔ Maruthamalai Murugan Temple.<br>
+                                <strong>Corridor:</strong> Western educational &amp; heritage corridor.
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline" style="width: 100%; padding: 8px 12px; font-size: 0.8rem;" onclick="panToBusStand(11.0280, 76.9020, 14, 'Route 70 Corridor', 'West corridor connecting Gandhipuram to Vadavalli & Maruthamalai Temple.')">
+                            Track Corridor 🎯
+                        </button>
+                    </div>
+
+                    <div class="route-card">
+                        <div>
+                            <div class="route-card-header">
+                                <span class="route-number-badge">🚍 ROUTE 20A</span>
+                                <span class="route-type-tag">Every 6 Mins</span>
+                            </div>
+                            <div class="route-title">Ukkadam ⇄ Saravanampatti (IT Hub)</div>
+                            <div class="route-path-trail">
+                                <strong>Major Stops:</strong> Ukkadam Terminus ➔ Town Hall ➔ Gandhipuram ➔ Ganapathy ➔ Sathy Road ➔ Prozone Mall ➔ Saravanampatti IT Corridor (CHIL SEZ).<br>
+                                <strong>Corridor:</strong> Primary Tech Corridor connecting IT professionals.
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline" style="width: 100%; padding: 8px 12px; font-size: 0.8rem;" onclick="panToBusStand(11.0558, 76.9942, 14, 'Route 20A IT Corridor', 'Connecting Ukkadam, Gandhipuram, and Saravanampatti IT Corridor.')">
+                            Track Corridor 🎯
+                        </button>
+                    </div>
+
+                    <div class="route-card">
+                        <div>
+                            <div class="route-card-header">
+                                <span class="route-number-badge">🚍 ROUTE 3D</span>
+                                <span class="route-type-tag">Airport Express</span>
+                            </div>
+                            <div class="route-title">Railway Station ⇄ Airport (CJB)</div>
+                            <div class="route-path-trail">
+                                <strong>Major Stops:</strong> Coimbatore Railway Junction ➔ Gandhipuram ➔ Lakshmi Mills ➔ PSG Tech ➔ Peelamedu ➔ KMCH ➔ International Airport.<br>
+                                <strong>Corridor:</strong> Avinashi Expressway Rapid Line.
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline" style="width: 100%; padding: 8px 12px; font-size: 0.8rem;" onclick="panToBusStand(11.0300, 77.0434, 14, 'Route 3D Airport Express', 'Connecting Coimbatore Junction Railway Station to International Airport.')">
+                            Track Corridor 🎯
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. ROLE PORTALS LAUNCHPAD & CREDENTIALS -->
             <div id="portalsSection">
                 <div class="section-header">
-                    <span class="section-eyebrow">PORTAL ACCESS GATEWAY</span>
+                    <span class="section-eyebrow">OPERATIONAL CONSOLES</span>
                     <h2 class="section-title">Launch Transit &amp; Emergency Consoles</h2>
                     <p class="section-subtitle">
                         Select a portal below to enter with full role permissions. All accounts are pre-seeded with strict security authentication.
@@ -171,7 +416,7 @@
                 <div class="credentials-banner">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                         <strong style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #93c5fd;">
-                            🔑 Master Access Credentials (All Devices / Worldwide)
+                            🔑 Official Access Credentials (All Devices / Worldwide)
                         </strong>
                         <span style="font-size: 0.78rem; color: #60a5fa; font-weight: bold; background: rgba(59, 130, 246, 0.2); padding: 3px 10px; border-radius: 6px;">
                             Password for all: Password123
@@ -249,9 +494,9 @@
                 </div>
             </div>
 
-            <!-- 4. WHAT HAPPENS IN EACH PART: DEEP-DIVE SYSTEM EXPLAINER -->
+            <!-- 6. WHAT HAPPENS IN EACH PART: DEEP-DIVE SYSTEM EXPLAINER -->
             <div class="section-header">
-                <span class="section-eyebrow">SYSTEM ARCHITECTURE &amp; WORKFLOW</span>
+                <span class="section-eyebrow">COIMBATORE SYSTEM ARCHITECTURE</span>
                 <h2 class="section-title">How Each Component Operates</h2>
                 <p class="section-subtitle">
                     Explore the technical breakdown of each subsystem — from hardware satellite coordinates to predictive arrival formulas and multi-stage rescue lifecycles.
@@ -259,22 +504,22 @@
             </div>
 
             <div class="story-grid">
-                <!-- Story 1: Driver Cockpit -->
+                <!-- Story 1: Driver Cockpit with Authentic TNSTC Bus Image -->
                 <div class="story-card">
                     <div class="story-image-wrap">
-                        <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=80" alt="Driver Cockpit Console" loading="lazy">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/TNSTC_public_transit_bus_in_Coimbatore.jpg" alt="TNSTC City Bus in Coimbatore" loading="lazy">
                         <div class="story-badge-overlay">🚍 PART 1: DRIVER COCKPIT</div>
                     </div>
                     <div class="story-content">
                         <span class="story-role-tag driver">🚍 Vehicle Controller &amp; Beacon</span>
                         <h3>Real GNSS Hardware Satellite Telemetry</h3>
                         <p>
-                            The driver cockpit communicates directly with the smartphone's internal GNSS sensor via high-accuracy HTML5 geolocation. Telemetry is streamed securely via WebSockets to our central FastAPI server every 2 seconds.
+                            The driver cockpit communicates directly with the driver's smartphone internal GPS sensor. Telemetry for <strong>BUS-001 (TN 38 BX 1001)</strong> is streamed securely via WebSockets to our central server every 2 seconds, broadcasting to all commuters.
                         </p>
                         <ul class="story-steps-list">
                             <li><span class="step-num">1</span> <strong>Trip Lifecycle Management:</strong> Driver taps "Start Trip" to lock onto Bus BUS-001 and initialize telemetry recording.</li>
                             <li><span class="step-num">2</span> <strong>Continuous Satellite Ingest:</strong> Acquires latitude, longitude, transit speed, and heading with ±5m precision.</li>
-                            <li><span class="step-num">3</span> <strong>Autonomous Fallback Engine:</strong> In demo mode, our 176-waypoint Coimbatore corridor simulation keeps the bus active 24/7.</li>
+                            <li><span class="step-num">3</span> <strong>Autonomous Fallback Engine:</strong> In demo mode, our 176-waypoint Coimbatore corridor simulation keeps the bus active 24/7 along Avinashi Road.</li>
                         </ul>
                         <button type="button" class="btn btn-outline" style="width: fit-content;" onclick="openRoleAuthModal('DRIVER', 'driver@nexora.local', 'Driver Cockpit', '🚍')">
                             Open Driver Cockpit &rarr;
@@ -285,7 +530,7 @@
                 <!-- Story 2: Passenger Radar -->
                 <div class="story-card reverse">
                     <div class="story-image-wrap">
-                        <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80" alt="Commuter Passenger Mobility" loading="lazy">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2c/Buses_Parked_Central_Bus_Station_Trichy_Aug22_A7C_02331.jpg" alt="Tamil Nadu Central Bus Station" loading="lazy">
                         <div class="story-badge-overlay">📱 PART 2: COMMUTER RADAR</div>
                     </div>
                     <div class="story-content">
@@ -308,7 +553,7 @@
                 <!-- Story 3: Emergency Responder -->
                 <div class="story-card">
                     <div class="story-image-wrap">
-                        <img src="https://images.unsplash.com/photo-1587745416684-47953f16f02f?auto=format&fit=crop&w=800&q=80" alt="Emergency Rescue Response" loading="lazy">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/08/TNSTC_Bus_Departing_Central_Trichy_Aug22_A7C_02323.jpg" alt="TNSTC Bus & Emergency Response" loading="lazy">
                         <div class="story-badge-overlay">🚨 PART 3: RESCUE DISPATCH</div>
                     </div>
                     <div class="story-content">
@@ -352,41 +597,288 @@
                 </div>
             </div>
 
-            <!-- 5. DYNAMIC VIDEO SHOWCASE & MEDIA TOUR -->
+            <!-- 7. DYNAMIC VIDEO SHOWCASE & MEDIA TOUR -->
             <div class="section-header">
-                <span class="section-eyebrow">DYNAMIC MEDIA SHOWCASE</span>
-                <h2 class="section-title">NEXORA in Motion</h2>
+                <span class="section-eyebrow">INDIAN TRANSIT IN MOTION</span>
+                <h2 class="section-title">Coimbatore &amp; Indian Transit Showcase</h2>
                 <p class="section-subtitle">
-                    Watch our smart transit platform in action — from real-time vehicle movement along city highways to instant incident dispatch.
+                    Experience dynamic urban public bus transit in action — from dedicated bus rapid corridors to live traffic flow along city expressways.
                 </p>
             </div>
 
             <div class="video-showcase-card">
                 <div class="video-frame-wrap">
-                    <video id="showcaseVideo" controls playsinline poster="https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=1200&q=80">
-                        <source id="showcaseSource" src="https://upload.wikimedia.org/wikipedia/commons/7/78/Alaskan_Way_Viaduct_timelapse.webm" type="video/webm">
+                    <video id="showcaseVideoPlayer" controls playsinline poster="https://upload.wikimedia.org/wikipedia/commons/b/b1/TNSTC_public_transit_bus_in_Coimbatore.jpg">
+                        <source src="https://upload.wikimedia.org/wikipedia/commons/c/c1/India%27s_Number_one_BRTS_Bus_Service_Hubli_to_Dharwad_Karnataka.webm" type="video/webm">
                         Your browser does not support HTML5 video.
                     </video>
                 </div>
                 <div class="video-tab-bar">
-                    <button type="button" class="video-tab-btn active" onclick="switchShowcaseVideo('https://upload.wikimedia.org/wikipedia/commons/7/78/Alaskan_Way_Viaduct_timelapse.webm', 'video/webm', this)">
-                        🎬 1. City Corridor Transit Flow
+                    <button type="button" class="video-tab-btn active" onclick="switchShowcaseVideo('https://upload.wikimedia.org/wikipedia/commons/c/c1/India%27s_Number_one_BRTS_Bus_Service_Hubli_to_Dharwad_Karnataka.webm', 'video/webm', this)">
+                        🚍 1. Indian Bus Rapid Transit Flow
                     </button>
-                    <button type="button" class="video-tab-btn" onclick="switchShowcaseVideo('https://upload.wikimedia.org/wikipedia/commons/c/c9/Bus_Ride_Through_Downtown_Seattle_%28Time-lapse%29.ogv', 'video/ogg', this)">
-                        🚍 2. Bus Ride Cockpit Perspective
+                    <button type="button" class="video-tab-btn" onclick="switchShowcaseVideo('https://upload.wikimedia.org/wikipedia/commons/6/6d/Moving_vehicles_in_Link_road%2C_Cuttack%2C_Odisha.webm', 'video/webm', this)">
+                        🏙️ 2. City Road &amp; Transit Flow
                     </button>
-                    <button type="button" class="video-tab-btn" onclick="switchShowcaseVideo('https://vjs.zencdn.net/v/oceans.mp4', 'video/mp4', this)">
-                        🌐 3. Global Telemetry Network
+                    <button type="button" class="video-tab-btn" onclick="switchShowcaseVideo('https://upload.wikimedia.org/wikipedia/commons/7/78/Alaskan_Way_Viaduct_timelapse.webm', 'video/webm', this)">
+                        🛣️ 3. Highway &amp; Flyover Transit
                     </button>
                 </div>
             </div>
 
-            <!-- 6. ARCHITECTURE & TECHNOLOGY SPECIFICATIONS -->
+            <!-- 8. COMPREHENSIVE OPERATIONAL GUIDE & BUTTON DIRECTORY -->
+            <div id="guideSection" class="guide-container">
+                <div class="section-header" style="text-align: left; margin-bottom: 20px;">
+                    <span class="section-eyebrow">SYSTEM OPERATIONAL MANUAL</span>
+                    <h2 class="section-title">What Does Each Role &amp; Button Do?</h2>
+                    <p class="section-subtitle" style="margin: 0;">
+                        Complete operational guide in clear English explaining what every subsystem accomplishes, how Emergency SOS functions, and the purpose of every interactive button.
+                    </p>
+                </div>
+
+                <div class="guide-tabs">
+                    <button type="button" class="guide-tab-btn active" onclick="switchGuideTab('overview', this)">
+                        📌 Overview
+                    </button>
+                    <button type="button" class="guide-tab-btn" onclick="switchGuideTab('sos', this)">
+                        🚨 What is SOS?
+                    </button>
+                    <button type="button" class="guide-tab-btn" onclick="switchGuideTab('admin', this)">
+                        ⚡ Admin Command
+                    </button>
+                    <button type="button" class="guide-tab-btn" onclick="switchGuideTab('driver', this)">
+                        🚍 Driver Cockpit
+                    </button>
+                    <button type="button" class="guide-tab-btn" onclick="switchGuideTab('passenger', this)">
+                        🧭 Passenger Radar
+                    </button>
+                    <button type="button" class="guide-tab-btn" onclick="switchGuideTab('responder', this)">
+                        🚒 Rescue Responder
+                    </button>
+                    <button type="button" class="guide-tab-btn" onclick="switchGuideTab('buttons', this)">
+                        🔘 Button Directory
+                    </button>
+                </div>
+
+                <!-- Tab 1: Overview -->
+                <div id="guide-overview" class="guide-tab-pane active">
+                    <div class="guide-card-content">
+                        <div class="guide-info-box">
+                            <h3>🌐 The Purpose of NEXORA V1</h3>
+                            <p>
+                                NEXORA is designed specifically for Coimbatore, Tamil Nadu, to eliminate commuter uncertainty, prevent crowded bus stand confusion, and provide a rapid emergency safety net across the entire 35 km metropolitan radius.
+                            </p>
+                            <ul class="guide-points-list">
+                                <li><span class="check-icon">✓</span> <strong>Unified Single Platform:</strong> All 4 roles run within one responsive web application accessible anywhere worldwide.</li>
+                                <li><span class="check-icon">✓</span> <strong>Real Phone Hardware GPS:</strong> Bus drivers and passengers use genuine satellite positioning from their smartphones.</li>
+                                <li><span class="check-icon">✓</span> <strong>Zero Dummy Controls:</strong> Every button triggers an authentic action, from map pan/zoom to emergency beacon dispatch.</li>
+                            </ul>
+                        </div>
+                        <div class="guide-info-box">
+                            <h3>🗺️ Coimbatore Metropolitan Coverage</h3>
+                            <p>
+                                Covers all key Coimbatore zones: Gandhipuram, Peelamedu, Singanallur, Ukkadam, Ramanathapuram, Saibaba Colony, Saravanampatti, Vadavalli, Perur, Sulur, and Coimbatore International Airport.
+                            </p>
+                            <ul class="guide-points-list">
+                                <li><span class="check-icon">✓</span> <strong>58+ Coimbatore City POIs:</strong> Categorized hospitals, police stations, fire stations, schools, and bus terminals.</li>
+                                <li><span class="check-icon">✓</span> <strong>Google Maps Level 21 Zoom:</strong> View individual streets, apartment blocks, and shop fronts.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: What is SOS? -->
+                <div id="guide-sos" class="guide-tab-pane">
+                    <div class="guide-card-content">
+                        <div class="guide-info-box" style="border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.05);">
+                            <h3 style="color: #f87171;">🚨 What is Emergency SOS?</h3>
+                            <p>
+                                Emergency SOS is a high-priority distress broadcast protocol designed for commuters in danger, medical distress, or road accidents across Coimbatore.
+                            </p>
+                            <ul class="guide-points-list">
+                                <li><span class="check-icon">🔒</span> <strong>GPS Lockout Security:</strong> The SOS button is locked until genuine phone GPS coordinates are acquired. Dummy or spoofed dispatches are rejected.</li>
+                                <li><span class="check-icon">⏱️</span> <strong>2-Step Confirmation &amp; 3s Countdown:</strong> Clicking "ARM EMERGENCY SOS" opens a confirmation modal with a 3-second countdown to prevent accidental clicks.</li>
+                                <li><span class="check-icon">📡</span> <strong>35.0 km Whole-City Broadcast:</strong> When confirmed, coordinates are transmitted via WebSockets to all rescue units and Admin Command within the 35 km Coimbatore perimeter.</li>
+                            </ul>
+                        </div>
+                        <div class="guide-info-box">
+                            <h3>📍 Real-Time Geocoding &amp; Life Cycle</h3>
+                            <p>
+                                Once triggered, the backend automatically uses OpenStreetMap Nominatim reverse-geocoding to convert raw latitude/longitude into human-readable Coimbatore street addresses (e.g. <em>"Opposite Fun Republic Mall, Avinashi Road, Peelamedu"</em>).
+                            </p>
+                            <ul class="guide-points-list">
+                                <li><span class="check-icon">1</span> <strong>Alerted:</strong> Distress beacon active; siren sounds in responder consoles.</li>
+                                <li><span class="check-icon">2</span> <strong>Accepted:</strong> Nearest rescue unit acknowledges and claims the ticket.</li>
+                                <li><span class="check-icon">3</span> <strong>En Route:</strong> Responder initiates turn-by-turn navigation to the commuter.</li>
+                                <li><span class="check-icon">4</span> <strong>Resolved:</strong> Incident closed safely by Admin Command or responding unit.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Admin Command -->
+                <div id="guide-admin" class="guide-tab-pane">
+                    <div class="guide-card-content">
+                        <div class="guide-info-box">
+                            <h3 style="color: #8b5cf6;">⚡ What Does the Admin Do?</h3>
+                            <p>
+                                The Admin is the central city transit authority (Coimbatore City Municipal Corporation &amp; TNSTC Traffic Operations). The Admin oversees all city operations simultaneously.
+                            </p>
+                            <ul class="guide-points-list">
+                                <li><span class="check-icon">🚍</span> <strong>Real-Time Fleet Oversight:</strong> Monitors BUS-001 speed, exact 5-decimal coordinates, and current road waypoint.</li>
+                                <li><span class="check-icon">⏯️</span> <strong>Autonomous Simulation Control:</strong> Toggles the autonomous 176-waypoint Coimbatore transit simulation (pause/resume).</li>
+                                <li><span class="check-icon">🚨</span> <strong>Emergency Incident Management:</strong> Reviews active SOS distress cards with victim details and marks them "Resolved" with 1 click.</li>
+                            </ul>
+                        </div>
+                        <div class="guide-info-box">
+                            <h3>💻 Admin Console Key Buttons</h3>
+                            <ul class="guide-points-list">
+                                <li><strong>Pause / Resume Transit:</strong> Controls autonomous bus movement along the Gandhipuram–Airport corridor.</li>
+                                <li><strong>Resolve Incident:</strong> Closes an active SOS ticket and resets alert flags once rescue units assist the victim.</li>
+                                <li><strong>POI Filter Pills:</strong> Toggles visibility of Coimbatore hospitals, police stations, and bus stands on the master map.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 4: Driver Cockpit -->
+                <div id="guide-driver" class="guide-tab-pane">
+                    <div class="guide-card-content">
+                        <div class="guide-info-box">
+                            <h3 style="color: #f59e0b;">🚍 What Does the Bus Driver Do?</h3>
+                            <p>
+                                The Driver Cockpit is designed to be mounted on the bus dashboard. It turns any driver's smartphone into a real-time satellite transit beacon.
+                            </p>
+                            <ul class="guide-points-list">
+                                <li><span class="check-icon">📡</span> <strong>Real Satellite Hardware GPS:</strong> Reads native phone geolocation and streams vehicle latitude, longitude, and speed every 2 seconds.</li>
+                                <li><span class="check-icon">▶</span> <strong>Trip Controls:</strong> Tapping "START TRIP" locks onto BUS-001 and begins live route broadcasting. Tapping "COMPLETE TRIP" ends the route safely.</li>
+                                <li><span class="check-icon">🛣️</span> <strong>Corridor Headway:</strong> Alerts driver to distance traveled and stops along the Coimbatore transit corridor.</li>
+                            </ul>
+                        </div>
+                        <div class="guide-info-box">
+                            <h3>📱 Driver Console Key Buttons</h3>
+                            <ul class="guide-points-list">
+                                <li><strong>▶ START TRIP / ⏹ COMPLETE TRIP:</strong> Starts or ends active bus telemetry broadcasting.</li>
+                                <li><strong>POI Highlights (Hospitals, Police, Bus Stands):</strong> Toggles emergency landmark overlays on driver navigation.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 5: Passenger Radar -->
+                <div id="guide-passenger" class="guide-tab-pane">
+                    <div class="guide-card-content">
+                        <div class="guide-info-box">
+                            <h3 style="color: #3b82f6;">🧭 What Does the Passenger Do?</h3>
+                            <p>
+                                The Passenger Web App is used by daily Coimbatore commuters waiting at bus stops or traveling on buses. It works directly in mobile browsers without downloading any app.
+                            </p>
+                            <ul class="guide-points-list">
+                                <li><span class="check-icon">🗺️</span> <strong>Live Bus Proximity:</strong> Displays moving BUS-001 in real time along Avinashi Road and Trichy Road.</li>
+                                <li><span class="check-icon">⏱️</span> <strong>Haversine Arrival Countdown:</strong> Computes walking distance (km) and estimated arrival time (minutes) from commuter's exact phone GPS position.</li>
+                                <li><span class="check-icon">🚨</span> <strong>2-Step Emergency SOS:</strong> Allows commuter to transmit high-priority distress alerts with exact GPS coordinates in danger.</li>
+                            </ul>
+                        </div>
+                        <div class="guide-info-box">
+                            <h3>📱 Passenger App Key Buttons</h3>
+                            <ul class="guide-points-list">
+                                <li><strong>⚠️ GPS REQUIRED / 🚨 ARM EMERGENCY SOS:</strong> Unlocks once GPS is acquired; opens confirmation modal.</li>
+                                <li><strong>Confirm Emergency Dispatch (3s):</strong> Finalizes distress transmission after 3-second countdown.</li>
+                                <li><strong>Cancel Emergency (False Alarm):</strong> Cancels ticket if triggered by accident.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 6: Rescue Responder -->
+                <div id="guide-responder" class="guide-tab-pane">
+                    <div class="guide-card-content">
+                        <div class="guide-info-box">
+                            <h3 style="color: #ef4444;">🚒 What Does the Rescue Responder Do?</h3>
+                            <p>
+                                Responders (police patrol cars, 108 ambulances, and fire rescue units) monitor the 35.0 km Coimbatore emergency radar perimeter.
+                            </p>
+                            <ul class="guide-points-list">
+                                <li><span class="check-icon">🚨</span> <strong>Emergency Siren &amp; Alert Feed:</strong> Plays audible synthesized siren immediately when any commuter activates SOS in Coimbatore.</li>
+                                <li><span class="check-icon">📍</span> <strong>Victim Intelligence:</strong> Displays commuter name, phone number, exact GPS coordinates, and reverse-geocoded street address.</li>
+                                <li><span class="check-icon">🗺️</span> <strong>1-Tap Google Navigation:</strong> Clicks button to open turn-by-turn driving directions to the victim's location.</li>
+                            </ul>
+                        </div>
+                        <div class="guide-info-box">
+                            <h3>🚒 Responder Key Buttons</h3>
+                            <ul class="guide-points-list">
+                                <li><strong>Navigate with Google Maps:</strong> Launches external Google Maps driving directions directly to victim's coordinates.</li>
+                                <li><strong>Acknowledge SOS:</strong> Advances ticket state from "Alerted" to "Accepted".</li>
+                                <li><strong>Mark En Route:</strong> Signals to victim and Admin that rescue vehicle is actively traveling.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 7: Button Directory -->
+                <div id="guide-buttons" class="guide-tab-pane">
+                    <div style="overflow-x: auto;">
+                        <table class="button-directory-table">
+                            <thead>
+                                <tr>
+                                    <th>Button / Control</th>
+                                    <th>Location</th>
+                                    <th>Exact Action Executed</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="btn-preview-tag" style="background: rgba(5,150,105,0.2); color: #34d399;">📍 Gandhipuram Central</span></td>
+                                    <td>Front Map Toolbar</td>
+                                    <td>Smoothly pans and zooms the Google Roadmap to Gandhipuram Town Bus Stand (11.0168, 76.9678) and displays details.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="btn-preview-tag" style="background: rgba(5,150,105,0.2); color: #34d399;">📍 Ukkadam Terminus</span></td>
+                                    <td>Front Map Toolbar</td>
+                                    <td>Pans map to Ukkadam Bus Stand (10.9875, 76.9615) connecting South routes (Pollachi/Palakkad).</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="btn-preview-tag" style="background: rgba(37,99,235,0.2); color: #60a5fa;">🚍 Locate BUS-001</span></td>
+                                    <td>Front Map Toolbar</td>
+                                    <td>Locates the live moving bus coordinates and opens the real-time telemetry popup showing speed and road name.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="btn-preview-tag" style="background: rgba(239,68,68,0.2); color: #f87171;">🚨 ARM EMERGENCY SOS</span></td>
+                                    <td>Passenger App</td>
+                                    <td>Unlocks after phone GPS acquisition; opens 2-step confirmation modal with 3-second countdown.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="btn-preview-tag" style="background: rgba(16,185,129,0.2); color: #34d399;">▶ START TRIP</span></td>
+                                    <td>Driver Cockpit</td>
+                                    <td>Locks onto BUS-001 and starts transmitting phone GPS coordinates every 2s via WebSocket.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="btn-preview-tag" style="background: rgba(139,92,246,0.2); color: #c084fc;">Resolve Incident</span></td>
+                                    <td>Admin Command</td>
+                                    <td>Sends API POST to /api/sos/{id}/resolve and marks the emergency ticket safely closed.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="btn-preview-tag" style="background: rgba(59,130,246,0.2); color: #93c5fd;">🚏 Bus Stands (8)</span></td>
+                                    <td>Map Filter Bar</td>
+                                    <td>Toggles visibility of all 8 Coimbatore bus stand markers on the active Google roadmap.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="btn-preview-tag" style="background: rgba(245,158,11,0.2); color: #fbbf24;">Auto-fill Password123</span></td>
+                                    <td>Login Modal</td>
+                                    <td>Convenience 1-tap auto-fill inserting demo password "Password123" into password input.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 9. ARCHITECTURE & TECHNOLOGY SPECIFICATIONS -->
             <div class="section-header">
                 <span class="section-eyebrow">ENGINEERING SPECIFICATIONS</span>
                 <h2 class="section-title">Built with Production-Grade Architecture</h2>
                 <p class="section-subtitle">
-                    Engineered from the ground up for high reliability, zero-latency streaming, and offline-resilient operations.
+                    Engineered from the ground up for high reliability, zero-latency streaming, and offline-resilient operations in Coimbatore.
                 </p>
             </div>
 
@@ -423,7 +915,7 @@
                 </div>
             </div>
 
-            <!-- 7. MANUAL CUSTOM ACCOUNT SIGN IN -->
+            <!-- 10. MANUAL CUSTOM ACCOUNT SIGN IN -->
             <div class="card" style="max-width: 460px; margin: 0 auto 40px;">
                 <div class="card-title" style="margin-bottom: 12px;">Sign In with Custom Account</div>
                 <form onsubmit="handleFormLogin(event)">
@@ -447,14 +939,14 @@
         <section id="viewDriver" class="view-panel">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">🚍 Vehicle & Live Mobile GPS Transmitter</div>
+                    <div class="card-title">🚍 Vehicle &amp; Live Mobile GPS Transmitter</div>
                     <span class="gps-pill acquiring" id="driverGpsPill"><span>🟡</span> Acquiring GPS...</span>
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; background: var(--bg-card); padding: 10px 14px; border-radius: 8px;">
                     <div>
                         <strong style="font-size: 1.1rem; color: #60a5fa;">BUS-001</strong>
-                        <div style="font-size: 0.75rem; color: var(--text-muted);">TN 38 BX 1001 • Route 1 Corridor</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">TN 38 BX 1001 • Avinashi Transit Corridor</div>
                     </div>
                     <div id="driverTripState" style="font-weight: 700; font-size: 0.85rem; color: #94a3b8;">BUS IDLE</div>
                 </div>
@@ -491,12 +983,13 @@
             <!-- Driver Map -->
             <div class="card" style="padding: 10px;">
                 <div class="poi-filter-bar">
-                    <span class="poi-filter-label">📍 Coimbatore Highlights:</span>
-                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('driver', 'hospital', this)">🏥 Hospitals (11)</button>
+                    <span class="poi-filter-label">📍 Coimbatore Overlays:</span>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('driver', 'bus_stand', this)">🚏 Bus Stands (8)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('driver', 'hospital', this)">🏥 Hospitals (12)</button>
                     <button type="button" class="poi-btn active" onclick="toggleMapPOI('driver', 'fire', this)">🚒 Fire Stations (6)</button>
                     <button type="button" class="poi-btn active" onclick="toggleMapPOI('driver', 'police', this)">🚓 Police (11)</button>
                     <button type="button" class="poi-btn active" onclick="toggleMapPOI('driver', 'school', this)">🎓 Schools (11)</button>
-                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('driver', 'landmark', this)">🏟️ Stadiums & Malls (11)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('driver', 'landmark', this)">🏟️ Stadiums &amp; Malls (11)</button>
                 </div>
                 <div id="driverMap" class="map-box"></div>
             </div>
@@ -538,124 +1031,131 @@
             </div>
 
             <!-- Bus Radar & Arrival Information -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">🚍 Approaching Bus Radar</div>
-                    <span class="gps-pill acquiring" id="paxGpsPill"><span>🟡</span> Acquiring GPS...</span>
-                </div>
-
-                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+            <div class="eta-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <strong style="font-size: 1.1rem; color: #60a5fa;">BUS-001 (TN 38 BX 1001)</strong>
-                        <div style="font-size: 0.75rem; color: var(--text-muted);">Route 1 Corridor • Status: <span id="paxBusStatus" style="font-weight: 700; color: #10b981;">TRACKING</span></div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Your Coordinates: <span id="paxCoords">—</span></div>
+                        <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Nearest Vehicle</span>
+                        <h2 style="font-size: 1.3rem; margin: 2px 0;">BUS-001 (TN 38 BX 1001)</h2>
+                        <div id="paxBusStatus" style="font-size: 0.8rem; color: #34d399; font-weight: 600;">EN ROUTE • LIVE GPS</div>
                     </div>
                     <div style="text-align: right;">
-                        <div style="font-size: 1.6rem; font-weight: 800; color: #60a5fa;" id="paxEtaMinutes">-- min</div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted);" id="paxEtaDistance">-- km away</div>
+                        <div class="eta-large" id="paxEtaMinutes">-- min</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);" id="paxEtaDistance">Locating...</div>
                     </div>
                 </div>
+            </div>
 
+            <!-- Passenger Map -->
+            <div class="card" style="padding: 10px;">
                 <div class="poi-filter-bar">
-                    <span class="poi-filter-label">📍 Safety & Key Landmarks:</span>
-                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('passenger', 'hospital', this)">🏥 Hospitals (11)</button>
+                    <span class="poi-filter-label">📍 Coimbatore Overlays:</span>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('passenger', 'bus_stand', this)">🚏 Bus Stands (8)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('passenger', 'hospital', this)">🏥 Hospitals (12)</button>
                     <button type="button" class="poi-btn active" onclick="toggleMapPOI('passenger', 'fire', this)">🚒 Fire Stations (6)</button>
                     <button type="button" class="poi-btn active" onclick="toggleMapPOI('passenger', 'police', this)">🚓 Police (11)</button>
                     <button type="button" class="poi-btn active" onclick="toggleMapPOI('passenger', 'school', this)">🎓 Schools (11)</button>
-                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('passenger', 'landmark', this)">🏟️ Stadiums & Malls (11)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('passenger', 'landmark', this)">🏟️ Stadiums &amp; Malls (11)</button>
                 </div>
                 <div id="passengerMap" class="map-box"></div>
             </div>
         </section>
 
         <!-- ======================================================= -->
-        <!-- VIEW 4: TACTICAL RESPONDER (35 KM METROPOLITAN RADAR)   -->
+        <!-- VIEW 4: EMERGENCY RESPONDER (WHOLE CITY 35 KM RADAR)   -->
         <!-- ======================================================= -->
         <section id="viewResponder" class="view-panel">
-            <div class="card">
+            <div class="card" style="margin-bottom: 16px;">
                 <div class="card-header">
-                    <div class="card-title">🚨 Tactical Emergency Radar (Unit RSP-001)</div>
-                    <span class="gps-pill acquiring" id="respGpsPill"><span>🟡</span> Connecting Beacon...</span>
+                    <div class="card-title">🚨 Tactical Emergency Dispatch Console</div>
+                    <span class="gps-pill live"><span>🟢</span> Active 35 km Perimeter Radar</span>
                 </div>
-                <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">
-                    Tactical Geofence: <strong style="color: #60a5fa;">Whole Coimbatore City (35.0 km radius)</strong> • 
-                    Beacon Fix: <span id="respCoords">—</span>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+                    Listening for active emergency beacons across the entire Coimbatore metropolitan area (35.0 km radius). Dual-tone siren sounds automatically on new alerts.
+                </p>
+
+                <!-- Active Incident Feed -->
+                <div id="responderAlertFeed">
+                    <div style="color: var(--text-dim); font-size: 0.85rem;">Listening for emergency dispatches across Coimbatore...</div>
                 </div>
+            </div>
+
+            <!-- Responder Map with 35km Radius -->
+            <div class="card" style="padding: 10px;">
                 <div class="poi-filter-bar">
-                    <span class="poi-filter-label">🚨 Emergency POIs (35 km Radar):</span>
-                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('responder', 'hospital', this)">🏥 Hospitals (11)</button>
+                    <span class="poi-filter-label">📍 Coimbatore Overlays:</span>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('responder', 'bus_stand', this)">🚏 Bus Stands (8)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('responder', 'hospital', this)">🏥 Hospitals (12)</button>
                     <button type="button" class="poi-btn active" onclick="toggleMapPOI('responder', 'fire', this)">🚒 Fire Stations (6)</button>
                     <button type="button" class="poi-btn active" onclick="toggleMapPOI('responder', 'police', this)">🚓 Police (11)</button>
                     <button type="button" class="poi-btn active" onclick="toggleMapPOI('responder', 'school', this)">🎓 Schools (11)</button>
-                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('responder', 'landmark', this)">🏟️ Stadiums & Malls (11)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('responder', 'landmark', this)">🏟️ Stadiums &amp; Malls (11)</button>
                 </div>
                 <div id="responderMap" class="map-box"></div>
-            </div>
-
-            <!-- Live Emergency Dispatches Feed -->
-            <div class="card">
-                <div class="card-title" style="color: #f87171; margin-bottom: 12px;">🚨 Active Emergency Dispatches</div>
-                <div id="responderAlertsFeed">
-                    <div style="text-align: center; color: var(--text-dim); padding: 16px;">Scanning tactical radius...</div>
-                </div>
             </div>
         </section>
 
         <!-- ======================================================= -->
-        <!-- VIEW 5: ADMIN HOST COMMAND CENTER                      -->
+        <!-- VIEW 5: ADMIN COMMAND CENTER (UNIFIED MAP & TELEMETRY)  -->
         <!-- ======================================================= -->
         <section id="viewAdmin" class="view-panel">
-            <!-- City Fleet KPI Strip -->
-            <div class="card">
+            <div class="card" style="margin-bottom: 16px;">
                 <div class="card-header">
-                    <div class="card-title">🖥️ Master City Transit & Incident Command</div>
+                    <div class="card-title">🖥️ Master Fleet &amp; Emergency Incident Command</div>
                     <div style="display: flex; gap: 8px; align-items: center;">
-                        <span id="admLiveBadge" class="gps-pill live" style="font-size: 0.75rem;"><span>🟢</span> LIVE TELEMETRY</span>
-                        <button type="button" class="btn-nav" id="btnSimToggle" onclick="toggleSimulationUI()">⏸ Pause Transit</button>
-                        <button type="button" class="btn-nav" onclick="loadAdminDashboard()">↻ Refresh</button>
+                        <button type="button" class="btn btn-outline" id="btnSimToggle" onclick="toggleSimulationUI()" style="padding: 6px 12px; font-size: 0.8rem;">
+                            ⏯ Pause / Resume Transit
+                        </button>
+                        <span class="gps-pill live"><span>🟢</span> Master Radar Streaming</span>
                     </div>
                 </div>
-                <div class="telemetry-row" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));">
+
+                <!-- Admin Metrics Row -->
+                <div class="telemetry-row" style="margin-bottom: 14px;">
                     <div class="telemetry-metric">
-                        <div class="val" id="admBusStatus" style="font-size: 1rem; color: #10b981;">ONLINE (LIVE)</div>
-                        <div class="lbl">BUS-001 Status</div>
-                    </div>
-                    <div class="telemetry-metric">
-                        <div class="val" id="admBusCoords" style="font-size: 0.85rem; font-family: monospace; color: #38bdf8;">11.01684, 76.95583</div>
-                        <div class="lbl">📍 Live GPS Coordinates</div>
+                        <div class="val" id="admBusCoords" style="font-size: 0.9rem;">11.01853, 76.99124</div>
+                        <div class="lbl">📍 Live Bus Coordinates</div>
                     </div>
                     <div class="telemetry-metric">
                         <div class="val" id="admBusSpeed">0.0 km/h</div>
-                        <div class="lbl">Bus Speed</div>
+                        <div class="lbl">⚡ Transit Velocity</div>
                     </div>
                     <div class="telemetry-metric">
-                        <div class="val" id="admBusRoad" style="font-size: 0.8rem; color: #f59e0b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Gandhipuram Central</div>
-                        <div class="lbl">Current Sector</div>
+                        <div class="val" id="admBusRoad" style="font-size: 0.85rem; color: #f59e0b;">Avinashi Road</div>
+                        <div class="lbl">🛣️ Active Sector</div>
                     </div>
                     <div class="telemetry-metric">
-                        <div class="val" id="admActiveSosCount" style="color: #ef4444;">0</div>
-                        <div class="lbl">Active SOS</div>
+                        <div class="val" id="admBusStatus" style="color: #34d399;">ACTIVE (LIVE)</div>
+                        <div class="lbl">🟢 Fleet Status</div>
+                    </div>
+                    <div class="telemetry-metric">
+                        <div class="val" id="admActiveSosCount" style="color: #f87171;">0</div>
+                        <div class="lbl">🚨 Active Emergencies</div>
                     </div>
                 </div>
 
+                <!-- Active Emergencies Incident Desk -->
+                <div style="margin-top: 10px;">
+                    <strong style="font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 8px;">
+                        🚨 Active Emergency Incidents:
+                    </strong>
+                    <div id="adminSosFeed">
+                        <div style="color: var(--text-dim); font-size: 0.85rem;">No active emergencies. System nominal across Coimbatore.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Master Map -->
+            <div class="card" style="padding: 10px;">
                 <div class="poi-filter-bar">
-                    <span class="poi-filter-label">🏙️ Coimbatore City POI Overlays:</span>
-                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('admin', 'hospital', this)">🏥 Hospitals (11)</button>
+                    <span class="poi-filter-label">📍 Coimbatore Overlays:</span>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('admin', 'bus_stand', this)">🚏 Bus Stands (8)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('admin', 'hospital', this)">🏥 Hospitals (12)</button>
                     <button type="button" class="poi-btn active" onclick="toggleMapPOI('admin', 'fire', this)">🚒 Fire Stations (6)</button>
                     <button type="button" class="poi-btn active" onclick="toggleMapPOI('admin', 'police', this)">🚓 Police (11)</button>
                     <button type="button" class="poi-btn active" onclick="toggleMapPOI('admin', 'school', this)">🎓 Schools (11)</button>
-                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('admin', 'landmark', this)">🏟️ Stadiums & Malls (11)</button>
+                    <button type="button" class="poi-btn active" onclick="toggleMapPOI('admin', 'landmark', this)">🏟️ Stadiums &amp; Malls (11)</button>
                 </div>
-                <!-- Master Map -->
-                <div id="adminMap" class="map-box"></div>
-            </div>
-
-            <!-- Emergency Incident Desk -->
-            <div class="card">
-                <div class="card-title" style="color: #f87171; margin-bottom: 12px;">🚨 City Emergency Dispatch Desk</div>
-                <div id="adminSosFeed">
-                    <div style="color: var(--text-dim); font-size: 0.85rem;">No active emergencies. System nominal.</div>
-                </div>
+                <div id="adminMap" class="map-box" style="height: 520px;"></div>
             </div>
         </section>
     </main>
@@ -692,7 +1192,7 @@
                 <div id="roleAuthError" style="display: none; color: #f87171; font-size: 0.8rem; margin-bottom: 14px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 12px; border-radius: 6px; text-align: left;"></div>
 
                 <button type="submit" class="btn btn-primary" id="roleAuthSubmitBtn" style="width: 100%; padding: 12px; font-weight: 700; margin-bottom: 8px;">
-                    Sign In & Enter
+                    Sign In &amp; Enter
                 </button>
                 <button type="button" class="btn btn-outline" onclick="closeRoleAuthModal()" style="width: 100%; padding: 10px;">
                     Cancel
@@ -717,13 +1217,13 @@
             <button type="button" class="btn btn-danger" id="btnConfirmSOS" onclick="triggerConfirmedSOS()" disabled style="margin-bottom: 10px; padding: 14px;">
                 Confirm Emergency Dispatch (3s)
             </button>
-            <button type="button" class="btn btn-outline" onclick="closeSOSModal()">
-                Dismiss / Not an Emergency
+            <button type="button" class="btn btn-outline" onclick="closeSOSModal()" style="padding: 10px;">
+                Cancel (False Alarm)
             </button>
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- Leaflet & App Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="/coimbatore_pois.js"></script>
     <script src="/app.js"></script>

@@ -500,6 +500,7 @@ function setupMapWithGoogleTilesAndPOIs(mapId, defaultZoom = 14) {
 
     // POI Layer Groups for this map
     const poiGroups = {
+        bus_stand: L.layerGroup(),
         hospital: L.layerGroup(),
         fire: L.layerGroup(),
         police: L.layerGroup(),
@@ -526,6 +527,7 @@ function setupMapWithGoogleTilesAndPOIs(mapId, defaultZoom = 14) {
         "🏙️ OpenStreetMap": osmDetailed
     };
     const overlayMaps = {
+        "🚏 Coimbatore Bus Stands (8)": poiGroups.bus_stand,
         "🏥 Hospitals & Trauma Centers": poiGroups.hospital,
         "🚒 Fire & Rescue Stations": poiGroups.fire,
         "🚓 Police Stations & Command": poiGroups.police,
@@ -549,6 +551,79 @@ function toggleMapPOI(mapRole, category, btn) {
         btn.classList.remove("active");
     } else {
         map.addLayer(group);
+        btn.classList.add("active");
+    }
+}
+
+// Pan smoothly to a specific Coimbatore bus stand
+function panToBusStand(lat, lng, zoom = 16, name = "", desc = "") {
+    const map = maps.home || maps.admin || maps.passenger || maps.driver || maps.responder;
+    if (!map) return;
+    
+    // Smooth scroll to map section if page is scrolled down
+    const mapEl = document.getElementById("radarSection") || document.getElementById("homeMap");
+    if (mapEl) {
+        mapEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    map.flyTo([lat, lng], zoom, {
+        animate: true,
+        duration: 1.2
+    });
+
+    setTimeout(() => {
+        L.popup()
+            .setLatLng([lat, lng])
+            .setContent(`
+                <div style="min-width: 220px; font-family: 'Inter', sans-serif;">
+                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                        <span style="font-size: 1.3rem;">🚏</span>
+                        <strong style="font-size: 0.95rem; color: #047857;">${name}</strong>
+                    </div>
+                    <div style="background: rgba(5,150,105,0.1); color: #047857; font-size: 0.7rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 6px;">
+                        COIMBATORE TRANSIT TERMINAL
+                    </div>
+                    <div style="font-size: 0.8rem; color: #374151; line-height: 1.4;">
+                        ${desc || "Major transit terminus connecting frequent town buses and inter-city express routes across Tamil Nadu."}
+                    </div>
+                </div>
+            `)
+            .openOn(map);
+    }, 1250);
+}
+
+// Locate and center map on the live moving bus
+function focusOnLiveBus() {
+    const map = maps.home || maps.admin || maps.passenger;
+    const marker = markers.homeBus || markers.adminBus || markers.passengerBus;
+    if (!map) return;
+
+    const mapEl = document.getElementById("radarSection") || document.getElementById("homeMap");
+    if (mapEl) {
+        mapEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    if (marker) {
+        const latlng = marker.getLatLng();
+        map.flyTo(latlng, 16, { animate: true, duration: 1.0 });
+        setTimeout(() => {
+            marker.openPopup();
+        }, 1100);
+    } else {
+        map.flyTo([11.0168, 76.9678], 15, { animate: true, duration: 1.0 });
+    }
+}
+
+// Switch between Role Guide & Explainer Tabs
+function switchGuideTab(tabKey, btn) {
+    document.querySelectorAll(".guide-tab-pane").forEach(p => p.classList.remove("active"));
+    document.querySelectorAll(".guide-tab-btn").forEach(b => b.classList.remove("active"));
+
+    const target = document.getElementById(`guide-${tabKey}`);
+    if (target) {
+        target.classList.add("active");
+    }
+    if (btn) {
         btn.classList.add("active");
     }
 }

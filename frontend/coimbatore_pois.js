@@ -6,6 +6,114 @@
 
 const COIMBATORE_POIS = [
     // -----------------------------------------------------
+    // 0. COIMBATORE BUS STANDS & CENTRAL TRANSIT TERMINALS (8)
+    // -----------------------------------------------------
+    {
+        id: "BS-01",
+        category: "bus_stand",
+        name: "Gandhipuram Town Bus Stand",
+        type: "Primary Intra-City Transit Terminus (Town Bus Hub)",
+        lat: 11.0168,
+        lng: 76.9678,
+        address: "Cross Cut Road, Gandhipuram, Coimbatore - 641012",
+        phone: "0422 252 6112 / 1800 599 1500",
+        icon: "🚏",
+        color: "#059669",
+        badge: "TNSTC City Bus Hub"
+    },
+    {
+        id: "BS-02",
+        category: "bus_stand",
+        name: "Gandhipuram Central Bus Terminus (SETC / Express)",
+        type: "State Inter-District & Inter-State Express Hub",
+        lat: 11.0180,
+        lng: 76.9685,
+        address: "Dr. Nanjappa Road, Gandhipuram, Coimbatore - 641018",
+        phone: "0422 252 1111 / SETC Enquiry",
+        icon: "🚏",
+        color: "#059669",
+        badge: "SETC Express Hub"
+    },
+    {
+        id: "BS-03",
+        category: "bus_stand",
+        name: "Gandhipuram Omni Bus Stand",
+        type: "Inter-State AC Sleeper & Luxury Coach Terminal",
+        lat: 11.0210,
+        lng: 76.9710,
+        address: "Sathyamangalam Road, GP Signal, Coimbatore - 641012",
+        phone: "0422 249 8899",
+        icon: "🚏",
+        color: "#059669",
+        badge: "Omni Sleeper Hub"
+    },
+    {
+        id: "BS-04",
+        category: "bus_stand",
+        name: "Ukkadam Bus Terminus",
+        type: "South Hub (Pollachi, Palakkad, Valparai, Anaimalai)",
+        lat: 10.9875,
+        lng: 76.9615,
+        address: "Ukkadam Bypass Road, Near Periyakulam, Coimbatore - 641001",
+        phone: "0422 239 8811",
+        icon: "🚏",
+        color: "#059669",
+        badge: "South Corridor Hub"
+    },
+    {
+        id: "BS-05",
+        category: "bus_stand",
+        name: "Singanallur Bus Terminal",
+        type: "East Hub (Madurai, Trichy, Thanjavur, Karur, Dindigul)",
+        lat: 10.9980,
+        lng: 77.0245,
+        address: "Trichy Road, Singanallur, Coimbatore - 641005",
+        phone: "0422 257 6622",
+        icon: "🚏",
+        color: "#059669",
+        badge: "Trichy Highway Hub"
+    },
+    {
+        id: "BS-06",
+        category: "bus_stand",
+        name: "Mettupalayam Road Bus Stand (Saibaba Colony)",
+        type: "Nilgiris Mountain Route (Ooty, Coonoor, Kotagiri)",
+        lat: 11.0315,
+        lng: 76.9480,
+        address: "Mettupalayam Road, Saibaba Colony, Coimbatore - 641043",
+        phone: "0422 244 5511",
+        icon: "🚏",
+        color: "#059669",
+        badge: "Nilgiris Gateway"
+    },
+    {
+        id: "BS-07",
+        category: "bus_stand",
+        name: "Sulur Bus Terminus",
+        type: "Eastern Metropolitan Link (Tirupur, Kangeyam, Palladam)",
+        lat: 11.0250,
+        lng: 77.1260,
+        address: "Trichy Main Road, Sulur, Coimbatore - 641402",
+        phone: "0422 268 7200",
+        icon: "🚏",
+        color: "#059669",
+        badge: "East Outer Hub"
+    },
+    {
+        id: "BS-08",
+        category: "bus_stand",
+        name: "Vadavalli Bus Stand",
+        type: "West Hub (Maruthamalai Temple, Bharathiar University)",
+        lat: 11.0280,
+        lng: 76.9020,
+        address: "Maruthamalai Main Road, Vadavalli, Coimbatore - 641041",
+        phone: "0422 242 2211",
+        icon: "🚏",
+        color: "#059669",
+        badge: "West Temple Hub"
+    },
+
+    // -----------------------------------------------------
     // 1. HOSPITALS & EMERGENCY TRAUMA CENTERS (12)
     // -----------------------------------------------------
     {

@@ -1022,3 +1022,307 @@ body {
     padding: 20px;
   }
 }
+
+/* ======================================================= */
+/* TAMIL NADU & COIMBATORE SMART TRANSIT SYSTEM STYLES     */
+/* ======================================================= */
+
+/* Indian Transit Brand Badges */
+.tn-smart-city-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(5, 150, 105, 0.15), rgba(37, 99, 235, 0.15));
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #34d399;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+}
+
+.tn-smart-city-badge .flag-dots {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+}
+.tn-smart-city-badge .flag-dot-saffron { width: 6px; height: 6px; border-radius: 50%; background: #f59e0b; }
+.tn-smart-city-badge .flag-dot-white { width: 6px; height: 6px; border-radius: 50%; background: #ffffff; }
+.tn-smart-city-badge .flag-dot-green { width: 6px; height: 6px; border-radius: 50%; background: #10b981; }
+
+/* Bus Stands Quick-Jump Toolbar */
+.bus-stand-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(5, 150, 105, 0.3);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  backdrop-filter: blur(8px);
+}
+.bus-stand-toolbar-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #34d399;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 4px;
+}
+.bus-stand-pill {
+  background: rgba(5, 150, 105, 0.12);
+  border: 1px solid rgba(5, 150, 105, 0.35);
+  color: #a7f3d0;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.bus-stand-pill:hover {
+  background: rgba(5, 150, 105, 0.3);
+  border-color: #10b981;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.35);
+}
+.bus-stand-pill.live-track {
+  background: rgba(37, 99, 235, 0.25);
+  border-color: #3b82f6;
+  color: #bfdbfe;
+  font-weight: 700;
+  animation: busPulseBorder 2s infinite;
+}
+.bus-stand-pill.live-track:hover {
+  background: rgba(37, 99, 235, 0.5);
+  color: #ffffff;
+}
+
+@keyframes busPulseBorder {
+  0%, 100% { box-shadow: 0 0 0 rgba(59, 130, 246, 0.4); }
+  50% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.8); }
+}
+
+/* Coimbatore Bus Routes Grid */
+.routes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 40px;
+}
+.route-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.route-card:hover {
+  border-color: #10b981;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.route-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.route-number-badge {
+  background: #047857;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.85rem;
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.route-type-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #f59e0b;
+  text-transform: uppercase;
+}
+.route-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin-bottom: 8px;
+}
+.route-path-trail {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+.route-path-trail strong {
+  color: #cbd5e1;
+}
+
+/* Comprehensive Role & Button Operational Guide */
+.guide-container {
+  background: var(--bg-panel);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: 20px;
+  padding: 30px;
+  margin-bottom: 50px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+}
+.guide-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 14px;
+}
+.guide-tab-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.guide-tab-btn:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-main);
+  border-color: rgba(59, 130, 246, 0.4);
+}
+.guide-tab-btn.active {
+  background: #2563eb;
+  border-color: #3b82f6;
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(37, 99, 235, 0.4);
+}
+
+.guide-tab-pane {
+  display: none;
+  animation: fadeInPane 0.3s ease;
+}
+.guide-tab-pane.active {
+  display: block;
+}
+
+@keyframes fadeInPane {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.guide-card-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+@media (max-width: 860px) {
+  .guide-card-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+.guide-info-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px;
+}
+.guide-info-box h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.guide-info-box p {
+  font-size: 0.87rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+
+.guide-points-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.guide-points-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: var(--text-main);
+  margin-bottom: 10px;
+  line-height: 1.45;
+}
+.guide-points-list li .check-icon {
+  color: #10b981;
+  font-weight: bold;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+/* Button Directory Table */
+.button-directory-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 14px;
+  font-size: 0.85rem;
+}
+.button-directory-table th {
+  text-align: left;
+  padding: 10px 14px;
+  background: rgba(30, 41, 59, 0.7);
+  color: #93c5fd;
+  border-bottom: 1px solid var(--border);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+.button-directory-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+.button-directory-table tr:hover td {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-main);
+}
+.btn-preview-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
