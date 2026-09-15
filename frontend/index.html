@@ -1054,6 +1054,29 @@
                 </button>
             </div>
 
+            <!-- Passenger Mobile GPS & Real-Time Location Card -->
+            <div class="card" style="margin-bottom: 14px; padding: 12px 14px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.1rem;">🧭</span>
+                        <strong style="font-size: 0.95rem; color: #a7f3d0;">Mobile Commuter Location</strong>
+                    </div>
+                    <span class="gps-pill acquiring" id="paxGpsPill"><span>🟡</span> Acquiring GPS...</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; margin-bottom: 8px;">
+                    <span style="color: var(--text-muted);">Satellite Fix: <strong id="paxCoords" style="color: #6ee7b7; font-family: monospace;">Acquiring...</strong></span>
+                    <button type="button" class="btn-sm" style="background: rgba(16, 185, 129, 0.2); border: 1px solid var(--border-focus); color: #a7f3d0; padding: 4px 10px; font-size: 0.75rem; cursor: pointer; border-radius: 4px;" onclick="forcePassengerGPSFix()">📍 Update Fix</button>
+                </div>
+                <div style="display: flex; gap: 6px; align-items: center; overflow-x: auto; padding-bottom: 2px;">
+                    <span style="font-size: 0.7rem; color: var(--text-muted); white-space: nowrap;">Coimbatore Presets:</span>
+                    <button type="button" class="btn-sm" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: #f0fdf4; padding: 3px 8px; font-size: 0.7rem; border-radius: 4px; cursor: pointer;" onclick="setPassengerPreset('gandhipuram')">Gandhipuram</button>
+                    <button type="button" class="btn-sm" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: #f0fdf4; padding: 3px 8px; font-size: 0.7rem; border-radius: 4px; cursor: pointer;" onclick="setPassengerPreset('lakshmimills')">Lakshmi Mills</button>
+                    <button type="button" class="btn-sm" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: #f0fdf4; padding: 3px 8px; font-size: 0.7rem; border-radius: 4px; cursor: pointer;" onclick="setPassengerPreset('peelamedu')">Peelamedu</button>
+                    <button type="button" class="btn-sm" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: #f0fdf4; padding: 3px 8px; font-size: 0.7rem; border-radius: 4px; cursor: pointer;" onclick="setPassengerPreset('airport')">Airport</button>
+                    <button type="button" class="btn-sm" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: #f0fdf4; padding: 3px 8px; font-size: 0.7rem; border-radius: 4px; cursor: pointer;" onclick="setPassengerPreset('junction')">Junction</button>
+                </div>
+            </div>
+
             <!-- STRICT EMERGENCY SOS BOX -->
             <div class="sos-box">
                 <button type="button" class="btn-sos disabled" id="btnPassengerSOS">
@@ -1101,7 +1124,11 @@
             <div class="card" style="margin-bottom: 16px;">
                 <div class="card-header">
                     <div class="card-title">🚨 Tactical Emergency Dispatch Console</div>
-                    <span class="gps-pill live"><span>🟢</span> Active 35 km Perimeter Radar</span>
+                    <span class="gps-pill live" id="respGpsPill"><span>🟢</span> Active 35 km Perimeter Radar</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; margin-bottom: 10px;">
+                    <span style="color: var(--text-muted);">Responder Beacon: <strong id="respCoords" style="color: #f87171; font-family: monospace;">11.01684, 76.95583</strong></span>
+                    <span style="color: #34d399; font-size: 0.75rem;">Radius: 35.0 km</span>
                 </div>
                 <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
                     Listening for active emergency beacons across the entire Coimbatore metropolitan area (35.0 km radius). Dual-tone siren sounds automatically on new alerts.
