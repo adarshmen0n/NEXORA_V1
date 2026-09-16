@@ -11,6 +11,31 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- High-Priority Audio-Visual Emergency Dispatch Banner -->
+    <div id="emergencyTopBanner" class="emergency-top-banner" style="display: none;">
+        <div class="emergency-banner-content">
+            <div class="emergency-banner-text">
+                <span class="pulse-beacon-dot"></span>
+                <strong style="color: #fca5a5;">🚨 EMERGENCY SOS ACTIVE:</strong>
+                <span id="bannerSosId" style="font-weight: 800; color: white;">SOS-000001</span> • 
+                <span id="bannerPassengerName" style="color: #fef08a;">Passenger</span> • 
+                <span id="bannerAddress" style="color: #e2e8f0;">Coimbatore Location</span>
+                <span id="bannerDistanceBadge" class="banner-dist-badge">35.0 km</span>
+            </div>
+            <div class="emergency-banner-actions">
+                <button type="button" class="btn-banner-action btn-banner-view" onclick="navigateToResponderConsole()">
+                    🚒 Open Tactical Console
+                </button>
+                <button type="button" class="btn-banner-action btn-banner-mute" id="btnSirenMute" onclick="toggleSirenMute()">
+                    🔊 Mute Siren
+                </button>
+                <button type="button" class="btn-banner-action btn-banner-close" onclick="dismissEmergencyBanner()">
+                    ✕
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Persistent Sticky Header -->
     <header class="app-header">
         <div class="brand-logo-container">
@@ -60,12 +85,41 @@
                 <button type="button" class="theme-opt-btn" data-theme="forest-mint" onclick="setDynamicTheme('forest-mint')">🌿 Mint</button>
             </div>
 
+            <!-- Notifications Center Trigger Button -->
+            <button type="button" class="btn-nav notif-btn" id="notifBellBtn" onclick="toggleNotifDrawer()" title="Incident Notifications">
+                🔔 <span id="notifBadge" class="notif-badge" style="display: none;">0</span>
+            </button>
+
             <span id="activeRoleTag" class="role-tag">Gateway</span>
             <span id="navUserLabel" style="font-size: 0.8rem; color: var(--text-muted); display: none;"></span>
             <button type="button" class="btn-nav" id="btnSwitchRole" style="display: none;" onclick="switchRole()">🔄 Switch Role</button>
             <button type="button" class="btn-nav" id="btnSignOut" style="display: none;" onclick="signOut()">Sign Out</button>
         </div>
     </header>
+
+    <!-- Incident Notifications Slide-Out Drawer -->
+    <div id="notifDrawer" class="notif-drawer">
+        <div class="notif-drawer-header">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 1.2rem;">🔔</span>
+                <strong style="font-size: 1rem; color: #f0fdf4;">Incident Notifications</strong>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <button type="button" class="btn-sm" onclick="markAllNotificationsRead()" style="background: rgba(16, 185, 129, 0.2); border: 1px solid var(--border-focus); color: #a7f3d0; padding: 3px 8px; font-size: 0.75rem; border-radius: 4px; cursor: pointer;">
+                    ✓ Mark all read
+                </button>
+                <button type="button" class="btn-sm" onclick="toggleNotifDrawer()" style="background: none; border: none; color: var(--text-muted); font-size: 1.1rem; cursor: pointer;">
+                    ✕
+                </button>
+            </div>
+        </div>
+        <div id="notifList" class="notif-list-container">
+            <div style="text-align: center; color: var(--text-dim); padding: 24px; font-size: 0.85rem;">
+                No unread notifications. System nominal.
+            </div>
+        </div>
+    </div>
+    <div id="notifDrawerBackdrop" class="notif-backdrop" onclick="toggleNotifDrawer()"></div>
 
     <!-- Live Municipal Transit Status Ticker -->
     <div class="transit-ticker-bar">

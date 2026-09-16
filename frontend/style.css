@@ -1485,4 +1485,210 @@ body {
   pointer-events: none;
 }
 
+/* ======================================================= */
+/* EMERGENCY TOP BANNER & SIREN ALERT SYSTEM               */
+/* ======================================================= */
+
+@keyframes emergencyPulse {
+  0% { background-color: rgba(185, 28, 28, 0.95); box-shadow: 0 0 20px rgba(239, 68, 68, 0.7); }
+  50% { background-color: rgba(127, 29, 29, 0.98); box-shadow: 0 0 35px rgba(239, 68, 68, 0.95); }
+  100% { background-color: rgba(185, 28, 28, 0.95); box-shadow: 0 0 20px rgba(239, 68, 68, 0.7); }
+}
+
+@keyframes beaconFlash {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.3); }
+}
+
+.emergency-top-banner {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10000;
+  animation: emergencyPulse 1.4s infinite;
+  border-bottom: 2px solid #f87171;
+  padding: 10px 16px;
+  color: #ffffff;
+  backdrop-filter: blur(10px);
+}
+
+.emergency-banner-content {
+  max-width: 1300px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.emergency-banner-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  flex-wrap: wrap;
+}
+
+.pulse-beacon-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 10px #ffffff;
+  animation: beaconFlash 0.8s infinite;
+}
+
+.banner-dist-badge {
+  background: rgba(0, 0, 0, 0.4);
+  color: #fef08a;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 1px solid rgba(254, 240, 138, 0.4);
+}
+
+.emergency-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-banner-action {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.btn-banner-view {
+  background: #ffffff;
+  color: #991b1b;
+  border-color: #ffffff;
+}
+.btn-banner-view:hover {
+  background: #fee2e2;
+}
+
+.btn-banner-mute {
+  background: rgba(0, 0, 0, 0.4);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+.btn-banner-mute:hover {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.btn-banner-close {
+  background: transparent;
+  color: #fca5a5;
+  font-size: 1rem;
+  padding: 4px 8px;
+}
+.btn-banner-close:hover {
+  color: #ffffff;
+}
+
+/* ======================================================= */
+/* NOTIFICATION DRAWER & BADGE SYSTEM                      */
+/* ======================================================= */
+
+.notif-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.notif-badge {
+  background: #ef4444;
+  color: #ffffff;
+  border-radius: 9999px;
+  padding: 1px 6px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
+  animation: beaconFlash 1.2s infinite;
+}
+
+.notif-drawer {
+  position: fixed;
+  top: 0;
+  right: -380px;
+  width: 360px;
+  max-width: 90vw;
+  height: 100vh;
+  background: var(--bg-panel);
+  border-left: 1px solid var(--border);
+  box-shadow: -6px 0 25px rgba(0, 0, 0, 0.5);
+  z-index: 10001;
+  transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.notif-drawer.open {
+  right: 0;
+}
+
+.notif-drawer-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-card);
+}
+
+.notif-list-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.notif-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.82rem;
+  transition: all 0.2s ease;
+}
+
+.notif-card.emergency {
+  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.notif-card.unread {
+  border-left: 4px solid #10b981;
+}
+
+.notif-card.emergency.unread {
+  border-left: 4px solid #ef4444;
+}
+
+.notif-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 10000;
+  display: none;
+}
+
+.notif-backdrop.open {
+  display: block;
+}
+
 

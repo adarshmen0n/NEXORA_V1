@@ -42,10 +42,16 @@ let markers = {
     responderSos: null
 };
 
-// Emergency State
+// Emergency State & Siren
 let activeSOS = null;
 let sosCountdown = 3;
 let sosTimer = null;
+let isSirenMuted = false;
+let sirenInterval = null;
+let sirenAudioCtx = null;
+let sosResponderInterval = null;
+let sosAdminInterval = null;
+let notifPollInterval = null;
 
 // ==========================================
 // 1. INITIALIZATION & AUTHENTICATION
@@ -59,6 +65,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     checkServerHealth();
     initWebSocket();
     initHomeMap();
+    fetchNotifications();
+    if (notifPollInterval) clearInterval(notifPollInterval);
+    notifPollInterval = setInterval(fetchNotifications, 4000);
 
     // Check existing stored session
     const storedToken = localStorage.getItem("nexora_token");
@@ -411,6 +420,11 @@ function showRoleView(role) {
     // Hide all views
     document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
     stopRealPhoneGPS();
+
+    // Clear role-specific intervals
+    if (sosResponderInterval) { clearInterval(sosResponderInterval); sosResponderInterval = null; }
+    if (sosAdminInterval) { clearInterval(sosAdminInterval); sosAdminInterval = null; }
+    if (paxSafetyTimer) { clearTimeout(paxSafetyTimer); paxSafetyTimer = null; }
 
     const tag = document.getElementById("activeRoleTag");
 
@@ -783,51 +797,71 @@ async function toggleTrip() {
     const btn = document.getElementById("btnTripToggle");
 
     if (!isTripActive) {
-        if (!realLat || !realLng) {
-            alert("Waiting for valid mobile GPS fix before starting trip. Make sure Location is enabled.");
-            return;
-        }
+        const startLat = realLat || 11.01684;
+        const startLng = realLng || 76.95583;
 
         try {
-            btn.disabled = true;
-            btn.textContent = "Starting trip...";
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = "Starting trip...";
+            }
             const res = await apiRequest("/api/trips/start", "POST", {
                 bus_id: "BUS-001",
                 route_id: "Route 1",
-                start_latitude: realLat,
-                start_longitude: realLng
+                start_latitude: startLat,
+                start_longitude: startLng
             });
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.detail || `Failed to start trip (${res.status})`);
+            }
             const data = await res.json();
             isTripActive = true;
-            currentTripId = data.trip_id;
-            btn.className = "btn btn-danger";
-            btn.textContent = "⏹ STOP TRIP";
-            document.getElementById("driverTripState").textContent = "TRIP ACTIVE (BROADCASTING)";
-            document.getElementById("driverTripState").style.color = "#10b981";
+            currentTripId = data.trip_id || (data.trip && data.trip.trip_id) || "TRIP-000001";
+            if (btn) {
+                btn.className = "btn btn-danger";
+                btn.textContent = "⏹ STOP TRIP";
+            }
+            const stateEl = document.getElementById("driverTripState");
+            if (stateEl) {
+                stateEl.textContent = "TRIP ACTIVE (BROADCASTING)";
+                stateEl.style.color = "#10b981";
+            }
         } catch (e) {
-            alert(e.message);
+            alert("Trip Start Error: " + e.message);
         } finally {
-            btn.disabled = false;
+            if (btn) btn.disabled = false;
         }
     } else {
         try {
-            btn.disabled = true;
-            btn.textContent = "Stopping trip...";
-            await apiRequest("/api/trips/stop", "POST", {
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = "Stopping trip...";
+            }
+            const res = await apiRequest("/api/trips/stop", "POST", {
                 bus_id: "BUS-001",
                 trip_id: currentTripId,
-                end_latitude: realLat,
-                end_longitude: realLng
+                end_latitude: realLat || 11.01684,
+                end_longitude: realLng || 76.95583
             });
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.detail || `Failed to stop trip (${res.status})`);
+            }
             isTripActive = false;
-            btn.className = "btn btn-success";
-            btn.textContent = "▶ START TRIP";
-            document.getElementById("driverTripState").textContent = "BUS IDLE";
-            document.getElementById("driverTripState").style.color = "#94a3b8";
+            if (btn) {
+                btn.className = "btn btn-success";
+                btn.textContent = "▶ START TRIP";
+            }
+            const stateEl = document.getElementById("driverTripState");
+            if (stateEl) {
+                stateEl.textContent = "BUS IDLE";
+                stateEl.style.color = "#94a3b8";
+            }
         } catch (e) {
-            alert(e.message);
+            alert("Trip Stop Error: " + e.message);
         } finally {
-            btn.disabled = false;
+            if (btn) btn.disabled = false;
         }
     }
 }
@@ -1037,22 +1071,32 @@ function closeSOSModal() {
 async function triggerConfirmedSOS() {
     closeSOSModal();
     const btn = document.getElementById("btnPassengerSOS");
-    btn.disabled = true;
-    btn.textContent = "Transmitting Emergency Signal...";
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = "Transmitting Emergency Signal...";
+    }
 
     try {
         const res = await apiRequest("/api/sos", "POST", {
             latitude: realLat,
             longitude: realLng
         });
+        if (!res.ok) {
+            const errData = await res.json().catch(() => ({ detail: "SOS request failed." }));
+            throw new Error(errData.detail || "SOS request failed.");
+        }
         const data = await res.json();
         activeSOS = data;
         renderActiveSOSTracker(data);
+        showEmergencyAlertBanner(data);
+        fetchNotifications();
     } catch (e) {
         alert("Failed to transmit emergency SOS: " + e.message);
     } finally {
-        btn.disabled = false;
-        armSOSButton();
+        if (btn) {
+            btn.disabled = false;
+            armSOSButton();
+        }
     }
 }
 
@@ -1064,6 +1108,10 @@ async function checkActiveSOS() {
             if (cases.length > 0) {
                 activeSOS = cases[0];
                 renderActiveSOSTracker(cases[0]);
+            } else {
+                activeSOS = null;
+                const card = document.getElementById("activeSOSCard");
+                if (card) card.style.display = "none";
             }
         }
     } catch (e) {}
@@ -1071,44 +1119,49 @@ async function checkActiveSOS() {
 
 function renderActiveSOSTracker(sos) {
     const card = document.getElementById("activeSOSCard");
-    if (!sos || ["RESOLVED", "CANCELLED"].includes(sos.status)) {
+    if (!card) return;
+    if (!sos || !sos.sos_id || ["RESOLVED", "CANCELLED"].includes(sos.status)) {
         card.style.display = "none";
         return;
     }
 
     card.style.display = "block";
-    document.getElementById("sosTicketCode").textContent = sos.sos_id;
-    document.getElementById("sosTicketAddress").textContent = sos.address || "Resolving location...";
-    document.getElementById("sosTicketStatus").textContent = sos.status;
+    const elCode = document.getElementById("sosTicketCode");
+    if (elCode) elCode.textContent = sos.sos_id;
+    const elAddr = document.getElementById("sosTicketAddress");
+    if (elAddr) elAddr.textContent = sos.address || "Resolving location...";
+    const elStatus = document.getElementById("sosTicketStatus");
+    if (elStatus) elStatus.textContent = sos.status;
 
     const s1 = document.getElementById("step1");
     const s2 = document.getElementById("step2");
     const s3 = document.getElementById("step3");
     const s4 = document.getElementById("step4");
 
-    s1.className = "step done";
-    s2.className = "step";
-    s3.className = "step";
-    s4.className = "step";
+    if (s1) s1.className = "step done";
+    if (s2) s2.className = "step";
+    if (s3) s3.className = "step";
+    if (s4) s4.className = "step";
 
+    const elDetail = document.getElementById("sosTicketDetail");
     if (sos.status === "ACTIVE") {
-        s1.className = "step active";
-        document.getElementById("sosTicketDetail").textContent = "Alert broadcasted. Alerting nearest emergency rescue units across Coimbatore City (35.0 km coverage)...";
+        if (s1) s1.className = "step active";
+        if (elDetail) elDetail.textContent = "Alert broadcasted. Alerting nearest emergency rescue units across Coimbatore City (35.0 km coverage)...";
     } else if (sos.status === "ACKNOWLEDGED") {
-        s1.className = "step done";
-        s2.className = "step active";
-        document.getElementById("sosTicketDetail").textContent = `Accepted by Responder: ${sos.responder_name || 'Rescue Unit'}. Mobilizing.`;
+        if (s1) s1.className = "step done";
+        if (s2) s2.className = "step active";
+        if (elDetail) elDetail.textContent = `Accepted by Responder: ${sos.responder_name || 'Rescue Unit'}. Mobilizing.`;
     } else if (sos.status === "RESPONDING") {
-        s1.className = "step done";
-        s2.className = "step done";
-        s3.className = "step active";
-        document.getElementById("sosTicketDetail").textContent = `Responder ${sos.responder_name || 'Unit'} is EN ROUTE to your coordinates!`;
+        if (s1) s1.className = "step done";
+        if (s2) s2.className = "step done";
+        if (s3) s3.className = "step active";
+        if (elDetail) elDetail.textContent = `Responder ${sos.responder_name || 'Unit'} is EN ROUTE to your coordinates!`;
     } else if (sos.status === "RESOLVED") {
-        s1.className = "step done";
-        s2.className = "step done";
-        s3.className = "step done";
-        s4.className = "step done";
-        document.getElementById("sosTicketDetail").textContent = "Emergency resolved. You are marked safe.";
+        if (s1) s1.className = "step done";
+        if (s2) s2.className = "step done";
+        if (s3) s3.className = "step done";
+        if (s4) s4.className = "step done";
+        if (elDetail) elDetail.textContent = "Emergency resolved. You are marked safe.";
     }
 }
 
@@ -1220,6 +1273,8 @@ function initResponderView() {
     });
 
     loadResponderAlerts();
+    if (sosResponderInterval) clearInterval(sosResponderInterval);
+    sosResponderInterval = setInterval(loadResponderAlerts, 3000);
 }
 
 async function loadResponderAlerts() {
@@ -1227,16 +1282,23 @@ async function loadResponderAlerts() {
         const res = await apiRequest("/api/sos/active");
         if (!res.ok) return;
         const cases = await res.json();
-        const container = document.getElementById("responderAlertsFeed");
+        const container = document.getElementById("responderAlertFeed") || document.getElementById("responderAlertsFeed");
+        if (!container) return;
         container.innerHTML = "";
 
         if (cases.length === 0) {
             container.innerHTML = `<div style="text-align: center; color: var(--text-dim); padding: 18px;">No active emergency cases. Radar monitoring sector.</div>`;
-            if (markers.responderSos) {
+            if (markers.responderSos && maps.responder) {
                 maps.responder.removeLayer(markers.responderSos);
                 markers.responderSos = null;
             }
             return;
+        }
+
+        // Trigger siren & emergency banner if logged in as responder
+        if (currentUser && currentUser.role === "RESPONDER" && cases.length > 0) {
+            showEmergencyAlertBanner(cases[0]);
+            playEmergencySiren();
         }
 
         cases.forEach(c => {
@@ -1280,19 +1342,23 @@ async function loadResponderAlerts() {
             container.appendChild(card);
 
             // Marker on map
-            if (markers.responderSos) {
-                markers.responderSos.setLatLng([c.latitude, c.longitude]);
-            } else {
-                const icon = L.divIcon({
-                    className: "sos-icon-marker",
-                    html: `<div style="background: #ef4444; width: 22px; height: 22px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 15px #ef4444; animation: armedPulse 1s infinite;"></div>`,
-                    iconSize: [22, 22],
-                    iconAnchor: [11, 11]
-                });
-                markers.responderSos = L.marker([c.latitude, c.longitude], { icon }).addTo(maps.responder);
+            if (maps.responder) {
+                if (markers.responderSos) {
+                    markers.responderSos.setLatLng([c.latitude, c.longitude]);
+                } else {
+                    const icon = L.divIcon({
+                        className: "sos-icon-marker",
+                        html: `<div style="background: #ef4444; width: 22px; height: 22px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 15px #ef4444; animation: armedPulse 1s infinite;"></div>`,
+                        iconSize: [22, 22],
+                        iconAnchor: [11, 11]
+                    });
+                    markers.responderSos = L.marker([c.latitude, c.longitude], { icon }).addTo(maps.responder);
+                }
             }
         });
-    } catch (e) {}
+    } catch (e) {
+        console.error("loadResponderAlerts error:", e);
+    }
 }
 
 async function responderAccept(sosId) {
@@ -1438,8 +1504,11 @@ function handleWsMessage(msg) {
     } else if (msg.type === "SOS_ALERT") {
         playAlertTone();
         if (currentUser && currentUser.role === "RESPONDER") {
+            playEmergencySiren();
             loadResponderAlerts();
         }
+        showEmergencyAlertBanner(msg.data);
+        fetchNotifications();
         loadAdminDashboard();
     } else if (msg.type === "SOS_STATUS_UPDATE") {
         if (activeSOS && activeSOS.sos_id === msg.data.sos_id) {
@@ -1447,7 +1516,12 @@ function handleWsMessage(msg) {
             if (msg.data.responder_name) activeSOS.responder_name = msg.data.responder_name;
             renderActiveSOSTracker(activeSOS);
         }
+        if (msg.data && (msg.data.status === "RESOLVED" || msg.data.status === "CANCELLED")) {
+            stopEmergencySiren();
+            dismissEmergencyBanner();
+        }
         if (currentUser && currentUser.role === "RESPONDER") loadResponderAlerts();
+        fetchNotifications();
         loadAdminDashboard();
     }
 }
@@ -1669,4 +1743,187 @@ async function checkServerHealth() {
         badge.textContent = "🔴 Server Offline";
         badge.style.color = "#ef4444";
     }
+}
+
+// ==========================================
+// 10. EMERGENCY SIREN & BANNER CONTROLLER
+// ==========================================
+
+function playEmergencySiren() {
+    if (isSirenMuted) return;
+    if (sirenInterval) return; // already active
+    
+    const playWarble = () => {
+        if (isSirenMuted) return;
+        try {
+            if (!sirenAudioCtx) {
+                sirenAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (sirenAudioCtx.state === "suspended") {
+                sirenAudioCtx.resume().catch(() => {});
+            }
+            const osc = sirenAudioCtx.createOscillator();
+            const gain = sirenAudioCtx.createGain();
+            osc.type = "sine";
+            // Two-tone high/low frequency warble
+            osc.frequency.setValueAtTime(960, sirenAudioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(650, sirenAudioCtx.currentTime + 0.45);
+            gain.gain.setValueAtTime(0.35, sirenAudioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, sirenAudioCtx.currentTime + 0.45);
+            osc.connect(gain);
+            gain.connect(sirenAudioCtx.destination);
+            osc.start();
+            osc.stop(sirenAudioCtx.currentTime + 0.45);
+        } catch (e) {}
+    };
+
+    playWarble();
+    sirenInterval = setInterval(playWarble, 650);
+}
+
+function stopEmergencySiren() {
+    if (sirenInterval) {
+        clearInterval(sirenInterval);
+        sirenInterval = null;
+    }
+}
+
+function toggleSirenMute() {
+    isSirenMuted = !isSirenMuted;
+    const btn = document.getElementById("bannerMuteBtn");
+    if (btn) {
+        btn.textContent = isSirenMuted ? "🔇 Unmute Siren" : "🔊 Mute Siren";
+    }
+    if (isSirenMuted) {
+        stopEmergencySiren();
+    } else {
+        const banner = document.getElementById("emergencyTopBanner");
+        if (banner && banner.style.display !== "none") {
+            playEmergencySiren();
+        }
+    }
+}
+
+function showEmergencyAlertBanner(sos) {
+    if (!sos) return;
+    const banner = document.getElementById("emergencyTopBanner");
+    const textEl = document.getElementById("emergencyBannerText");
+    if (banner && textEl) {
+        const victimName = sos.passenger_name || (currentUser && currentUser.role === "PASSENGER" ? currentUser.name : "Commuter");
+        const loc = sos.address || `${(sos.latitude || 0).toFixed(4)}, ${(sos.longitude || 0).toFixed(4)}`;
+        textEl.innerHTML = `<strong>🚨 CRITICAL EMERGENCY SOS:</strong> Incident <span style="text-decoration: underline;">${sos.sos_id || 'ACTIVE'}</span> reported near <strong>${loc}</strong> by ${victimName}!`;
+        banner.style.display = "block";
+    }
+    if (currentUser && ["RESPONDER", "ADMIN"].includes(currentUser.role)) {
+        playEmergencySiren();
+    }
+}
+
+function dismissEmergencyBanner() {
+    const banner = document.getElementById("emergencyTopBanner");
+    if (banner) banner.style.display = "none";
+    stopEmergencySiren();
+}
+
+function navigateToResponderConsole() {
+    dismissEmergencyBanner();
+    if (currentUser && currentUser.role === "RESPONDER") {
+        showRoleView("RESPONDER");
+    } else {
+        openRoleAuthModal("RESPONDER", "responder@nexora.local", "Rescue Responder", "🛡️");
+    }
+}
+
+// ==========================================
+// 11. NOTIFICATION CENTER SYSTEM
+// ==========================================
+
+async function fetchNotifications() {
+    if (!currentToken) {
+        const badge = document.getElementById("notifBadge");
+        if (badge) badge.style.display = "none";
+        return;
+    }
+    try {
+        const res = await apiRequest("/api/notifications");
+        if (!res.ok) return;
+        const notifs = await res.json();
+        renderNotificationList(notifs);
+    } catch (e) {}
+}
+
+function renderNotificationList(notifs) {
+    if (!Array.isArray(notifs)) return;
+    const badge = document.getElementById("notifBadge");
+    const unreadCount = notifs.filter(n => !n.is_read).length;
+    
+    if (badge) {
+        if (unreadCount > 0) {
+            badge.textContent = unreadCount > 99 ? "99+" : unreadCount;
+            badge.style.display = "inline-flex";
+        } else {
+            badge.style.display = "none";
+        }
+    }
+
+    const feed = document.getElementById("notifFeed");
+    if (!feed) return;
+    
+    if (notifs.length === 0) {
+        feed.innerHTML = `<div style="text-align: center; color: var(--text-dim); padding: 24px;">No notifications yet.</div>`;
+        return;
+    }
+
+    feed.innerHTML = notifs.slice(0, 30).map(n => {
+        const isSOS = n.type && n.type.includes("SOS");
+        const cardBg = n.is_read ? "transparent" : (isSOS ? "rgba(239, 68, 68, 0.12)" : "rgba(37, 99, 235, 0.08)");
+        const borderCol = isSOS ? "#ef4444" : (n.is_read ? "rgba(255,255,255,0.06)" : "rgba(59, 130, 246, 0.4)");
+        const timeStr = n.created_at ? new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Just now";
+        return `
+            <div class="notif-card" style="background: ${cardBg}; border: 1px solid ${borderCol}; padding: 10px; border-radius: 8px; margin-bottom: 8px; font-size: 0.85rem; cursor: pointer;" onclick="markNotificationRead(${n.id})">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                    <strong style="color: ${isSOS ? '#f87171' : 'var(--text-main)'}; font-size: 0.9rem;">
+                        ${isSOS ? '🚨' : '📢'} ${n.title}
+                    </strong>
+                    <span style="font-size: 0.72rem; color: var(--text-dim);">${timeStr}</span>
+                </div>
+                <div style="color: var(--text-muted); line-height: 1.35; margin-bottom: 4px;">${n.message}</div>
+                ${!n.is_read ? '<span style="display: inline-block; font-size: 0.7rem; color: #60a5fa; font-weight: 600;">• Unread</span>' : ''}
+            </div>
+        `;
+    }).join("");
+}
+
+function toggleNotifDrawer() {
+    const drawer = document.getElementById("notifDrawer");
+    const backdrop = document.getElementById("notifBackdrop");
+    if (!drawer) return;
+    const isOpen = drawer.classList.contains("open");
+    if (isOpen) {
+        drawer.classList.remove("open");
+        if (backdrop) backdrop.classList.remove("open");
+    } else {
+        drawer.classList.add("open");
+        if (backdrop) backdrop.classList.add("open");
+        if (!currentUser) {
+            const feed = document.getElementById("notifFeed");
+            if (feed) feed.innerHTML = `<div style="text-align: center; color: var(--text-dim); padding: 24px;">Please sign in to view your alert notifications.</div>`;
+        } else {
+            fetchNotifications();
+        }
+    }
+}
+
+async function markNotificationRead(notifId) {
+    try {
+        await apiRequest(`/api/notifications/${notifId}/read`, "POST");
+        fetchNotifications();
+    } catch (e) {}
+}
+
+async function markAllNotificationsRead() {
+    try {
+        await apiRequest("/api/notifications/read-all", "POST");
+        fetchNotifications();
+    } catch (e) {}
 }

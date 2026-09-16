@@ -56,6 +56,8 @@ async def create_sos(
             detail="Valid, active GPS coordinates are strictly required before initiating an emergency SOS."
         )
 
+    now = datetime.datetime.now(datetime.timezone.utc)
+
     # Check for active existing SOS for this passenger
     existing = db.query(EmergencyCase).filter(
         EmergencyCase.passenger_id == current_user.id,
@@ -63,9 +65,75 @@ async def create_sos(
     ).first()
 
     if existing:
-        return format_sos_response(existing, db)
+        # Update coordinates and address with fresh GPS fix
+        address = reverse_geocode(data.latitude, data.longitude)
+        existing.latitude = data.latitude
+        existing.longitude = data.longitude
+        existing.address = address
+        current_user.last_latitude = data.latitude
+        current_user.last_longitude = data.longitude
+        current_user.location_updated_at = now
 
-    now = datetime.datetime.now(datetime.timezone.utc)
+        audit = SOSAuditLog(
+            sos_id=existing.sos_id,
+            action="SOS_UPDATED",
+            actor_id=current_user.id,
+            actor_role=current_user.role,
+            notes=f"Emergency SOS updated with new coordinates at {address}",
+            timestamp=now
+        )
+        db.add(audit)
+
+        # Re-notify nearby responders
+        responders = db.query(User).filter(User.role == "RESPONDER", User.is_active == True).all()
+        for resp in responders:
+            dist = None
+            if resp.last_latitude and resp.last_longitude:
+                dist = calculate_haversine_km(resp.last_latitude, resp.last_longitude, data.latitude, data.longitude)
+            if dist is None or dist <= settings.SOS_RADIUS_KM:
+                dist_str = f" ({dist:.2f} km away)" if dist is not None else ""
+                notif = Notification(
+                    user_id=resp.id,
+                    title="EMERGENCY SOS ALERT (UPDATE)",
+                    message=f"Passenger {current_user.name} requires emergency assistance at {address}{dist_str}.",
+                    type="EMERGENCY",
+                    is_read=False,
+                    created_at=now
+                )
+                db.add(notif)
+
+        # Confirmation notification for passenger
+        pax_notif = Notification(
+            user_id=current_user.id,
+            title="EMERGENCY SOS UPDATED",
+            message=f"Distress coordinates for {existing.sos_id} updated. Rescue units alerted.",
+            type="EMERGENCY",
+            is_read=False,
+            created_at=now
+        )
+        db.add(pax_notif)
+
+        db.commit()
+        db.refresh(existing)
+
+        # Real-time WebSocket re-broadcast to all connected clients
+        await ws_manager.broadcast({
+            "type": "SOS_ALERT",
+            "data": {
+                "id": existing.id,
+                "sos_id": existing.sos_id,
+                "passenger_id": current_user.id,
+                "passenger_name": current_user.name,
+                "passenger_phone": current_user.phone or "N/A",
+                "latitude": existing.latitude,
+                "longitude": existing.longitude,
+                "address": existing.address,
+                "status": existing.status,
+                "created_at": existing.created_at.isoformat() if hasattr(existing.created_at, "isoformat") else str(existing.created_at)
+            }
+        })
+
+        return format_sos_response(existing, db)
     sos_count = db.query(EmergencyCase).count() + 1
     sos_id = f"SOS-{sos_count:06d}"
 
@@ -122,6 +190,17 @@ async def create_sos(
             )
             db.add(notif)
             nearby_responders.append(resp.id)
+
+    # Confirmation notification for passenger
+    pax_notif = Notification(
+        user_id=current_user.id,
+        title="EMERGENCY SOS DISPATCHED",
+        message=f"Your emergency distress call {sos.sos_id} has been transmitted to Coimbatore Emergency Response. Help is mobilizing.",
+        type="EMERGENCY",
+        is_read=False,
+        created_at=now
+    )
+    db.add(pax_notif)
 
     db.commit()
 
@@ -386,6 +465,20 @@ async def cancel_sos(
         timestamp=now
     )
     db.add(audit)
+
+    # Notify responders of stand-down / cancellation
+    responders = db.query(User).filter(User.role == "RESPONDER", User.is_active == True).all()
+    for resp in responders:
+        notif = Notification(
+            user_id=resp.id,
+            title="Emergency SOS Cancelled",
+            message=f"Emergency SOS {sos.sos_id} cancelled by commuter ({current_user.name}). Stand down.",
+            type="INFO",
+            is_read=False,
+            created_at=now
+        )
+        db.add(notif)
+
     db.commit()
     db.refresh(sos)
 

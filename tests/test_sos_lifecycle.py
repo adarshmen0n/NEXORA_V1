@@ -72,3 +72,42 @@ def test_sos_full_lifecycle():
     logs = res_logs.json()
     sos_actions = [l["action"] for l in logs if l["sos_id"] == sos_id]
     assert "RESOLVED" in sos_actions
+
+def test_sos_retrigger_and_notification_dispatch():
+    pax_token = get_token("passenger2@nexora.local")
+    resp_token = get_token("responder@nexora.local")
+    pax_headers = {"Authorization": f"Bearer {pax_token}"}
+    resp_headers = {"Authorization": f"Bearer {resp_token}"}
+
+    # First SOS trigger
+    res1 = client.post("/api/sos", json={"latitude": 11.0180, "longitude": 76.9600}, headers=pax_headers)
+    assert res1.status_code == 200
+    sos1 = res1.json()
+    sos_id = sos1["sos_id"]
+
+    # Re-trigger with new coordinates while active
+    res2 = client.post("/api/sos", json={"latitude": 11.0195, "longitude": 76.9620}, headers=pax_headers)
+    assert res2.status_code == 200
+    sos2 = res2.json()
+    assert sos2["sos_id"] == sos_id
+    assert abs(sos2["latitude"] - 11.0195) < 0.0001
+
+    # Check passenger received confirmation notifications
+    pax_notifs = client.get("/api/notifications", headers=pax_headers).json()
+    assert len(pax_notifs) > 0
+    assert any("SOS" in n["title"] for n in pax_notifs)
+
+    # Check responder received alert notifications
+    resp_notifs = client.get("/api/notifications", headers=resp_headers).json()
+    assert len(resp_notifs) > 0
+    assert any("EMERGENCY" in n["type"] for n in resp_notifs)
+
+    # Commuter cancels emergency
+    res_cancel = client.post(f"/api/sos/{sos_id}/cancel", json={"notes": "False alarm, safe."}, headers=pax_headers)
+    assert res_cancel.status_code == 200
+    assert res_cancel.json()["status"] == "CANCELLED"
+
+    # Verify responder received stand-down notification
+    resp_notifs_after = client.get("/api/notifications", headers=resp_headers).json()
+    assert any("STAND-DOWN" in n["title"] or "Cancelled" in n["title"] for n in resp_notifs_after)
+

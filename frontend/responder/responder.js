@@ -9,7 +9,7 @@ let socket;
 
 let responderLat = 11.0180; // Gandhipuram Quick Response Base
 let responderLng = 76.9600;
-const SOS_RADIUS_KM = 1.0;
+const SOS_RADIUS_KM = 35.0;
 
 document.addEventListener("DOMContentLoaded", async () => {
     let user = getUser();
@@ -56,7 +56,7 @@ function initMap() {
     });
     responderMarker = L.marker([responderLat, responderLng], { icon: icon }).addTo(map);
 
-    // Draw 1.0 km tactical radius
+    // Draw 35.0 km tactical radius
     radiusCircle = L.circle([responderLat, responderLng], {
         radius: SOS_RADIUS_KM * 1000,
         color: "#ef4444",
@@ -136,7 +136,7 @@ function renderIncidents(cases) {
             <div class="incident-top">
                 <span class="incident-code">🚨 ${c.sos_id}</span>
                 <span class="distance-badge ${isWithinRadius ? 'immediate' : ''}">
-                    ${isWithinRadius ? '📍 WITHIN 1.0 KM GEOFENCE' : '⚠️ OUTSIDE GEOFENCE'} • ${distText}
+                    ${isWithinRadius ? '📍 WITHIN 35.0 KM GEOFENCE' : '⚠️ OUTSIDE GEOFENCE'} • ${distText}
                 </span>
             </div>
 
