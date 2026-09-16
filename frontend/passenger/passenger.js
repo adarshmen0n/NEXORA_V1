@@ -69,35 +69,49 @@ function setPresetLocation(key) {
 
 function requestDeviceLocation() {
     if (!navigator.geolocation) {
-        showToast("Geolocation not supported by device. Using landmark simulation.", "error");
-        setPresetLocation("gandhipuram");
+        showToast("Geolocation is not supported by this browser or device.", "error");
         return;
     }
 
-    showToast("Acquiring high-accuracy GPS fix...", "info");
+    showToast("Acquiring high-accuracy GNSS satellite fix...", "info");
+    const ind = document.getElementById("gpsIndicator");
+    if (ind) {
+        ind.className = "gps-indicator acquiring";
+        ind.innerHTML = "<span>🟡</span> Acquiring GNSS Satellites...";
+    }
+
     navigator.geolocation.getCurrentPosition(
         (pos) => {
-            updatePassengerPosition(pos.coords.latitude, pos.coords.longitude, "Live GPS Position");
-            showToast("GPS position acquired successfully!", "success");
+            updatePassengerPosition(pos.coords.latitude, pos.coords.longitude, "Live GNSS Position", pos.coords.accuracy);
+            showToast(`GNSS fix acquired (±${(pos.coords.accuracy || 5.0).toFixed(1)}m)!`, "success");
         },
         (err) => {
             console.warn("GPS error:", err);
-            showToast("Could not get device GPS. Using landmark simulator.", "error");
-            setPresetLocation("gandhipuram");
+            let msg = "Could not acquire device GPS.";
+            if (err.code === 1) msg = "Location permission denied. Please allow location in your browser settings.";
+            else if (err.code === 2) msg = "GPS satellite signal unavailable. Please ensure Device Location is ON.";
+            else if (err.code === 3) msg = "GPS request timed out. Please retry with a clear view of the sky.";
+            showToast(msg, "error");
+            if (ind) {
+                ind.className = "gps-indicator";
+                ind.innerHTML = `<span>⚠️</span> ${msg}`;
+            }
         },
-        { enableHighAccuracy: true, timeout: 6000 }
+        { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
     );
 }
 
-async function updatePassengerPosition(lat, lng, label) {
+async function updatePassengerPosition(lat, lng, label, accuracy = 5.0) {
     userLatitude = lat;
     userLongitude = lng;
     isGpsActive = true;
 
     // Update GPS indicator UI
     const ind = document.getElementById("gpsIndicator");
-    ind.className = "gps-indicator active";
-    ind.innerHTML = `<span>🟢</span> GPS Active (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+    if (ind) {
+        ind.className = "gps-indicator active";
+        ind.innerHTML = `<span>🟢</span> GNSS Active (${lat.toFixed(5)}, ${lng.toFixed(5)} ±${accuracy.toFixed(1)}m)`;
+    }
 
     // Arm the Strict SOS Button
     armSOSButton();

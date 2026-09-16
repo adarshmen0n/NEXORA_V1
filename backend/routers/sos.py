@@ -18,11 +18,13 @@ def format_sos_response(sos: EmergencyCase, db: Session, responder_coords: Optio
     passenger = db.query(User).filter(User.id == sos.passenger_id).first()
     responder = db.query(User).filter(User.id == sos.responder_id).first() if sos.responder_id else None
     
-    dist_km = sos.responder_distance_km
-    if responder_coords and not dist_km:
+    dist_km = None
+    if responder_coords:
         r_lat, r_lng = responder_coords
         dist_km = round(calculate_haversine_km(r_lat, r_lng, sos.latitude, sos.longitude), 2)
-    elif responder and responder.last_latitude and responder.last_longitude and not dist_km:
+    elif sos.responder_distance_km is not None:
+        dist_km = sos.responder_distance_km
+    elif responder and responder.last_latitude and responder.last_longitude:
         dist_km = round(calculate_haversine_km(responder.last_latitude, responder.last_longitude, sos.latitude, sos.longitude), 2)
 
     return {
@@ -86,6 +88,7 @@ async def create_sos(
 
         # Re-notify nearby responders
         responders = db.query(User).filter(User.role == "RESPONDER", User.is_active == True).all()
+        notified_responders = []
         for resp in responders:
             dist = None
             if resp.last_latitude and resp.last_longitude:
@@ -95,6 +98,24 @@ async def create_sos(
                 notif = Notification(
                     user_id=resp.id,
                     title="EMERGENCY SOS ALERT (UPDATE)",
+                    message=f"Passenger {current_user.name} requires emergency assistance at {address}{dist_str}.",
+                    type="EMERGENCY",
+                    is_read=False,
+                    created_at=now
+                )
+                db.add(notif)
+                notified_responders.append(resp.id)
+
+        # Long-distance fallback: notify all active responders with true distance so alerts are never lost
+        if not notified_responders:
+            for resp in responders:
+                dist = None
+                if resp.last_latitude and resp.last_longitude:
+                    dist = calculate_haversine_km(resp.last_latitude, resp.last_longitude, data.latitude, data.longitude)
+                dist_str = f" ({dist:.2f} km away)" if dist is not None else ""
+                notif = Notification(
+                    user_id=resp.id,
+                    title="EMERGENCY SOS ALERT (UPDATE - METRO PERIMETER)",
                     message=f"Passenger {current_user.name} requires emergency assistance at {address}{dist_str}.",
                     type="EMERGENCY",
                     is_read=False,
@@ -190,6 +211,23 @@ async def create_sos(
             )
             db.add(notif)
             nearby_responders.append(resp.id)
+
+    # Long-distance fallback: notify all active responders with true distance so alerts are never lost
+    if not nearby_responders:
+        for resp in responders:
+            dist = None
+            if resp.last_latitude and resp.last_longitude:
+                dist = calculate_haversine_km(resp.last_latitude, resp.last_longitude, data.latitude, data.longitude)
+            dist_str = f" ({dist:.2f} km away)" if dist is not None else ""
+            notif = Notification(
+                user_id=resp.id,
+                title="EMERGENCY SOS ALERT (METRO PERIMETER)",
+                message=f"Passenger {current_user.name} requires emergency assistance at {address}{dist_str}.",
+                type="EMERGENCY",
+                is_read=False,
+                created_at=now
+            )
+            db.add(notif)
 
     # Confirmation notification for passenger
     pax_notif = Notification(

@@ -10,6 +10,7 @@ let socket;
 let responderLat = 11.0180; // Gandhipuram Quick Response Base
 let responderLng = 76.9600;
 const SOS_RADIUS_KM = 35.0;
+let responderWatchId = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
     let user = getUser();
@@ -31,11 +32,48 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     initMap();
     initWebSocket();
-    await updateBeaconLocation(responderLat, responderLng);
+    startResponderLiveGPS();
     await loadActiveAlerts();
 
-    setInterval(loadActiveAlerts, 8000);
+    setInterval(loadActiveAlerts, 4000);
 });
+
+function startResponderLiveGPS() {
+    if (!navigator.geolocation) {
+        console.warn("Geolocation API not supported by device.");
+        updateBeaconLocation(responderLat, responderLng);
+        return;
+    }
+
+    const geoOptions = {
+        enableHighAccuracy: true,
+        timeout: 30000,
+        maximumAge: 0
+    };
+
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            updateBeaconLocation(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy || 5.0);
+            if (map) map.setView([pos.coords.latitude, pos.coords.longitude], 14);
+            loadActiveAlerts();
+        },
+        (err) => {
+            console.warn("Responder initial GNSS acquisition error:", err);
+            updateBeaconLocation(responderLat, responderLng);
+        },
+        geoOptions
+    );
+
+    responderWatchId = navigator.geolocation.watchPosition(
+        (pos) => {
+            updateBeaconLocation(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy || 5.0);
+        },
+        (err) => {
+            console.warn("Responder watchPosition error:", err);
+        },
+        geoOptions
+    );
+}
 
 function initMap() {
     map = L.map("responderMap", {
@@ -67,14 +105,17 @@ function initMap() {
     }).addTo(map);
 }
 
-async function updateBeaconLocation(lat, lng) {
+async function updateBeaconLocation(lat, lng, acc = 5.0) {
     responderLat = lat;
     responderLng = lng;
 
     if (responderMarker) responderMarker.setLatLng([lat, lng]);
     if (radiusCircle) radiusCircle.setLatLng([lat, lng]);
 
-    document.getElementById("beaconCoords").textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    const coordsEl = document.getElementById("beaconCoords");
+    if (coordsEl) {
+        coordsEl.textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)} (±${acc.toFixed(1)}m)`;
+    }
 
     // Push responder location fix
     try {

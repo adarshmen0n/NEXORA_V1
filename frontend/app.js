@@ -486,82 +486,66 @@ function updateNavHeader() {
 // 3. GENUINE MOBILE HARDWARE GPS ENGINE
 // ==========================================
 
-function startRealPhoneGPS(onFixCallback) {
+function startRealPhoneGPS(onFixCallback, onErrorCallback) {
     stopRealPhoneGPS();
 
-    if (navigator.geolocation) {
-        // Fast one-shot fix for immediate UI response
-        navigator.geolocation.getCurrentPosition(
-            (pos) => {
-                realLat = pos.coords.latitude;
-                realLng = pos.coords.longitude;
-                realAccuracy = pos.coords.accuracy || 5.0;
-                realSpeed = pos.coords.speed ? (pos.coords.speed * 3.6) : 25.0;
-                if (onFixCallback) {
-                    onFixCallback(realLat, realLng, realSpeed, realAccuracy);
-                }
-            },
-            (err) => {
-                console.warn("Fast GPS fix not available, continuing with watchPosition:", err);
-            },
-            { enableHighAccuracy: true, timeout: 5000, maximumAge: 10000 }
-        );
-
-        // Continuous satellite track
-        activeWatchId = navigator.geolocation.watchPosition(
-            (pos) => {
-                realLat = pos.coords.latitude;
-                realLng = pos.coords.longitude;
-                realAccuracy = pos.coords.accuracy || 5.0;
-                realSpeed = pos.coords.speed ? (pos.coords.speed * 3.6) : 25.0; // km/h
-
-                if (onFixCallback) {
-                    onFixCallback(realLat, realLng, realSpeed, realAccuracy);
-                }
-            },
-            (err) => {
-                console.warn("Real GPS access error (fallback will activate):", err);
-                // On error / timeout, provide default Gandhipuram Central fix so system stays 100% operational
-                if (!realLat || !realLng) {
-                    realLat = 11.01684;
-                    realLng = 76.95583;
-                    realAccuracy = 10.0;
-                    realSpeed = 20.0;
-                    if (onFixCallback) {
-                        onFixCallback(realLat, realLng, realSpeed, realAccuracy);
-                    }
-                }
-            },
-            {
-                enableHighAccuracy: true,
-                maximumAge: 0,
-                timeout: 10000
-            }
-        );
-    } else {
-        console.warn("Geolocation API not supported. Using Coimbatore Central coordinates.");
-        realLat = 11.01684;
-        realLng = 76.95583;
-        realAccuracy = 10.0;
-        realSpeed = 20.0;
-        if (onFixCallback) {
-            onFixCallback(realLat, realLng, realSpeed, realAccuracy);
-        }
+    if (!navigator.geolocation) {
+        const msg = "Geolocation API is not supported by your browser or device.";
+        console.warn(msg);
+        if (onErrorCallback) onErrorCallback(msg, "UNSUPPORTED");
+        return;
     }
 
-    // Safety timeout: If no GPS fix acquired after 3.5s (e.g. desktop PC or slow connection), activate fallback
-    setTimeout(() => {
-        if (!realLat || !realLng) {
-            console.log("GPS acquisition timeout: setting Gandhipuram Central fallback fix.");
-            realLat = 11.01684;
-            realLng = 76.95583;
-            realAccuracy = 12.0;
-            realSpeed = 20.0;
+    const geoOptions = {
+        enableHighAccuracy: true,
+        timeout: 30000,
+        maximumAge: 0
+    };
+
+    // Fast one-shot fix for immediate UI response
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            realLat = pos.coords.latitude;
+            realLng = pos.coords.longitude;
+            realAccuracy = pos.coords.accuracy || 5.0;
+            realSpeed = pos.coords.speed ? (pos.coords.speed * 3.6) : 0.0;
             if (onFixCallback) {
                 onFixCallback(realLat, realLng, realSpeed, realAccuracy);
             }
-        }
-    }, 3500);
+        },
+        (err) => {
+            console.warn("Initial GNSS getCurrentPosition notice:", err);
+            let reason = "Acquiring hardware GNSS satellite lock...";
+            if (err.code === 1) reason = "Location permission was denied. Please allow location access in your browser settings.";
+            else if (err.code === 2) reason = "Position unavailable. Please ensure GPS/Location is turned on in device settings.";
+            else if (err.code === 3) reason = "GNSS lock taking longer than usual. Continuing background search...";
+            if (onErrorCallback) onErrorCallback(reason, err.code);
+        },
+        geoOptions
+    );
+
+    // Continuous real-time satellite track
+    activeWatchId = navigator.geolocation.watchPosition(
+        (pos) => {
+            realLat = pos.coords.latitude;
+            realLng = pos.coords.longitude;
+            realAccuracy = pos.coords.accuracy || 5.0;
+            realSpeed = pos.coords.speed ? (pos.coords.speed * 3.6) : 0.0; // km/h
+
+            if (onFixCallback) {
+                onFixCallback(realLat, realLng, realSpeed, realAccuracy);
+            }
+        },
+        (err) => {
+            console.warn("Real GNSS watchPosition error:", err);
+            let reason = "GNSS tracking error.";
+            if (err.code === 1) reason = "Location permission denied. Please allow location in your browser settings.";
+            else if (err.code === 2) reason = "GPS satellite signal unavailable. Please ensure Device Location is ON.";
+            else if (err.code === 3) reason = "Acquiring GNSS satellites... Please stand with a clear view of sky.";
+            if (onErrorCallback) onErrorCallback(reason, err.code);
+        },
+        geoOptions
+    );
 }
 
 function stopRealPhoneGPS() {
@@ -896,32 +880,49 @@ const PAX_PRESETS = {
 function setPassengerPreset(key) {
     const p = PAX_PRESETS[key];
     if (!p) return;
-    applyPassengerGPSFix(p.lat, p.lng, 20.0, 5.0);
+    if (confirm(`Set simulated commuter position to ${p.name} (${p.lat}, ${p.lng})?\nUse this only for testing without hardware GPS.`)) {
+        applyPassengerGPSFix(p.lat, p.lng, 20.0, 5.0, true);
+    }
 }
 
 function forcePassengerGPSFix() {
     const pill = document.getElementById("paxGpsPill");
     if (pill) {
         pill.className = "gps-pill acquiring";
-        pill.innerHTML = "<span>🟡</span> Re-acquiring GPS...";
+        pill.innerHTML = "<span>🟡</span> Acquiring Real GNSS Fix...";
     }
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            (pos) => {
-                applyPassengerGPSFix(pos.coords.latitude, pos.coords.longitude, 25.0, pos.coords.accuracy || 8.0);
-            },
-            (err) => {
-                console.warn("Manual GPS fix error:", err);
-                applyPassengerGPSFix(11.01684, 76.95583, 20.0, 10.0);
-            },
-            { enableHighAccuracy: true, timeout: 6000 }
-        );
-    } else {
-        applyPassengerGPSFix(11.01684, 76.95583, 20.0, 10.0);
+    const coords = document.getElementById("paxCoords");
+    if (coords) coords.textContent = "Querying satellite receivers...";
+
+    if (!navigator.geolocation) {
+        alert("Geolocation API is not supported on this browser.");
+        return;
     }
+
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            applyPassengerGPSFix(pos.coords.latitude, pos.coords.longitude, pos.coords.speed ? (pos.coords.speed * 3.6) : 0.0, pos.coords.accuracy || 5.0);
+        },
+        (err) => {
+            console.warn("Manual GNSS fix error:", err);
+            let errDetail = "Could not acquire satellite fix.";
+            if (err.code === 1) errDetail = "Location permission denied. Please allow location in your browser settings.";
+            else if (err.code === 2) errDetail = "GPS signal unavailable. Please ensure Device Location/GPS is turned ON.";
+            else if (err.code === 3) errDetail = "GPS request timed out. Please move to an open area with clear sky view.";
+            
+            if (pill) {
+                pill.className = "gps-pill acquiring";
+                pill.innerHTML = `<span>⚠️</span> ${err.code === 1 ? 'Permission Denied' : 'Fix Timeout'}`;
+            }
+            if (coords) coords.textContent = errDetail;
+            disarmSOSButton(errDetail);
+            alert("GNSS Status: " + errDetail);
+        },
+        { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
+    );
 }
 
-function applyPassengerGPSFix(lat, lng, speed = 20.0, acc = 5.0) {
+function applyPassengerGPSFix(lat, lng, speed = 0.0, acc = 5.0, isSimulated = false) {
     realLat = lat;
     realLng = lng;
     realAccuracy = acc;
@@ -930,7 +931,8 @@ function applyPassengerGPSFix(lat, lng, speed = 20.0, acc = 5.0) {
     const pill = document.getElementById("paxGpsPill");
     if (pill) {
         pill.className = "gps-pill live";
-        pill.innerHTML = `<span>🟢</span> GPS Active (±${acc.toFixed(1)}m)`;
+        const tag = isSimulated ? "Simulated" : "GNSS Active";
+        pill.innerHTML = `<span>🟢</span> ${tag} (±${acc.toFixed(1)}m)`;
     }
 
     const coords = document.getElementById("paxCoords");
@@ -975,33 +977,38 @@ function initPassengerView() {
     }, 150);
 
     // Lock SOS button initially until phone GPS is acquired
-    disarmSOSButton("Acquiring real mobile GPS coordinates...");
+    disarmSOSButton("Acquiring real hardware GNSS/GPS coordinates...");
 
     const pill = document.getElementById("paxGpsPill");
     if (pill) {
         pill.className = "gps-pill acquiring";
-        pill.innerHTML = "<span>🟡</span> Acquiring GPS...";
+        pill.innerHTML = "<span>🟡</span> Acquiring GNSS Satellites...";
     }
     const coords = document.getElementById("paxCoords");
     if (coords) {
-        coords.textContent = "Acquiring...";
+        coords.textContent = "Acquiring real coordinates...";
     }
 
-    // Start Real Phone GPS for Commuter
-    startRealPhoneGPS((lat, lng, speed, acc) => {
-        applyPassengerGPSFix(lat, lng, speed, acc);
-    });
+    // Start Real Phone GPS for Commuter with transparent error handling
+    startRealPhoneGPS(
+        (lat, lng, speed, acc) => {
+            applyPassengerGPSFix(lat, lng, speed, acc);
+        },
+        (errReason, errCode) => {
+            if (!realLat || !realLng) {
+                disarmSOSButton(errReason);
+                if (pill) {
+                    pill.className = "gps-pill acquiring";
+                    pill.innerHTML = `<span>⚠️</span> ${errCode === 1 ? 'Permission Denied' : 'Awaiting GNSS'}`;
+                }
+                if (coords) coords.textContent = errReason;
+            }
+        }
+    );
 
-    // If we already have a fix, apply immediately; otherwise fallback after 2.5 seconds
+    // If we already have a real fix from continuous tracking, apply immediately
     if (realLat && realLng) {
         applyPassengerGPSFix(realLat, realLng, realSpeed, realAccuracy);
-    } else {
-        if (paxSafetyTimer) clearTimeout(paxSafetyTimer);
-        paxSafetyTimer = setTimeout(() => {
-            if (!realLat || !realLng) {
-                applyPassengerGPSFix(11.01684, 76.95583, 20.0, 10.0);
-            }
-        }, 2500);
     }
 
     checkActiveSOS();
@@ -1223,54 +1230,73 @@ function initResponderView() {
         maps.responder.invalidateSize();
     }, 150);
 
-    // Start Responder Real Phone GPS Beacon
-    startRealPhoneGPS((lat, lng, speed, acc) => {
-        const pill = document.getElementById("respGpsPill");
-        if (pill) {
-            pill.className = "gps-pill live";
-            pill.innerHTML = `<span>🟢</span> Beacon Transmitting (±${acc.toFixed(1)}m)`;
+    const initPill = document.getElementById("respGpsPill");
+    if (initPill) {
+        initPill.className = "gps-pill acquiring";
+        initPill.innerHTML = "<span>🟡</span> Acquiring Live GNSS Fix...";
+    }
+    const initCoords = document.getElementById("respCoords");
+    if (initCoords) initCoords.textContent = "Acquiring real coordinates...";
+
+    // Start Responder Real Phone GPS Beacon with error handling
+    startRealPhoneGPS(
+        (lat, lng, speed, acc) => {
+            const pill = document.getElementById("respGpsPill");
+            if (pill) {
+                pill.className = "gps-pill live";
+                pill.innerHTML = `<span>🟢</span> Beacon Transmitting (±${acc.toFixed(1)}m)`;
+            }
+
+            const coords = document.getElementById("respCoords");
+            if (coords) {
+                coords.textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+            }
+
+            // Update responder marker
+            if (markers.responderUser) {
+                markers.responderUser.setLatLng([lat, lng]);
+            } else if (maps.responder) {
+                const icon = L.divIcon({
+                    className: "custom-resp-icon",
+                    html: `<div style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 8px; font-weight: 800; font-size: 11px; border: 2px solid white; box-shadow: 0 0 12px #ef4444;">🛡️ RESPONDER (RSP-001)</div>`,
+                    iconSize: [110, 26],
+                    iconAnchor: [55, 13]
+                });
+                markers.responderUser = L.marker([lat, lng], { icon }).addTo(maps.responder);
+            }
+
+            // Whole Coimbatore City Metropolitan Geofence Radar (35 km)
+            if (markers.responderCircle) {
+                markers.responderCircle.setLatLng([lat, lng]);
+            } else if (maps.responder) {
+                markers.responderCircle = L.circle([lat, lng], {
+                    radius: COIMBATORE_RADIUS_METERS,
+                    color: "#3b82f6",
+                    fillColor: "#3b82f6",
+                    fillOpacity: 0.05,
+                    weight: 2,
+                    dashArray: "6, 8"
+                }).addTo(maps.responder);
+                markers.responderCircle.bindTooltip("🛡️ Tactical Rescue Radar: 35.0 km Coverage", { permanent: false });
+            }
+
+            if (maps.responder) maps.responder.panTo([lat, lng]);
+
+            // Transmit genuine beacon fix to server
+            apiRequest("/api/tracking/responder/location", "POST", { latitude: lat, longitude: lng }).catch(() => {});
+
+            loadResponderAlerts();
+        },
+        (errReason, errCode) => {
+            const pill = document.getElementById("respGpsPill");
+            if (pill) {
+                pill.className = "gps-pill acquiring";
+                pill.innerHTML = `<span>⚠️</span> ${errCode === 1 ? 'Permission Denied' : 'Awaiting GNSS'}`;
+            }
+            const coords = document.getElementById("respCoords");
+            if (coords) coords.textContent = errReason;
         }
-
-        const coords = document.getElementById("respCoords");
-        if (coords) {
-            coords.textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-        }
-
-        // Update responder marker
-        if (markers.responderUser) {
-            markers.responderUser.setLatLng([lat, lng]);
-        } else {
-            const icon = L.divIcon({
-                className: "custom-resp-icon",
-                html: `<div style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 8px; font-weight: 800; font-size: 11px; border: 2px solid white; box-shadow: 0 0 12px #ef4444;">🛡️ RESPONDER (RSP-001)</div>`,
-                iconSize: [110, 26],
-                iconAnchor: [55, 13]
-            });
-            markers.responderUser = L.marker([lat, lng], { icon }).addTo(maps.responder);
-        }
-
-        // Whole Coimbatore City Metropolitan Geofence Radar (35 km)
-        if (markers.responderCircle) {
-            markers.responderCircle.setLatLng([lat, lng]);
-        } else {
-            markers.responderCircle = L.circle([lat, lng], {
-                radius: COIMBATORE_RADIUS_METERS,
-                color: "#3b82f6",
-                fillColor: "#3b82f6",
-                fillOpacity: 0.05,
-                weight: 2,
-                dashArray: "6, 8"
-            }).addTo(maps.responder);
-            markers.responderCircle.bindTooltip("🛡️ Coimbatore Metropolitan Rescue Radar: 35.0 km Coverage", { permanent: false });
-        }
-
-        maps.responder.panTo([lat, lng]);
-
-        // Transmit beacon fix to server
-        apiRequest("/api/tracking/responder/location", "POST", { latitude: lat, longitude: lng }).catch(() => {});
-
-        loadResponderAlerts();
-    });
+    );
 
     loadResponderAlerts();
     if (sosResponderInterval) clearInterval(sosResponderInterval);
@@ -1302,15 +1328,20 @@ async function loadResponderAlerts() {
         }
 
         cases.forEach(c => {
-            let distKm = 0;
+            let distKm = null;
             let withinCitySector = true;
 
             if (realLat && realLng) {
                 distKm = computeHaversineKm(realLat, realLng, c.latitude, c.longitude);
-                withinCitySector = distKm <= SOS_RADIUS_KM;
+            } else if (typeof c.responder_distance_km === "number") {
+                distKm = c.responder_distance_km;
             }
 
-            const distStr = distKm < 1.0 ? `${Math.round(distKm * 1000)} meters away` : `${distKm.toFixed(2)} km away`;
+            let distStr = "Calculating distance...";
+            if (distKm !== null) {
+                withinCitySector = distKm <= SOS_RADIUS_KM;
+                distStr = distKm < 1.0 ? `${Math.round(distKm * 1000)} meters away` : `${distKm.toFixed(2)} km away`;
+            }
 
             const card = document.createElement("div");
             card.className = "card";
@@ -1324,6 +1355,9 @@ async function loadResponderAlerts() {
                     </span>
                 </div>
                 <div style="font-size: 0.95rem; font-weight: 600; margin-bottom: 6px;">📍 ${c.address || 'Location Coordinates Dispatched'}</div>
+                <div style="font-size: 0.8rem; color: #93c5fd; font-family: monospace; margin-bottom: 6px;">
+                    Exact GNSS: ${c.latitude.toFixed(6)}, ${c.longitude.toFixed(6)}
+                </div>
                 <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
                     Victim: ${c.passenger_name} (${c.passenger_phone}) • Status: <strong style="color: #60a5fa;">${c.status}</strong>
                 </div>

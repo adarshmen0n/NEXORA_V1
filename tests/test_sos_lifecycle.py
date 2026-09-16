@@ -111,3 +111,41 @@ def test_sos_retrigger_and_notification_dispatch():
     resp_notifs_after = client.get("/api/notifications", headers=resp_headers).json()
     assert any("STAND-DOWN" in n["title"] or "Cancelled" in n["title"] for n in resp_notifs_after)
 
+def test_sos_exact_20km_distance_and_dispatch():
+    pax_token = get_token("passenger1@nexora.local")
+    resp_token = get_token("responder@nexora.local")
+    pax_headers = {"Authorization": f"Bearer {pax_token}"}
+    resp_headers = {"Authorization": f"Bearer {resp_token}"}
+
+    # 1. Responder is at their genuine GPS location (20.0 km south of Gandhipuram)
+    resp_loc_res = client.post("/api/tracking/responder/location", json={
+        "latitude": 10.8381,
+        "longitude": 76.9600
+    }, headers=resp_headers)
+    assert resp_loc_res.status_code == 200
+
+    # 2. Passenger triggers SOS at Gandhipuram (11.0180, 76.9600)
+    res_trigger = client.post("/api/sos", json={
+        "latitude": 11.0180,
+        "longitude": 76.9600
+    }, headers=pax_headers)
+    assert res_trigger.status_code == 200
+    sos_data = res_trigger.json()
+    sos_id = sos_data["sos_id"]
+
+    # 3. Check responder active alerts returns exact 20 km distance
+    res_active = client.get("/api/sos/active", headers=resp_headers)
+    assert res_active.status_code == 200
+    cases = res_active.json()
+    matching = [c for c in cases if c["sos_id"] == sos_id]
+    assert len(matching) > 0
+    assert abs(matching[0]["responder_distance_km"] - 20.00) < 0.1
+
+    # 4. Check notification sent to responder contains exact ~20 km distance
+    resp_notifs = client.get("/api/notifications", headers=resp_headers).json()
+    assert any("20.00 km away" in n["message"] or "20.0 km away" in n["message"] for n in resp_notifs)
+
+    # 5. Clean up by resolving
+    client.post(f"/api/sos/{sos_id}/resolve", json={"notes": "20km test completed."}, headers=resp_headers)
+
+
