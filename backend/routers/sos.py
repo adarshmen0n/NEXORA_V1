@@ -65,10 +65,12 @@ async def create_sos(
         EmergencyCase.passenger_id == current_user.id,
         EmergencyCase.status.in_(["ACTIVE", "ACKNOWLEDGED", "RESPONDING"])
     ).first()
-
     if existing:
         # Update coordinates and address with fresh GPS fix
-        address = reverse_geocode(data.latitude, data.longitude)
+        if data.address and len(data.address.strip()) > 3 and not data.address.startswith("GPS Position"):
+            address = data.address.strip()
+        else:
+            address = reverse_geocode(data.latitude, data.longitude)
         existing.latitude = data.latitude
         existing.longitude = data.longitude
         existing.address = address
@@ -158,8 +160,11 @@ async def create_sos(
     sos_count = db.query(EmergencyCase).count() + 1
     sos_id = f"SOS-{sos_count:06d}"
 
-    # Reverse geocode location
-    address = reverse_geocode(data.latitude, data.longitude)
+    # Reverse geocode location (use client-resolved address if valid)
+    if data.address and len(data.address.strip()) > 3 and not data.address.startswith("GPS Position"):
+        address = data.address.strip()
+    else:
+        address = reverse_geocode(data.latitude, data.longitude)
 
     # Update passenger's last known location
     current_user.last_latitude = data.latitude
@@ -264,6 +269,8 @@ async def create_sos(
 
 @router.get("/active", response_model=List[SOSResponse])
 def get_active_sos_cases(
+    lat: Optional[float] = None,
+    lon: Optional[float] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -277,7 +284,14 @@ def get_active_sos_cases(
     cases = query.order_by(EmergencyCase.created_at.desc()).all()
     
     responder_coords = None
-    if current_user.role in ["RESPONDER", "ADMIN"] and current_user.last_latitude and current_user.last_longitude:
+    if lat is not None and lon is not None:
+        responder_coords = (lat, lon)
+        if current_user.role in ["RESPONDER", "ADMIN"]:
+            current_user.last_latitude = lat
+            current_user.last_longitude = lon
+            current_user.location_updated_at = datetime.datetime.now(datetime.timezone.utc)
+            db.commit()
+    elif current_user.role in ["RESPONDER", "ADMIN"] and current_user.last_latitude and current_user.last_longitude:
         responder_coords = (current_user.last_latitude, current_user.last_longitude)
 
     return [format_sos_response(c, db, responder_coords) for c in cases]

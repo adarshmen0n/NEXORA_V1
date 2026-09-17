@@ -230,5 +230,38 @@ def test_tactical_10km_emergency_services_pois():
     for u in tactical_units:
         assert u["phone"] is not None and len(u["phone"]) > 0
 
+def test_sos_client_address_and_dynamic_query_coords():
+    pax_token = get_token("passenger1@nexora.local")
+    resp_token = get_token("responder@nexora.local")
+    pax_headers = {"Authorization": f"Bearer {pax_token}"}
+    resp_headers = {"Authorization": f"Bearer {resp_token}"}
+
+    # 1. Trigger SOS with explicit client-provided human-readable address
+    custom_addr = "Near PSG Tech, Avinashi Road, Peelamedu, Coimbatore - 641004"
+    res = client.post("/api/sos", json={
+        "latitude": 11.0250,
+        "longitude": 76.9950,
+        "address": custom_addr
+    }, headers=pax_headers)
+    assert res.status_code == 200
+    sos_data = res.json()
+    assert sos_data["address"] == custom_addr
+    sos_id = sos_data["sos_id"]
+
+    # 2. Query /api/sos/active with dynamic query parameters from responder
+    # Responder at Eachanari (10.9250, 76.9720) - ~11.38 km away
+    res_active = client.get("/api/sos/active?lat=10.9250&lon=76.9720", headers=resp_headers)
+    assert res_active.status_code == 200
+    cases = res_active.json()
+    matching = [c for c in cases if c["sos_id"] == sos_id]
+    assert len(matching) > 0
+    # Expected distance from (10.9250, 76.9720) to (11.0250, 76.9950) is ~11.38 km
+    from backend.services.distance_service import calculate_haversine_km
+    expected_dist = round(calculate_haversine_km(10.9250, 76.9720, 11.0250, 76.9950), 2)
+    assert abs(matching[0]["responder_distance_km"] - expected_dist) < 0.05
+
+    # 3. Clean up
+    client.post(f"/api/sos/{sos_id}/resolve", json={"notes": "Test address & query verified."}, headers=resp_headers)
+
 
 

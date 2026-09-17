@@ -7,8 +7,9 @@ let sosMarkers = {};
 let incidentLine;
 let socket;
 
-let responderLat = 11.0180; // Gandhipuram Quick Response Base
-let responderLng = 76.9600;
+let responderLat = null;
+let responderLng = null;
+let responderGpsLocked = false;
 const SOS_RADIUS_KM = 35.0;
 let responderWatchId = null;
 
@@ -35,31 +36,39 @@ document.addEventListener("DOMContentLoaded", async () => {
     startResponderLiveGPS();
     await loadActiveAlerts();
 
-    setInterval(loadActiveAlerts, 4000);
+    setInterval(loadActiveAlerts, 3000);
 });
 
 function startResponderLiveGPS() {
     if (!navigator.geolocation) {
         console.warn("Geolocation API not supported by device.");
-        updateBeaconLocation(responderLat, responderLng);
         return;
     }
 
+    // Fast network/Wi-Fi fix for instant proximity
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            updateBeaconLocation(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy || 15.0);
+            loadActiveAlerts();
+        },
+        () => {},
+        { enableHighAccuracy: false, timeout: 5000, maximumAge: 30000 }
+    );
+
     const geoOptions = {
         enableHighAccuracy: true,
-        timeout: 30000,
+        timeout: 25000,
         maximumAge: 0
     };
 
+    // High-precision satellite GNSS
     navigator.geolocation.getCurrentPosition(
         (pos) => {
             updateBeaconLocation(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy || 5.0);
-            if (map) map.setView([pos.coords.latitude, pos.coords.longitude], 14);
             loadActiveAlerts();
         },
         (err) => {
             console.warn("Responder initial GNSS acquisition error:", err);
-            updateBeaconLocation(responderLat, responderLng);
         },
         geoOptions
     );
@@ -79,45 +88,57 @@ function initMap() {
     map = L.map("responderMap", {
         zoomControl: false,
         attributionControl: false
-    }).setView([responderLat, responderLng], 14);
+    }).setView([11.0168, 76.9558], 13);
 
     L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
         maxZoom: 19
     }).addTo(map);
 
-    // Add Responder marker
+    // Allow responder to click anywhere to set their live unit beacon
+    map.on("click", (e) => {
+        updateBeaconLocation(e.latlng.lat, e.latlng.lng, 2.0);
+        showToast(`Unit beacon positioned: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`, "info");
+        loadActiveAlerts();
+    });
+}
+
+async function updateBeaconLocation(lat, lng, acc = 5.0) {
+    responderLat = lat;
+    responderLng = lng;
+    responderGpsLocked = true;
+
     const icon = L.divIcon({
         className: "responder-beacon-icon",
         html: `<div style="background: #2563eb; color: white; padding: 4px 8px; border-radius: 8px; font-weight: 800; font-size: 11px; border: 2px solid white; box-shadow: 0 0 14px #2563eb;">🛡️ YOU (UNIT-1)</div>`,
         iconSize: [90, 26],
         iconAnchor: [45, 13]
     });
-    responderMarker = L.marker([responderLat, responderLng], { icon: icon }).addTo(map);
 
-    // Draw 35.0 km tactical radius
-    radiusCircle = L.circle([responderLat, responderLng], {
-        radius: SOS_RADIUS_KM * 1000,
-        color: "#ef4444",
-        fillColor: "#ef4444",
-        fillOpacity: 0.08,
-        weight: 1.5,
-        dashArray: "4, 6"
-    }).addTo(map);
-}
+    if (responderMarker) {
+        responderMarker.setLatLng([lat, lng]);
+    } else if (map) {
+        responderMarker = L.marker([lat, lng], { icon: icon }).addTo(map);
+    }
 
-async function updateBeaconLocation(lat, lng, acc = 5.0) {
-    responderLat = lat;
-    responderLng = lng;
-
-    if (responderMarker) responderMarker.setLatLng([lat, lng]);
-    if (radiusCircle) radiusCircle.setLatLng([lat, lng]);
+    if (radiusCircle) {
+        radiusCircle.setLatLng([lat, lng]);
+    } else if (map) {
+        radiusCircle = L.circle([lat, lng], {
+            radius: SOS_RADIUS_KM * 1000,
+            color: "#ef4444",
+            fillColor: "#ef4444",
+            fillOpacity: 0.08,
+            weight: 1.5,
+            dashArray: "4, 6"
+        }).addTo(map);
+    }
 
     const coordsEl = document.getElementById("beaconCoords");
     if (coordsEl) {
         coordsEl.textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)} (±${acc.toFixed(1)}m)`;
     }
 
-    // Push responder location fix
+    // Push responder location fix to server
     try {
         await fetchWithAuth("/api/tracking/responder/location", {
             method: "POST",
@@ -137,7 +158,10 @@ function setResponderPreset(lat, lng, name) {
 
 async function loadActiveAlerts() {
     try {
-        const res = await fetchWithAuth("/api/sos/active");
+        const queryUrl = (responderLat !== null && responderLng !== null)
+            ? `/api/sos/active?lat=${responderLat}&lon=${responderLng}`
+            : `/api/sos/active`;
+        const res = await fetchWithAuth(queryUrl);
         if (res.ok) {
             const cases = await res.json();
             renderIncidents(cases);
@@ -232,17 +256,28 @@ function renderIncidents(cases) {
     }
 
     // Direct tactical line from Responder to Victim
-    if (incidentLine) map.removeLayer(incidentLine);
-    incidentLine = L.polyline([[responderLat, responderLng], [primary.latitude, primary.longitude]], {
-        color: "#ef4444",
-        weight: 3,
-        dashArray: "6, 8"
-    }).addTo(map);
+    if (incidentLine) { map.removeLayer(incidentLine); incidentLine = null; }
+    if (responderLat !== null && responderLng !== null) {
+        incidentLine = L.polyline([[responderLat, responderLng], [primary.latitude, primary.longitude]], {
+            color: "#ef4444",
+            weight: 3,
+            dashArray: "6, 8"
+        }).addTo(map);
+    }
 
     cases.forEach(c => {
-        const distKm = calculateHaversineKm(responderLat, responderLng, c.latitude, c.longitude);
-        const isWithinRadius = distKm <= SOS_RADIUS_KM;
-        const distText = distKm < 1.0 ? `${Math.round(distKm * 1000)} meters away` : `${distKm.toFixed(2)} km away`;
+        let distKm = null;
+        if (responderLat !== null && responderLng !== null) {
+            distKm = calculateHaversineKm(responderLat, responderLng, c.latitude, c.longitude);
+        } else if (typeof c.responder_distance_km === "number") {
+            distKm = c.responder_distance_km;
+        }
+
+        const isWithinRadius = distKm !== null ? distKm <= SOS_RADIUS_KM : true;
+        let distText = "Acquiring responder GPS fix... (Tap map to set beacon)";
+        if (distKm !== null) {
+            distText = distKm < 1.0 ? `${Math.round(distKm * 1000)} meters away` : `${distKm.toFixed(2)} km away`;
+        }
 
         // Generate nearby tactical units HTML for this incident
         let tacticalUnitsHtml = "";
@@ -342,12 +377,14 @@ function focusIncidentOnMap(lat, lng) {
     map.setView([lat, lng], 16, { animate: true });
 
     // Draw direct tactical vector line from responder to victim
-    if (incidentLine) map.removeLayer(incidentLine);
-    incidentLine = L.polyline([[responderLat, responderLng], [lat, lng]], {
-        color: "#ef4444",
-        weight: 3,
-        dashArray: "6, 8"
-    }).addTo(map);
+    if (incidentLine) { map.removeLayer(incidentLine); incidentLine = null; }
+    if (responderLat !== null && responderLng !== null) {
+        incidentLine = L.polyline([[responderLat, responderLng], [lat, lng]], {
+            color: "#ef4444",
+            weight: 3,
+            dashArray: "6, 8"
+        }).addTo(map);
+    }
 }
 
 async function acceptAlert(sosId) {

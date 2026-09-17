@@ -1069,19 +1069,34 @@ function disarmSOSButton(reason) {
     const btn = document.getElementById("btnPassengerSOS");
     if (btn) {
         btn.className = "btn-sos disabled";
-        btn.innerHTML = "⚠️ GPS REQUIRED FOR EMERGENCY SOS";
-        btn.onclick = null;
+        btn.innerHTML = "⚠️ GPS REQUIRED FOR EMERGENCY SOS (Click to Acquire)";
+        btn.onclick = forcePassengerGPSFix;
     }
     const helper = document.getElementById("sosHelperText");
     if (helper) {
-        helper.textContent = reason;
+        helper.innerHTML = `${reason} &bull; <a href="javascript:void(0)" onclick="forcePassengerGPSFix()" style="color:#6ee7b7; text-decoration:underline;">Click to acquire GNSS fix</a> or tap map to pin.`;
         helper.style.color = "#94a3b8";
     }
 }
 
+let paxResolvedAddress = null;
+
+async function resolvePassengerAddress(lat, lng) {
+    try {
+        const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
+        if (res.ok) {
+            const d = await res.json();
+            const parts = [d.locality || d.city, d.city, d.principalSubdivision].filter(Boolean);
+            if (parts.length > 0) {
+                paxResolvedAddress = parts.join(", ");
+            }
+        }
+    } catch (e) {}
+}
+
 function openSOSModal() {
     if (!realLat || !realLng) {
-        alert("Cannot trigger emergency without real GPS coordinates.");
+        alert("Cannot trigger emergency without real GPS coordinates. Please tap on the map or click Update Fix.");
         return;
     }
 
@@ -1121,10 +1136,15 @@ async function triggerConfirmedSOS() {
     }
 
     try {
-        const res = await apiRequest("/api/sos", "POST", {
+        const payload = {
             latitude: realLat,
             longitude: realLng
-        });
+        };
+        if (paxResolvedAddress && !paxResolvedAddress.startsWith("GPS Position")) {
+            payload.address = paxResolvedAddress;
+        }
+
+        const res = await apiRequest("/api/sos", "POST", payload);
         if (!res.ok) {
             const errData = await res.json().catch(() => ({ detail: "SOS request failed." }));
             throw new Error(errData.detail || "SOS request failed.");
@@ -1270,6 +1290,14 @@ function initResponderView() {
             maps.responder = setupMapWithGoogleTilesAndPOIs("responderMap", 14);
         }
         maps.responder.invalidateSize();
+
+        if (maps.responder && !maps.responder._hasClickPinListener) {
+            maps.responder.on("click", (e) => {
+                applyResponderGPSFix(e.latlng.lat, e.latlng.lng, 2.0);
+                showToast(`Responder beacon positioned: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`, "info");
+            });
+            maps.responder._hasClickPinListener = true;
+        }
     }, 150);
 
     const initPill = document.getElementById("respGpsPill");
@@ -1283,74 +1311,141 @@ function initResponderView() {
     // Start Responder Real Phone GPS Beacon with error handling
     startRealPhoneGPS(
         (lat, lng, speed, acc) => {
-            const pill = document.getElementById("respGpsPill");
-            if (pill) {
-                pill.className = "gps-pill live";
-                pill.innerHTML = `<span>🟢</span> Beacon Transmitting (±${acc.toFixed(1)}m)`;
-            }
-
-            const coords = document.getElementById("respCoords");
-            if (coords) {
-                coords.textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-            }
-
-            // Update responder marker
-            if (markers.responderUser) {
-                markers.responderUser.setLatLng([lat, lng]);
-            } else if (maps.responder) {
-                const icon = L.divIcon({
-                    className: "custom-resp-icon",
-                    html: `<div style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 8px; font-weight: 800; font-size: 11px; border: 2px solid white; box-shadow: 0 0 12px #ef4444;">🛡️ RESPONDER (RSP-001)</div>`,
-                    iconSize: [110, 26],
-                    iconAnchor: [55, 13]
-                });
-                markers.responderUser = L.marker([lat, lng], { icon }).addTo(maps.responder);
-            }
-
-            // Whole Coimbatore City Metropolitan Geofence Radar (35 km)
-            if (markers.responderCircle) {
-                markers.responderCircle.setLatLng([lat, lng]);
-            } else if (maps.responder) {
-                markers.responderCircle = L.circle([lat, lng], {
-                    radius: COIMBATORE_RADIUS_METERS,
-                    color: "#3b82f6",
-                    fillColor: "#3b82f6",
-                    fillOpacity: 0.05,
-                    weight: 2,
-                    dashArray: "6, 8"
-                }).addTo(maps.responder);
-                markers.responderCircle.bindTooltip("🛡️ Tactical Rescue Radar: 35.0 km Coverage", { permanent: false });
-            }
-
-            // Only pan to responder position if there is no active emergency case
-            if (!activeSOS && !markers.responderSos && maps.responder) {
-                maps.responder.panTo([lat, lng]);
-            }
-
-            // Transmit genuine beacon fix to server
-            apiRequest("/api/tracking/responder/location", "POST", { latitude: lat, longitude: lng }).catch(() => {});
-
-            loadResponderAlerts();
+            applyResponderGPSFix(lat, lng, acc);
         },
         (errReason, errCode) => {
             const pill = document.getElementById("respGpsPill");
-            if (pill) {
+            if (pill && (!realLat || !realLng)) {
                 pill.className = "gps-pill acquiring";
                 pill.innerHTML = `<span>⚠️</span> ${errCode === 1 ? 'Permission Denied' : 'Awaiting GNSS'}`;
             }
             const coords = document.getElementById("respCoords");
-            if (coords) coords.textContent = errReason;
+            if (coords && (!realLat || !realLng)) coords.textContent = errReason;
         }
     );
+
+    // If coordinates already cached from previous session or continuous fix, apply immediately
+    if (realLat && realLng) {
+        applyResponderGPSFix(realLat, realLng, realAccuracy || 5.0);
+    }
 
     loadResponderAlerts();
     if (sosResponderInterval) clearInterval(sosResponderInterval);
     sosResponderInterval = setInterval(loadResponderAlerts, 2500);
 }
 
+function applyResponderGPSFix(lat, lng, acc = 5.0) {
+    realLat = lat;
+    realLng = lng;
+    realAccuracy = acc;
+
+    const pill = document.getElementById("respGpsPill");
+    if (pill) {
+        pill.className = "gps-pill live";
+        pill.innerHTML = `<span>🟢</span> Beacon Transmitting (±${acc.toFixed(1)}m)`;
+    }
+
+    const coords = document.getElementById("respCoords");
+    if (coords) {
+        coords.textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    }
+
+    // Update responder marker
+    if (markers.responderUser) {
+        markers.responderUser.setLatLng([lat, lng]);
+    } else if (maps.responder) {
+        const icon = L.divIcon({
+            className: "custom-resp-icon",
+            html: `<div style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 8px; font-weight: 800; font-size: 11px; border: 2px solid white; box-shadow: 0 0 12px #ef4444;">🛡️ RESPONDER (RSP-001)</div>`,
+            iconSize: [110, 26],
+            iconAnchor: [55, 13]
+        });
+        markers.responderUser = L.marker([lat, lng], { icon }).addTo(maps.responder);
+    }
+
+    // Whole Coimbatore City Metropolitan Geofence Radar (35 km)
+    if (markers.responderCircle) {
+        markers.responderCircle.setLatLng([lat, lng]);
+    } else if (maps.responder) {
+        markers.responderCircle = L.circle([lat, lng], {
+            radius: COIMBATORE_RADIUS_METERS,
+            color: "#3b82f6",
+            fillColor: "#3b82f6",
+            fillOpacity: 0.05,
+            weight: 2,
+            dashArray: "6, 8"
+        }).addTo(maps.responder);
+        markers.responderCircle.bindTooltip("🛡️ Tactical Rescue Radar: 35.0 km Coverage", { permanent: false });
+    }
+
+    // Only pan to responder position if there is no active emergency case
+    if (!activeSOS && !markers.responderSos && maps.responder) {
+        maps.responder.panTo([lat, lng]);
+    }
+
+    // Transmit genuine beacon fix to server
+    apiRequest("/api/tracking/responder/location", "POST", { latitude: lat, longitude: lng }).catch(() => {});
+
+    loadResponderAlerts();
+}
+
+function forceResponderGPSFix() {
+    const pill = document.getElementById("respGpsPill");
+    if (pill) {
+        pill.className = "gps-pill acquiring";
+        pill.innerHTML = "<span>🟡</span> Acquiring GNSS Fix...";
+    }
+    const coords = document.getElementById("respCoords");
+    if (coords) coords.textContent = "Querying satellite receivers...";
+
+    if (!navigator.geolocation) {
+        alert("Geolocation API is not supported on this browser.");
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            applyResponderGPSFix(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy || 15.0);
+        },
+        () => {},
+        { enableHighAccuracy: false, timeout: 5000, maximumAge: 30000 }
+    );
+
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            applyResponderGPSFix(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy || 5.0);
+        },
+        (err) => {
+            console.warn("Manual responder GPS error:", err);
+            let reason = "Could not acquire GNSS fix.";
+            if (err.code === 1) reason = "Location permission denied. Please allow in browser.";
+            else if (err.code === 2) reason = "GPS signal unavailable. Please ensure Device Location is ON.";
+            if (coords && (!realLat || !realLng)) coords.textContent = reason;
+        },
+        { enableHighAccuracy: true, timeout: 25000, maximumAge: 0 }
+    );
+}
+
+const RESP_PRESETS = {
+    gandhipuram: { name: "Gandhipuram Base", lat: 11.0180, lng: 76.9600 },
+    peelamedu: { name: "Peelamedu Tech Post", lat: 11.0255, lng: 76.9960 },
+    junction: { name: "Railway Junction Post", lat: 11.0020, lng: 76.9630 },
+    airport: { name: "Airport East Sector", lat: 11.0315, lng: 77.0330 }
+};
+
+function setResponderPreset(key) {
+    const p = RESP_PRESETS[key];
+    if (!p) return;
+    applyResponderGPSFix(p.lat, p.lng, 3.0);
+    showToast(`Responder positioned to ${p.name}`, "info");
+}
+
 async function loadResponderAlerts() {
     try {
-        const res = await apiRequest("/api/sos/active");
+        const queryUrl = (realLat && realLng)
+            ? `/api/sos/active?lat=${realLat}&lon=${realLng}`
+            : `/api/sos/active`;
+        const res = await apiRequest(queryUrl);
         if (!res.ok) return;
         const cases = await res.json();
         const container = document.getElementById("responderAlertFeed") || document.getElementById("responderAlertsFeed");
@@ -1451,7 +1546,7 @@ async function loadResponderAlerts() {
                 distKm = c.responder_distance_km;
             }
 
-            let distStr = "Calculating distance...";
+            let distStr = "Acquiring responder GNSS fix... (Tap map to set beacon)";
             if (distKm !== null) {
                 withinCitySector = distKm <= SOS_RADIUS_KM;
                 distStr = distKm < 1.0 ? `${Math.round(distKm * 1000)} meters away` : `${distKm.toFixed(2)} km away`;

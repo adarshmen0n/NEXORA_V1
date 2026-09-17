@@ -108,6 +108,8 @@ def seed_database():
                 existing_user.password_hash = pwd_hash
                 existing_user.role = u["role"]
                 existing_user.is_active = True
+                existing_user.last_latitude = None
+                existing_user.last_longitude = None
                 logger.info(f"Updated core user: {u['role']} ({u['email']})")
 
         db.commit()

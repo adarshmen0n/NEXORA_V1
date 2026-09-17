@@ -75,38 +75,67 @@ function setPresetLocation(key) {
     updatePassengerPosition(loc.lat, loc.lng, loc.name);
 }
 
+let paxWatchId = null;
+
 function requestDeviceLocation() {
     if (!navigator.geolocation) {
         showToast("Geolocation is not supported by this browser or device.", "error");
         return;
     }
 
-    showToast("Acquiring high-accuracy GNSS satellite fix...", "info");
+    showToast("Acquiring GNSS satellite fix...", "info");
     const ind = document.getElementById("gpsIndicator");
     if (ind) {
         ind.className = "gps-indicator acquiring";
         ind.innerHTML = "<span>🟡</span> Acquiring GNSS Satellites...";
     }
 
+    // 1. Rapid network/cell/Wi-Fi fix for instant location response
     navigator.geolocation.getCurrentPosition(
         (pos) => {
-            updatePassengerPosition(pos.coords.latitude, pos.coords.longitude, "Live GNSS Position", pos.coords.accuracy);
+            if (userLatitude === null || userLongitude === null) {
+                updatePassengerPosition(pos.coords.latitude, pos.coords.longitude, "Network Fix", pos.coords.accuracy || 15.0);
+            }
+        },
+        () => {},
+        { enableHighAccuracy: false, timeout: 5000, maximumAge: 30000 }
+    );
+
+    // 2. High-precision GNSS satellite lock
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            updatePassengerPosition(pos.coords.latitude, pos.coords.longitude, "Live GNSS Position", pos.coords.accuracy || 5.0);
             showToast(`GNSS fix acquired (±${(pos.coords.accuracy || 5.0).toFixed(1)}m)!`, "success");
         },
         (err) => {
             console.warn("GPS error:", err);
             let msg = "Could not acquire device GPS.";
-            if (err.code === 1) msg = "Location permission denied. Please allow location in your browser settings.";
-            else if (err.code === 2) msg = "GPS satellite signal unavailable. Please ensure Device Location is ON.";
-            else if (err.code === 3) msg = "GPS request timed out. Please retry with a clear view of the sky.";
-            showToast(msg, "error");
-            if (ind) {
-                ind.className = "gps-indicator";
-                ind.innerHTML = `<span>⚠️</span> ${msg}`;
+            if (err.code === 1) msg = "Location permission denied. Please allow in browser settings or tap map.";
+            else if (err.code === 2) msg = "GPS signal unavailable. Please ensure Device Location is ON.";
+            else if (err.code === 3) msg = "GPS request timed out. Tap map to pin distress coordinates.";
+            if (userLatitude === null) {
+                showToast(msg, "error");
+                if (ind) {
+                    ind.className = "gps-indicator";
+                    ind.innerHTML = `<span>⚠️</span> ${msg}`;
+                }
             }
         },
-        { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 25000, maximumAge: 0 }
     );
+
+    // 3. Continuous satellite track
+    if (paxWatchId === null) {
+        paxWatchId = navigator.geolocation.watchPosition(
+            (pos) => {
+                updatePassengerPosition(pos.coords.latitude, pos.coords.longitude, "Live GNSS Position", pos.coords.accuracy || 5.0);
+            },
+            (err) => {
+                console.warn("Watch position notice:", err);
+            },
+            { enableHighAccuracy: true, timeout: 25000, maximumAge: 0 }
+        );
+    }
 }
 
 async function updatePassengerPosition(lat, lng, label, accuracy = 5.0) {
@@ -157,9 +186,9 @@ function armSOSButton() {
     const helper = document.getElementById("sosHelper");
     if (!isGpsActive || userLatitude === null) {
         btn.className = "btn-sos-main disabled";
-        btn.innerHTML = "⚠️ GPS REQUIRED FOR EMERGENCY SOS";
-        btn.onclick = null;
-        helper.textContent = "Please enable your GPS location above before emergency dispatch can be activated.";
+        btn.innerHTML = "⚠️ GPS REQUIRED FOR EMERGENCY SOS (Click to Acquire)";
+        btn.onclick = requestDeviceLocation;
+        helper.innerHTML = "Please enable GPS above or tap anywhere on map before emergency dispatch can be activated.";
     } else {
         btn.className = "btn-sos-main armed";
         btn.innerHTML = "🚨 ACTIVATE EMERGENCY SOS";
@@ -209,12 +238,17 @@ async function triggerEmergencySOS() {
     btn.textContent = "Transmitting Emergency Signal...";
 
     try {
+        const payload = {
+            latitude: userLatitude,
+            longitude: userLongitude
+        };
+        if (userAddress && !userAddress.startsWith("Detecting") && !userAddress.startsWith("GPS Position")) {
+            payload.address = userAddress;
+        }
+
         const res = await fetchWithAuth("/api/sos", {
             method: "POST",
-            body: JSON.stringify({
-                latitude: userLatitude,
-                longitude: userLongitude
-            })
+            body: JSON.stringify(payload)
         });
 
         if (res.ok) {

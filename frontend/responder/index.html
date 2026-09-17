@@ -35,13 +35,14 @@
                     <strong style="font-size: 0.95rem;">Tactical Responder Beacon ACTIVE</strong>
                     <div style="font-size: 0.75rem; color: var(--text-dim);">
                         Geofenced Emergency Radius: <span style="color: #f87171; font-weight: bold;">35.0 km</span> • 
-                        Current Fix: <span id="beaconCoords">11.01800, 76.96000</span>
+                        Current Fix: <span id="beaconCoords">Acquiring live GNSS fix...</span>
                     </div>
                 </div>
             </div>
 
             <!-- Preset Tactical Relocation Buttons for Testing Proximity -->
-            <div style="display: flex; gap: 6px;">
+            <div style="display: flex; gap: 6px; align-items: center;">
+                <button class="btn-sm" style="background: rgba(37, 99, 235, 0.3); border: 1px solid #3b82f6; color: white;" onclick="startResponderLiveGPS()">📍 Update Fix</button>
                 <button class="btn-sm" onclick="setResponderPreset(11.0180, 76.9600, 'Near Gandhipuram (400m from Stand)')">Base: Gandhipuram</button>
                 <button class="btn-sm" onclick="setResponderPreset(11.0255, 76.9960, 'Peelamedu Tech Park')">Peelamedu Post</button>
                 <button class="btn-sm" onclick="setResponderPreset(11.0020, 76.9630, 'Railway Junction Area')">Junction Post</button>
