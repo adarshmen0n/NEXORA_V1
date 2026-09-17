@@ -148,4 +148,87 @@ def test_sos_exact_20km_distance_and_dispatch():
     # 5. Clean up by resolving
     client.post(f"/api/sos/{sos_id}/resolve", json={"notes": "20km test completed."}, headers=resp_headers)
 
+def test_responder_action_rbac_and_sync():
+    pax_token = get_token("passenger1@nexora.local")
+    resp_token = get_token("responder@nexora.local")
+    pax_headers = {"Authorization": f"Bearer {pax_token}"}
+    resp_headers = {"Authorization": f"Bearer {resp_token}"}
+
+    # 1. Trigger SOS
+    res_trigger = client.post("/api/sos", json={"latitude": 11.0180, "longitude": 76.9600}, headers=pax_headers)
+    assert res_trigger.status_code == 200
+    sos_id = res_trigger.json()["sos_id"]
+
+    # 2. Passenger cannot accept their own SOS (RBAC check)
+    res_unauth = client.post(f"/api/sos/{sos_id}/accept", json={"notes": "Illegal attempt"}, headers=pax_headers)
+    assert res_unauth.status_code == 403
+
+    # 3. Responder accepts SOS
+    res_accept = client.post(f"/api/sos/{sos_id}/accept", json={"notes": "Unit assigned"}, headers=resp_headers)
+    assert res_accept.status_code == 200
+    assert res_accept.json()["status"] == "ACKNOWLEDGED"
+
+    # 4. Passenger /api/sos/active immediately reflects ACKNOWLEDGED
+    res_pax_check1 = client.get("/api/sos/active", headers=pax_headers)
+    assert res_pax_check1.status_code == 200
+    active_pax = res_pax_check1.json()
+    assert len(active_pax) > 0
+    assert active_pax[0]["status"] == "ACKNOWLEDGED"
+
+    # 5. Responder updates to RESPONDING
+    res_respond = client.post(f"/api/sos/{sos_id}/respond", json={"notes": "Unit en route"}, headers=resp_headers)
+    assert res_respond.status_code == 200
+    assert res_respond.json()["status"] == "RESPONDING"
+
+    # 6. Passenger /api/sos/active immediately reflects RESPONDING
+    res_pax_check2 = client.get("/api/sos/active", headers=pax_headers)
+    assert res_pax_check2.status_code == 200
+    assert res_pax_check2.json()[0]["status"] == "RESPONDING"
+
+    # 7. Responder resolves SOS
+    res_resolve = client.post(f"/api/sos/{sos_id}/resolve", json={"notes": "Resolved successfully."}, headers=resp_headers)
+    assert res_resolve.status_code == 200
+    assert res_resolve.json()["status"] == "RESOLVED"
+
+    # 8. Verify resolved case detail
+    res_detail = client.get(f"/api/sos/{sos_id}", headers=pax_headers)
+    assert res_detail.status_code == 200
+    assert res_detail.json()["status"] == "RESOLVED"
+
+def test_tactical_10km_emergency_services_pois():
+    from backend.services.distance_service import calculate_haversine_km
+
+    # Victim coordinates at Gandhipuram Central
+    victim_lat = 11.0168
+    victim_lng = 76.9558
+
+    # Fetch all POIs
+    res = client.get("/api/pois")
+    assert res.status_code == 200
+    pois = res.json()
+    assert len(pois) > 0
+
+    # Filter emergency services within 10 km
+    emergency_categories = ["hospital", "police", "fire"]
+    tactical_units = []
+    for p in pois:
+        if p["category"] in emergency_categories:
+            dist = calculate_haversine_km(victim_lat, victim_lng, p["lat"], p["lng"])
+            if dist <= 10.0:
+                tactical_units.append({**p, "dist": dist})
+
+    # Verify that tactical rescue units are present within 10km
+    hospitals = [u for u in tactical_units if u["category"] == "hospital"]
+    police = [u for u in tactical_units if u["category"] == "police"]
+    fire = [u for u in tactical_units if u["category"] == "fire"]
+
+    assert len(hospitals) >= 5, f"Expected at least 5 hospitals within 10km, found {len(hospitals)}"
+    assert len(police) >= 4, f"Expected at least 4 police stations within 10km, found {len(police)}"
+    assert len(fire) >= 3, f"Expected at least 3 fire stations within 10km, found {len(fire)}"
+
+    # Check all tactical units have valid phone contacts
+    for u in tactical_units:
+        assert u["phone"] is not None and len(u["phone"]) > 0
+
+
 

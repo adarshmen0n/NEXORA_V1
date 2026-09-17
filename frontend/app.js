@@ -39,7 +39,9 @@ let markers = {
     passengerBus: null,
     responderUser: null,
     responderCircle: null,
-    responderSos: null
+    responderSos: null,
+    responderVictimCircle10km: null,
+    responderTacticalPois: []
 };
 
 // Emergency State & Siren
@@ -51,6 +53,7 @@ let sirenInterval = null;
 let sirenAudioCtx = null;
 let sosResponderInterval = null;
 let sosAdminInterval = null;
+let paxSosInterval = null;
 let notifPollInterval = null;
 
 // ==========================================
@@ -425,6 +428,7 @@ function showRoleView(role) {
     if (sosResponderInterval) { clearInterval(sosResponderInterval); sosResponderInterval = null; }
     if (sosAdminInterval) { clearInterval(sosAdminInterval); sosAdminInterval = null; }
     if (paxSafetyTimer) { clearTimeout(paxSafetyTimer); paxSafetyTimer = null; }
+    if (paxSosInterval) { clearInterval(paxSosInterval); paxSosInterval = null; }
 
     const tag = document.getElementById("activeRoleTag");
 
@@ -496,13 +500,28 @@ function startRealPhoneGPS(onFixCallback, onErrorCallback) {
         return;
     }
 
+    // 1. Rapid network/cell/Wi-Fi fix for instant location response
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            if (!realLat || !realLng) {
+                realLat = pos.coords.latitude;
+                realLng = pos.coords.longitude;
+                realAccuracy = pos.coords.accuracy || 15.0;
+                realSpeed = pos.coords.speed ? (pos.coords.speed * 3.6) : 0.0;
+                if (onFixCallback) onFixCallback(realLat, realLng, realSpeed, realAccuracy);
+            }
+        },
+        () => {},
+        { enableHighAccuracy: false, timeout: 6000, maximumAge: 30000 }
+    );
+
     const geoOptions = {
         enableHighAccuracy: true,
-        timeout: 30000,
+        timeout: 25000,
         maximumAge: 0
     };
 
-    // Fast one-shot fix for immediate UI response
+    // 2. High-precision GNSS satellite lock
     navigator.geolocation.getCurrentPosition(
         (pos) => {
             realLat = pos.coords.latitude;
@@ -516,7 +535,7 @@ function startRealPhoneGPS(onFixCallback, onErrorCallback) {
         (err) => {
             console.warn("Initial GNSS getCurrentPosition notice:", err);
             let reason = "Acquiring hardware GNSS satellite lock...";
-            if (err.code === 1) reason = "Location permission was denied. Please allow location access in your browser settings.";
+            if (err.code === 1) reason = "Location permission denied. Please allow location access in your browser settings.";
             else if (err.code === 2) reason = "Position unavailable. Please ensure GPS/Location is turned on in device settings.";
             else if (err.code === 3) reason = "GNSS lock taking longer than usual. Continuing background search...";
             if (onErrorCallback) onErrorCallback(reason, err.code);
@@ -880,9 +899,8 @@ const PAX_PRESETS = {
 function setPassengerPreset(key) {
     const p = PAX_PRESETS[key];
     if (!p) return;
-    if (confirm(`Set simulated commuter position to ${p.name} (${p.lat}, ${p.lng})?\nUse this only for testing without hardware GPS.`)) {
-        applyPassengerGPSFix(p.lat, p.lng, 20.0, 5.0, true);
-    }
+    applyPassengerGPSFix(p.lat, p.lng, 0.0, 3.0, true);
+    showToast(`Commuter location pinned to ${p.name}`, "info");
 }
 
 function forcePassengerGPSFix() {
@@ -899,6 +917,16 @@ function forcePassengerGPSFix() {
         return;
     }
 
+    // Fast fallback fix for instant response
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            applyPassengerGPSFix(pos.coords.latitude, pos.coords.longitude, 0.0, pos.coords.accuracy || 15.0);
+        },
+        () => {},
+        { enableHighAccuracy: false, timeout: 5000, maximumAge: 30000 }
+    );
+
+    // High accuracy satellite GNSS
     navigator.geolocation.getCurrentPosition(
         (pos) => {
             applyPassengerGPSFix(pos.coords.latitude, pos.coords.longitude, pos.coords.speed ? (pos.coords.speed * 3.6) : 0.0, pos.coords.accuracy || 5.0);
@@ -910,15 +938,14 @@ function forcePassengerGPSFix() {
             else if (err.code === 2) errDetail = "GPS signal unavailable. Please ensure Device Location/GPS is turned ON.";
             else if (err.code === 3) errDetail = "GPS request timed out. Please move to an open area with clear sky view.";
             
-            if (pill) {
+            if (pill && (!realLat || !realLng)) {
                 pill.className = "gps-pill acquiring";
                 pill.innerHTML = `<span>⚠️</span> ${err.code === 1 ? 'Permission Denied' : 'Fix Timeout'}`;
             }
-            if (coords) coords.textContent = errDetail;
-            disarmSOSButton(errDetail);
-            alert("GNSS Status: " + errDetail);
+            if (coords && (!realLat || !realLng)) coords.textContent = errDetail;
+            if (!realLat || !realLng) disarmSOSButton(errDetail);
         },
-        { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 25000, maximumAge: 0 }
     );
 }
 
@@ -974,6 +1001,14 @@ function initPassengerView() {
             maps.passenger = setupMapWithGoogleTilesAndPOIs("passengerMap", 15);
         }
         maps.passenger.invalidateSize();
+
+        if (maps.passenger && !maps.passenger._hasClickPinListener) {
+            maps.passenger.on("click", (e) => {
+                applyPassengerGPSFix(e.latlng.lat, e.latlng.lng, 0.0, 2.0, true);
+                showToast(`Commuter location pinned: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`, "info");
+            });
+            maps.passenger._hasClickPinListener = true;
+        }
     }, 150);
 
     // Lock SOS button initially until phone GPS is acquired
@@ -1012,6 +1047,8 @@ function initPassengerView() {
     }
 
     checkActiveSOS();
+    if (paxSosInterval) clearInterval(paxSosInterval);
+    paxSosInterval = setInterval(checkActiveSOS, 2000);
 }
 
 function armSOSButton() {
@@ -1127,7 +1164,7 @@ async function checkActiveSOS() {
 function renderActiveSOSTracker(sos) {
     const card = document.getElementById("activeSOSCard");
     if (!card) return;
-    if (!sos || !sos.sos_id || ["RESOLVED", "CANCELLED"].includes(sos.status)) {
+    if (!sos || !sos.sos_id || sos.status === "CANCELLED") {
         card.style.display = "none";
         return;
     }
@@ -1167,8 +1204,8 @@ function renderActiveSOSTracker(sos) {
         if (s1) s1.className = "step done";
         if (s2) s2.className = "step done";
         if (s3) s3.className = "step done";
-        if (s4) s4.className = "step done";
-        if (elDetail) elDetail.textContent = "Emergency resolved. You are marked safe.";
+        if (s4) s4.className = "step done active";
+        if (elDetail) elDetail.innerHTML = `<strong>★ Emergency resolved. You are marked safe!</strong> <button type="button" class="btn-sm" style="margin-left: 8px; padding: 2px 8px; background: rgba(16, 185, 129, 0.2); border: 1px solid var(--border-focus); color: #a7f3d0; border-radius: 4px; cursor: pointer;" onclick="document.getElementById('activeSOSCard').style.display='none'; activeSOS=null;">Dismiss</button>`;
     }
 }
 
@@ -1223,6 +1260,11 @@ async function updatePassengerETA() {
 // ==========================================
 
 function initResponderView() {
+    if (!currentUser || !["RESPONDER", "ADMIN"].includes(currentUser.role)) {
+        openRoleAuthModal("RESPONDER", "responder@nexora.local", "Emergency Responder", "🚨");
+        return;
+    }
+
     setTimeout(() => {
         if (!maps.responder) {
             maps.responder = setupMapWithGoogleTilesAndPOIs("responderMap", 14);
@@ -1280,7 +1322,10 @@ function initResponderView() {
                 markers.responderCircle.bindTooltip("🛡️ Tactical Rescue Radar: 35.0 km Coverage", { permanent: false });
             }
 
-            if (maps.responder) maps.responder.panTo([lat, lng]);
+            // Only pan to responder position if there is no active emergency case
+            if (!activeSOS && !markers.responderSos && maps.responder) {
+                maps.responder.panTo([lat, lng]);
+            }
 
             // Transmit genuine beacon fix to server
             apiRequest("/api/tracking/responder/location", "POST", { latitude: lat, longitude: lng }).catch(() => {});
@@ -1300,7 +1345,7 @@ function initResponderView() {
 
     loadResponderAlerts();
     if (sosResponderInterval) clearInterval(sosResponderInterval);
-    sosResponderInterval = setInterval(loadResponderAlerts, 3000);
+    sosResponderInterval = setInterval(loadResponderAlerts, 2500);
 }
 
 async function loadResponderAlerts() {
@@ -1318,7 +1363,76 @@ async function loadResponderAlerts() {
                 maps.responder.removeLayer(markers.responderSos);
                 markers.responderSos = null;
             }
+            if (markers.responderVictimCircle10km && maps.responder) {
+                maps.responder.removeLayer(markers.responderVictimCircle10km);
+                markers.responderVictimCircle10km = null;
+            }
+            if (markers.responderTacticalPois && maps.responder) {
+                markers.responderTacticalPois.forEach(m => maps.responder.removeLayer(m));
+                markers.responderTacticalPois = [];
+            }
             return;
+        }
+
+        // Auto-focus map on the primary passenger SOS distress location
+        const primary = cases[0];
+        if (maps.responder) {
+            maps.responder.setView([primary.latitude, primary.longitude], 14, { animate: true });
+
+            // Draw 10 km Tactical Emergency Zone Circle around Victim
+            if (markers.responderVictimCircle10km) {
+                markers.responderVictimCircle10km.setLatLng([primary.latitude, primary.longitude]);
+            } else {
+                markers.responderVictimCircle10km = L.circle([primary.latitude, primary.longitude], {
+                    radius: 10000,
+                    color: "#dc2626",
+                    fillColor: "#ef4444",
+                    fillOpacity: 0.08,
+                    weight: 2.5,
+                    dashArray: "6, 6"
+                }).addTo(maps.responder);
+            }
+            markers.responderVictimCircle10km.bindTooltip("🚨 Tactical Emergency Zone: 10.0 km Radius around Victim", { permanent: false });
+
+            // Calculate & render nearby tactical services within 10 km (Hospitals, Police, Fire)
+            if (!markers.responderTacticalPois) markers.responderTacticalPois = [];
+            markers.responderTacticalPois.forEach(m => maps.responder.removeLayer(m));
+            markers.responderTacticalPois = [];
+
+            let nearbyEmergencyUnits = [];
+            if (typeof COIMBATORE_POIS !== "undefined") {
+                nearbyEmergencyUnits = COIMBATORE_POIS.filter(p => ["hospital", "police", "fire"].includes(p.category))
+                    .map(p => {
+                        const distFromVictim = computeHaversineKm(primary.latitude, primary.longitude, p.lat, p.lng);
+                        return { ...p, distFromVictim };
+                    })
+                    .filter(p => p.distFromVictim <= 10.0)
+                    .sort((a, b) => a.distFromVictim - b.distFromVictim);
+
+                nearbyEmergencyUnits.forEach(p => {
+                    const catColors = { hospital: "#dc2626", police: "#2563eb", fire: "#ea580c" };
+                    const catIcons = { hospital: "🏥", police: "🚓", fire: "🚒" };
+                    const m = L.circleMarker([p.lat, p.lng], {
+                        radius: 7,
+                        fillColor: catColors[p.category] || "#10b981",
+                        color: "#ffffff",
+                        weight: 1.5,
+                        opacity: 1,
+                        fillOpacity: 0.9
+                    }).addTo(maps.responder);
+
+                    m.bindPopup(`
+                        <div style="font-family: sans-serif; font-size: 12px; line-height: 1.4;">
+                            <strong style="color: ${catColors[p.category]};">${catIcons[p.category]} ${p.name}</strong><br>
+                            <span style="color: #64748b; font-size: 11px;">${p.type}</span><br>
+                            <strong>Distance from Victim:</strong> ${p.distFromVictim.toFixed(2)} km<br>
+                            <strong>Phone:</strong> <a href="tel:${p.phone}">${p.phone}</a><br>
+                            <small>${p.address}</small>
+                        </div>
+                    `);
+                    markers.responderTacticalPois.push(m);
+                });
+            }
         }
 
         // Trigger siren & emergency banner if logged in as responder
@@ -1343,6 +1457,37 @@ async function loadResponderAlerts() {
                 distStr = distKm < 1.0 ? `${Math.round(distKm * 1000)} meters away` : `${distKm.toFixed(2)} km away`;
             }
 
+            // Find top units for this incident card
+            let cardUnitsHtml = "";
+            if (typeof COIMBATORE_POIS !== "undefined") {
+                const cardNearby = COIMBATORE_POIS.filter(p => ["hospital", "police", "fire"].includes(p.category))
+                    .map(p => ({ ...p, dist: computeHaversineKm(c.latitude, c.longitude, p.lat, p.lng) }))
+                    .filter(p => p.dist <= 10.0)
+                    .sort((a, b) => a.dist - b.dist)
+                    .slice(0, 6);
+
+                if (cardNearby.length > 0) {
+                    cardUnitsHtml = `
+                        <div style="margin: 10px 0; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 8px 10px;">
+                            <div style="font-size: 0.75rem; font-weight: 700; color: #fca5a5; margin-bottom: 6px; display: flex; justify-content: space-between;">
+                                <span>🎯 TACTICAL UNITS WITHIN 10 KM OF VICTIM (${cardNearby.length})</span>
+                                <span style="color: #94a3b8; font-weight: normal;">Radius: 10.0 km</span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 6px;">
+                                ${cardNearby.map(u => `
+                                    <div style="background: rgba(30, 41, 59, 0.8); padding: 5px 8px; border-radius: 6px; font-size: 0.72rem; border-left: 3px solid ${u.category === 'hospital' ? '#ef4444' : (u.category === 'police' ? '#3b82f6' : '#f97316')};">
+                                        <div style="font-weight: 600; color: #f8fafc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                            ${u.icon} ${u.name}
+                                        </div>
+                                        <div style="color: #93c5fd; font-family: monospace;">📍 ${u.dist.toFixed(2)} km • 📞 <a href="tel:${u.phone}" style="color: #6ee7b7; text-decoration: none;">${u.phone.split('/')[0].trim()}</a></div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
             const card = document.createElement("div");
             card.className = "card";
             card.style.borderColor = withinCitySector ? "#ef4444" : "#f59e0b";
@@ -1356,19 +1501,22 @@ async function loadResponderAlerts() {
                 </div>
                 <div style="font-size: 0.95rem; font-weight: 600; margin-bottom: 6px;">📍 ${c.address || 'Location Coordinates Dispatched'}</div>
                 <div style="font-size: 0.8rem; color: #93c5fd; font-family: monospace; margin-bottom: 6px;">
-                    Exact GNSS: ${c.latitude.toFixed(6)}, ${c.longitude.toFixed(6)}
+                    Victim GNSS: ${c.latitude.toFixed(6)}, ${c.longitude.toFixed(6)}
                 </div>
-                <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
-                    Victim: ${c.passenger_name} (${c.passenger_phone}) • Status: <strong style="color: #60a5fa;">${c.status}</strong>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">
+                    Victim: <strong>${c.passenger_name}</strong> (${c.passenger_phone}) • Status: <strong style="color: #60a5fa;">${c.status}</strong>
                 </div>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <button class="btn btn-primary" style="flex: 1;" onclick="responderAccept('${c.sos_id}')" ${c.status !== 'ACTIVE' ? 'disabled style="opacity:0.5"' : ''}>
+
+                ${cardUnitsHtml}
+
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">
+                    <button class="btn btn-primary" id="respBtnAccept-${c.sos_id}" style="flex: 1;" onclick="responderAccept('${c.sos_id}')" ${c.status !== 'ACTIVE' ? 'disabled style="opacity:0.5"' : ''}>
                         ✓ Accept Alert
                     </button>
-                    <button class="btn btn-warning" style="flex: 1; background: #f59e0b; color: #111;" onclick="responderRespond('${c.sos_id}')" ${c.status === 'RESOLVED' ? 'disabled' : ''}>
+                    <button class="btn btn-warning" id="respBtnRespond-${c.sos_id}" style="flex: 1; background: #f59e0b; color: #111;" onclick="responderRespond('${c.sos_id}')" ${c.status === 'RESOLVED' ? 'disabled' : ''}>
                         🏃 En Route
                     </button>
-                    <button class="btn btn-success" style="flex: 1;" onclick="responderResolve('${c.sos_id}')">
+                    <button class="btn btn-success" id="respBtnResolve-${c.sos_id}" style="flex: 1;" onclick="responderResolve('${c.sos_id}')">
                         ★ Resolve
                     </button>
                 </div>
@@ -1396,26 +1544,66 @@ async function loadResponderAlerts() {
 }
 
 async function responderAccept(sosId) {
+    const btn = document.getElementById(`respBtnAccept-${sosId}`);
+    if (btn) { btn.disabled = true; btn.textContent = "Accepting..."; }
     try {
-        await apiRequest(`/api/sos/${sosId}/accept`, "POST", { notes: "Responder acknowledged" });
-        loadResponderAlerts();
-    } catch (e) { alert(e.message); }
+        const res = await apiRequest(`/api/sos/${sosId}/accept`, "POST", { notes: "Responder acknowledged and assigned" });
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            alert("Failed to accept alert: " + (err.detail || "Server error"));
+            if (btn) { btn.disabled = false; btn.textContent = "✓ Accept Alert"; }
+            return;
+        }
+        showToast("SOS Alert Accepted. Unit assigned.", "success");
+        await loadResponderAlerts();
+    } catch (e) {
+        alert("Error: " + e.message);
+        if (btn) { btn.disabled = false; btn.textContent = "✓ Accept Alert"; }
+    }
 }
 
 async function responderRespond(sosId) {
+    const btn = document.getElementById(`respBtnRespond-${sosId}`);
+    if (btn) { btn.disabled = true; btn.textContent = "Updating..."; }
     try {
-        await apiRequest(`/api/sos/${sosId}/respond`, "POST", { notes: "Rescue unit dispatched" });
-        loadResponderAlerts();
-    } catch (e) { alert(e.message); }
+        const res = await apiRequest(`/api/sos/${sosId}/respond`, "POST", { notes: "Rescue unit is EN ROUTE" });
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            alert("Failed to update status: " + (err.detail || "Server error"));
+            if (btn) { btn.disabled = false; btn.textContent = "🏃 En Route"; }
+            return;
+        }
+        showToast("Status updated: Unit EN ROUTE to victim coordinates.", "info");
+        await loadResponderAlerts();
+    } catch (e) {
+        alert("Error: " + e.message);
+        if (btn) { btn.disabled = false; btn.textContent = "🏃 En Route"; }
+    }
 }
 
 async function responderResolve(sosId) {
-    const notes = prompt("Enter resolution notes:", "Assistance rendered safely. Emergency resolved.");
-    if (notes === null) return;
+    let notes = prompt("Enter resolution notes:", "Assistance rendered safely. Emergency resolved.");
+    if (notes === null || notes.trim() === "") {
+        notes = "Assistance rendered safely. Emergency resolved by rescue unit.";
+    }
+    const btn = document.getElementById(`respBtnResolve-${sosId}`);
+    if (btn) { btn.disabled = true; btn.textContent = "Resolving..."; }
     try {
-        await apiRequest(`/api/sos/${sosId}/resolve`, "POST", { notes });
-        loadResponderAlerts();
-    } catch (e) { alert(e.message); }
+        const res = await apiRequest(`/api/sos/${sosId}/resolve`, "POST", { notes });
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            alert("Failed to resolve alert: " + (err.detail || "Server error"));
+            if (btn) { btn.disabled = false; btn.textContent = "★ Resolve"; }
+            return;
+        }
+        showToast("Emergency incident resolved and closed.", "success");
+        stopEmergencySiren();
+        dismissEmergencyBanner();
+        await loadResponderAlerts();
+    } catch (e) {
+        alert("Error: " + e.message);
+        if (btn) { btn.disabled = false; btn.textContent = "★ Resolve"; }
+    }
 }
 
 // ==========================================
@@ -1549,6 +1737,10 @@ function handleWsMessage(msg) {
             activeSOS.status = msg.data.status;
             if (msg.data.responder_name) activeSOS.responder_name = msg.data.responder_name;
             renderActiveSOSTracker(activeSOS);
+            playAlertTone();
+        }
+        if (currentUser && currentUser.role === "PASSENGER") {
+            checkActiveSOS();
         }
         if (msg.data && (msg.data.status === "RESOLVED" || msg.data.status === "CANCELLED")) {
             stopEmergencySiren();

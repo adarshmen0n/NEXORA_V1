@@ -44,9 +44,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     initWebSocket();
     await checkActiveEmergency();
 
-    // Default to Gandhipuram GPS fix if on desktop to arm system immediately
-    setPresetLocation("gandhipuram");
+    // Start GNSS satellite tracking immediately
+    requestDeviceLocation();
 
+    // Resilient fallback: poll for emergency status updates every 2.5s
+    setInterval(checkActiveEmergency, 2500);
     setInterval(refreshNearbyBuses, 8000);
 });
 
@@ -59,6 +61,12 @@ function initMap() {
     L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
         maxZoom: 19
     }).addTo(map);
+
+    // Allow user to tap anywhere on the map to place/adjust exact emergency distress coordinates
+    map.on("click", (e) => {
+        updatePassengerPosition(e.latlng.lat, e.latlng.lng, "Manual Map Pin", 2.0);
+        showToast(`Distress pin positioned: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`, "info");
+    });
 }
 
 function setPresetLocation(key) {
@@ -243,14 +251,14 @@ async function checkActiveEmergency() {
 
 function renderActiveSOSTracker(sos) {
     const container = document.getElementById("activeSOSContainer");
-    if (!sos || ["RESOLVED", "CANCELLED"].includes(sos.status)) {
+    if (!sos || sos.status === "CANCELLED") {
         container.style.display = "none";
         return;
     }
 
     container.style.display = "block";
     document.getElementById("activeSOSId").textContent = sos.sos_id;
-    document.getElementById("activeSOSAddress").textContent = sos.address;
+    document.getElementById("activeSOSAddress").textContent = sos.address || "Resolving location...";
     document.getElementById("activeSOSStatus").textContent = sos.status;
 
     // Steps
@@ -266,11 +274,11 @@ function renderActiveSOSTracker(sos) {
 
     if (sos.status === "ACTIVE") {
         s1.className = "tracker-step active";
-        document.getElementById("activeSOSDetail").textContent = "Alert broadcasted. Scanning for nearby emergency responders within 1km...";
+        document.getElementById("activeSOSDetail").textContent = "Alert broadcasted. Scanning for nearby emergency responders across Coimbatore sector...";
     } else if (sos.status === "ACKNOWLEDGED") {
         s1.className = "tracker-step completed";
         s2.className = "tracker-step active";
-        document.getElementById("activeSOSDetail").textContent = `Accepted by Responder: ${sos.responder_name || 'Emergency Unit'}. Preparing response.`;
+        document.getElementById("activeSOSDetail").textContent = `Accepted by Responder: ${sos.responder_name || 'Emergency Unit'}. Mobilizing.`;
     } else if (sos.status === "RESPONDING") {
         s1.className = "tracker-step completed";
         s2.className = "tracker-step completed";
@@ -280,8 +288,8 @@ function renderActiveSOSTracker(sos) {
         s1.className = "tracker-step completed";
         s2.className = "tracker-step completed";
         s3.className = "tracker-step completed";
-        s4.className = "tracker-step completed";
-        document.getElementById("activeSOSDetail").textContent = "Emergency resolved. You are marked safe.";
+        s4.className = "tracker-step completed active";
+        document.getElementById("activeSOSDetail").innerHTML = `<strong>★ Emergency resolved. You are marked safe!</strong> <button class="btn-sm" style="margin-left: 8px;" onclick="document.getElementById('activeSOSContainer').style.display='none'; activeSOS=null;">Dismiss</button>`;
     }
 }
 
