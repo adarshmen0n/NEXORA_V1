@@ -1,33 +1,33 @@
-# AGENTS.md — Antigravity Multi-Developer AI Operating Contract
+# AGENTS.md — Antigravity Multi-Developer AI Operating Contract (Permanent)
 
 > **Target Audience:** All AI Coding Assistants (Google Antigravity, Gemini Code Assist, Cursor, Claude Code) operating on either **Adarsh's** or **Dhanushya's** workstation.
 > **Project:** NEXORA (Next-generation Explainable Route Optimization & Retrieval Assistant)
-> **Baseline Release:** `v1.0.0` (Protected & Verified)
+> **Lifecycle Coverage:** V1 Baseline ➔ V2 Fleet Scaling ➔ V3 Smart Transit ➔ V4 Municipal Command ➔ V-FINAL Production Finish.
 
 ---
 
-## 1. Multi-Developer Context & Team Roles
+## 1. Multi-Developer Context & Long-Term Roles
 
-NEXORA is developed collaboratively by a two-person team using **Google Antigravity**:
+NEXORA is engineered cooperatively by a two-person team using **Google Antigravity**:
 
-| Developer | GitHub Username | Role | Primary Working Branch |
+| Developer | GitHub Username | Core Domain & Long-Term Responsibilities | Primary Working Branch |
 | :--- | :--- | :--- | :--- |
-| **Adarsh** | `adarshmen0n` | Original V1 Creator / Lead Architect | `adarsh-work` / `main` |
-| **Dhanushya** | `Dhanushya-lzs13` | V2 Lead Developer / Feature Engineer | `dhanushya-v2` |
+| **Adarsh** | `adarshmen0n` | **System Architect & Infrastructure Lead:** Backend FastAPI engine, SQLite/PostgreSQL architecture, security/JWT, telemetry ingestion, IoT gateway, CI/CD pipelines, and cloud deployment. | `adarsh-work` / `main` |
+| **Dhanushya** | `Dhanushya-lzs13` | **Feature Engineering & Transit Experience Lead:** Multi-bus frontend scaling, passenger experience, real-time crowding sensors, digital QR ticketing, PWA offline caching, and administrative analytics dashboards. | `dhanushya-v2` |
 
 **Canonical Repository:** `https://github.com/adarshmen0n/NEXORA_V1.git`
 
-Both developers run Antigravity instances on separate physical computers. The AI must act as an institutional team member that maintains total code integrity, adheres to architectural patterns, and never introduces conflicting or destructive changes.
+Both developers run Antigravity instances on separate physical machines. The AI must act as an institutional team member that maintains total code integrity, adheres to architectural patterns, and never introduces conflicting or destructive changes.
 
 ---
 
-## 2. The Zero-Destruction Policy (Strict Rule)
+## 2. The Zero-Destruction Policy (Strict Permanent Rule)
 
 The NEXORA V1 codebase is fully functioning, deployed on Render, and validated by **21 automated pytest test suites**. 
 
-When working on any task or prompt:
+When working on ANY phase or feature from V1 to V-FINAL:
 
-1. **NEVER delete, overwrite, or break working V1 functionality**:
+1. **NEVER delete, overwrite, or break established functionality**:
    - Authentication & Role-Based Access Control (`ADMIN`, `DRIVER`, `PASSENGER`, `RESPONDER`).
    - Hardware GNSS Mobile GPS Telemetry (Driver cockpit, Passenger tracking, Responder location).
    - Two-Step Confirmed Emergency SOS Pipeline with dynamic 35.0 km geofencing.
@@ -44,18 +44,21 @@ When working on any task or prompt:
 
 ---
 
-## 3. Git Branching & Synchronization Discipline
+## 3. Git Branching & Synchronization Discipline Across All Phases
 
 ### Branch Structure
 
 ```
-origin/main (PROTECTED - V1.0.0 baseline - Only merge verified, tested code)
+origin/main (PROTECTED - Production Baseline - Tagged releases: v1.0.0, v2.0.0, etc.)
    │
-   ├── origin/adarsh-work    (Adarsh's active development & architectural stabilization)
+   ├── origin/adarsh-work    (Adarsh's architectural & infrastructure branch)
    │
-   └── origin/dhanushya-v2   (Dhanushya's V2 feature engineering & enhancements)
+   └── origin/dhanushya-v2   (Dhanushya's feature engineering branch)
          │
-         └── feature/<dev>-<feature-name> (Optional task-specific feature branches)
+         ├── feature/dhanushya-fleet-scaling
+         ├── feature/dhanushya-crowd-density
+         ├── feature/v3-qr-ticketing
+         └── feature/v4-command-center
 ```
 
 ### Daily Operating Protocol for Antigravity
@@ -65,13 +68,13 @@ Before writing or editing code on any machine:
 2. **Pull upstream changes**:
    ```powershell
    git fetch origin
-   git merge origin/main   # Keep your branch up-to-date with production baseline
+   git merge origin/main --no-edit   # Keep your branch up-to-date with production baseline
    ```
 3. **Run automated test suite before starting**:
    ```powershell
    python -m pytest tests/ -v
    ```
-4. **Implement changes incrementally** with atomic commits.
+4. **Implement changes incrementally** with atomic, scoped commits.
 5. **Run automated test suite before pushing**:
    ```powershell
    python -m pytest tests/ -v
@@ -83,63 +86,53 @@ Before writing or editing code on any machine:
 
 ---
 
-## 4. Architectural Rules & Invariants
+## 4. Phase-by-Phase Evolutionary Invariants
 
-All AI agents must respect the following architectural invariants:
+When extending the system across phases, follow these architectural rules:
 
-### A. Coordinate System & Geolocation
-- **Format:** Decimal degrees `(latitude, longitude)`.
-- **Primary Region:** Coimbatore, Tamil Nadu, India (`11.0168° N, 76.9674° E`).
-- **Distance Metric:** Great-circle distance calculated strictly using the **Haversine formula** returning values in kilometers (`km`).
-- **Emergency Geofence:** Tactical dispatch limit is `35.0 km` (configurable via `SOS_RADIUS_KM`).
-- **Zero Mocking Fallbacks:** Real hardware coordinates from `navigator.geolocation` must never be silently overwritten by hardcoded default values. If GPS is unavailable, the UI must explicitly display "Acquiring GNSS fix..." and arm the SOS only when a genuine fix arrives.
+### A. Phase 2 (V2: Fleet Scaling & PWA)
+- **Multi-bus Support**: `Bus` model must support multiple active buses without breaking `BUS-001`.
+- **Occupancy Telemetry**: Add `occupancy_level` (`seats_available`, `standing_only`, `full`) to `BusResponse` schema with safe defaults so V1 clients don't crash.
+- **PWA Integrity**: Service worker must cache static assets while bypassing real-time WebSocket and telemetry endpoints.
 
-### B. Backend Architecture (FastAPI + SQLAlchemy)
-- **FastAPI Engine:** `backend/main.py`.
-- **Database:** SQLAlchemy ORM with SQLite (`nexora.db`) for development; schema designed for smooth PostgreSQL migration.
-- **Dependency Injection:** Database sessions must use `Depends(get_db)`.
-- **Security:** Passwords hashed with PBKDF2-SHA256 (`passlib`). Stateless authentication via signed JWTs (`python-jose`).
-- **Data Schemas:** All incoming and outgoing data models must be defined in `backend/schemas/` using Pydantic.
+### B. Phase 3 (V3: Smart Transit & QR Ticketing)
+- **Token Security**: QR boarding pass tokens must be cryptographically signed using the existing `SECRET_KEY` and include an expiration timestamp (`exp`).
+- **Explainable ETA Formula**: AI arrival predictions must factor in:
+  $$\text{ETA} = \frac{\text{Haversine Distance}}{\text{Live Speed}} + (\text{Remaining Stops} \times \text{Dwell Time}) + \text{Traffic Delay}$$
 
-### C. Frontend Architecture (Single Page Application)
-- **Unified Portal:** All four user experiences live in `frontend/index.html` and `frontend/app.js`:
-  - `admin-view`: Master fleet operations, driver roster, emergency ticket monitor.
-  - `driver-view`: Driver cockpit with start/stop trip, route stops, speed/heading telemetry.
-  - `passenger-view`: Commuter tracking, live bus ETA, stop sequence, 2-step emergency SOS.
-  - `responder-view`: Incident alert radar, victim street address, Haversine distance, status lifecycle.
-- **Style Theme:** Official dark transit theme (Dark Green / Forest Navy `#064e3b` accents) optimized for both desktop operations and mobile cockpits.
-- **Mapping:** Leaflet.js with high-contrast OpenStreetMap tiles, custom animated vehicle/responder/victim markers, and tactical POI overlays.
+### C. Phase 4 (V4: Municipal Command & IoT Gateway)
+- **IoT Payload Schema**: Telemetry from microcontrollers (ESP32/SIM800L) must pass through a strict Pydantic validator before hitting the tracking service.
+- **Database Scalability**: Any schema additions must include backward-compatible SQLAlchemy migrations that work identically on SQLite and PostgreSQL.
+
+### D. Phase 5 (V-FINAL: Production Finish)
+- **GitHub Actions**: Continuous integration must run all test suites on every pull request.
+- **Documentation**: Final defense presentation and thesis report must be kept in sync with code reality.
 
 ---
 
 ## 5. Testing & Quality Assurance Standard
 
-- **Test Suite Directory:** `tests/`
-- **Current Baseline:** 21 passing automated tests:
-  - `tests/test_auth_rbac.py`: User registration, login, role restrictions, password hashing.
-  - `tests/test_gps_tracking.py`: Bus telemetry, passenger geolocation, responder beacons, ETA math.
-  - `tests/test_sos_lifecycle.py`: SOS trigger, validation, alert dispatch, status progression, POIs.
-  - `tests/test_system_health.py`: Health endpoints, route retrieval, fleet status, trip lifecycle.
-- **Rule for New Features:** Every new feature branch created by Dhanushya or Adarsh **must include new unit/integration tests**.
-- **Passing Threshold:** `pytest` must report `21 passed` (or more) with `0 failed`. Never push code with failing tests.
+- **Current Baseline:** 21 passing automated tests in `tests/`.
+- **Target Across Phases:**
+  - V1: 21 tests (100% Passing)
+  - V2: 27 tests (+6 tests for fleet scaling and crowding)
+  - V3: 35 tests (+8 tests for QR ticketing and ETA predictions)
+  - V4: 41 tests (+6 tests for IoT gateway and command metrics)
+  - V-FINAL: 45+ tests (full regression and stress tests)
+- **Rule:** Every pull request into `main` MUST maintain 100% green tests. Never merge failing code.
 
 ---
 
 ## 6. Commit Message Convention
 
-Follow standard Conventional Commits:
-
 ```
 <type>(<scope>): <short description>
-
-[optional body]
 ```
 
-- `feat`: A new user-facing feature or enhancement.
-- `fix`: A bug fix in existing logic.
-- `docs`: Documentation updates (`README`, `AGENTS.md`, etc.).
-- `test`: Adding or updating test cases.
-- `refactor`: Code reorganization without functional changes.
-- `chore`: Build scripts, dependencies, or configuration changes.
-
-*Example:* `feat(v2-crowd): introduce passenger bus occupancy sensor telemetry`
+- `feat(v2-fleet)`: Multi-bus dynamic visualization
+- `feat(v2-crowd)`: Bus crowding sensor telemetry
+- `feat(v3-qr)`: Digital QR ticketing engine
+- `feat(v4-iot)`: ESP32 hardware telemetry gateway
+- `fix(gps)`: Geolocation calibration or bugfix
+- `docs(lifecycle)`: Documentation or roadmap updates
+- `test(v2)`: Adding new test suites

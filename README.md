@@ -2,33 +2,48 @@
 
 [![NEXORA Version](https://img.shields.io/badge/version-1.0.0-emerald.svg)](https://github.com/adarshmen0n/NEXORA_V1)
 [![Automated Tests](https://img.shields.io/badge/pytest-21%2F21%20passing-brightgreen.svg)](tests/)
+[![CI/CD Pipeline](https://img.shields.io/badge/GitHub%20Actions-Passing-blue.svg)](.github/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com/)
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/adarshmen0n/NEXORA_V1)
 
 > **Next-generation Explainable Route Optimization & Retrieval Assistant**  
-> AI-Powered Smart Public Transport Tracking, Prediction & Emergency Response System  
-> **Operational Domain:** Coimbatore Metropolitan Area, Tamil Nadu, India  
+> AI-Powered Smart Municipal Public Transport Tracking, Prediction & Tactical Emergency Network  
+> **Operational Scope:** Coimbatore Metropolitan Area, Tamil Nadu, India  
 
 ---
 
 ## 👥 Collaborative Engineering Team
 
-NEXORA is engineered cooperatively using **Google Antigravity** as our AI-powered vibe-coding pair programming environment:
+NEXORA is engineered collaboratively across its entire lifecycle using **Google Antigravity** as our AI-powered vibe-coding environment:
 
-| Developer | GitHub Profile | Role & Responsibilities | Working Branch |
+| Developer | GitHub Profile | Core Domain & Long-Term Responsibilities | Primary Working Branch |
 | :--- | :--- | :--- | :--- |
-| **Adarsh** | [`adarshmen0n`](https://github.com/adarshmen0n) | V1 Original Creator, Architecture Lead, Deployment & Stability | `adarsh-work` / `main` |
-| **Dhanushya** | [`Dhanushya-lzs13`](https://github.com/Dhanushya-lzs13) | V2 Lead Engineer, Fleet Scaling, Crowding Sensors & PWA | `dhanushya-v2` |
+| **Adarsh** | [`adarshmen0n`](https://github.com/adarshmen0n) | **System Architect & Infrastructure Lead:** FastAPI core, SQLite/PostgreSQL, security/JWT, GNSS telemetry, IoT gateway, CI/CD, and Render deployment. | `adarsh-work` / `main` |
+| **Dhanushya** | [`Dhanushya-lzs13`](https://github.com/Dhanushya-lzs13) | **Feature Engineering & Transit Experience Lead:** Multi-bus frontend, passenger experience, real-time crowd sensors, digital QR ticketing, PWA offline caching, and municipal analytics. | `dhanushya-v2` |
 
-**Single Canonical GitHub Repository:**  
+**Canonical Shared GitHub Repository:**  
 [`https://github.com/adarshmen0n/NEXORA_V1`](https://github.com/adarshmen0n/NEXORA_V1)
+
+---
+
+## 🗺️ Master Project Lifecycle Roadmap (V1 ➔ V-FINAL)
+
+| Phase | Version | Core Objectives | Status |
+| :--- | :--- | :--- | :--- |
+| **Phase 1** | `v1.0.0` | **Production Baseline:** 4-Role Unified SPA, Real Mobile GNSS GPS, 2-Step Confirmed SOS, 35 km Geofence, 21 Tests. | ✅ **Completed & Verified** |
+| **Phase 2** | `v2.0.0` | **Fleet Scaling & PWA:** Concurrent multi-bus tracking, in-cab crowd sensor, terminal timetables, offline PWA service worker. | 🔄 **Active Development** |
+| **Phase 3** | `v3.0.0` | **Smart Transit & Ticketing:** Cryptographic QR transit passes, driver camera scanner, explainable AI ETA, route trip planner. | 📋 **Roadmap** |
+| **Phase 4** | `v4.0.0` | **Municipal Command & IoT:** City transit authority command radar, ESP32 hardware IoT gateway, PostgreSQL migration. | 📋 **Roadmap** |
+| **Phase 5** | `v-final` | **Institutional Hardening:** Stress testing (100+ nodes), security audit, academic capstone thesis, presentation slides & video. | 🎓 **Final Defense** |
+
+*For complete milestones and sprint breakdowns, consult [`FULL_PROJECT_LIFECYCLE_GUIDE.md`](FULL_PROJECT_LIFECYCLE_GUIDE.md).*
 
 ---
 
 ## 🌟 1. System Overview
 
-NEXORA is a unified, single-application smart public transportation and emergency dispatch ecosystem. It connects transit administrators, municipal bus drivers, daily commuters, and emergency rescue units through real-time hardware GNSS telemetry, predictive arrival algorithms, geofenced alerts, and verified emergency dispatch workflows.
+NEXORA is a unified, single-application smart public transportation and emergency dispatch ecosystem. It links municipal transit administrators, bus operators, daily commuters, and emergency rescue units through real-time hardware GNSS telemetry, predictive arrival algorithms, geofenced alerts, and verified emergency dispatch workflows.
 
 ### 🎯 Core Operational Pipeline (Unified Roles)
 
@@ -51,7 +66,7 @@ NEXORA runs as a **Single Page Application (SPA)** from **one single URL**:
 When opened on any desktop, laptop, or mobile smartphone (iOS Safari / Android Chrome):
 1. **Gateway View**: Instant 1-tap quick buttons to enter any role.
 2. **Seamless Switching**: Top navigation bar allows instantaneous switching between roles without logging out.
-3. **No App Store Install Required**: Works directly in any modern browser with hardware GPS permissions.
+3. **Zero App Store Installs**: Works directly in any modern browser with hardware GPS permissions.
 
 ---
 
@@ -144,19 +159,20 @@ Open this link on your smartphone, grant location permissions when prompted, and
 ## 🤖 7. Antigravity AI Pair-Programming Rules
 
 When working with **Google Antigravity**:
-1. **Read `AGENTS.md`** before instructing the AI on new features.
-2. **Zero-Destruction Policy**: Never break or delete working V1 endpoints, schemas, or tests.
+1. **Read `AGENTS.md` and `FULL_PROJECT_LIFECYCLE_GUIDE.md`** before instructing the AI on new features.
+2. **Zero-Destruction Policy**: Never break or delete working functionality from previous versions.
 3. **Branch Discipline**:
-   - `main`: Protected production baseline (tagged `v1.0.0`).
+   - `main`: Protected production baseline (tagged releases: `v1.0.0`, `v2.0.0`, etc.).
    - `adarsh-work`: Adarsh's branch.
-   - `dhanushya-v2`: Dhanushya's branch for V2 feature development.
+   - `dhanushya-v2`: Dhanushya's branch for feature development.
 4. **Pre-Push Testing**: Always run `python -m pytest tests/ -v` before committing or pushing.
 
-For full architectural details, consult:
-- [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md) — Technical Blueprint & Data Models
+For complete documentation:
+- [`FULL_PROJECT_LIFECYCLE_GUIDE.md`](FULL_PROJECT_LIFECYCLE_GUIDE.md) — Master Roadmap to Project Finish
+- [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md) — Technical Blueprint & Architecture
 - [`V1_TO_V2_HANDOFF.md`](V1_TO_V2_HANDOFF.md) — Handoff Guide & V2 Priorities
 - [`AGENTS.md`](AGENTS.md) — AI Operating Contract & Coding Guidelines
-- [`CHANGELOG.md`](CHANGELOG.md) — Release History
+- [`CHANGELOG.md`](CHANGELOG.md) — Release History & Roadmap
 
 ---
 
@@ -178,4 +194,4 @@ Current test coverage (**21/21 passing**):
 
 ## 📜 License
 
-MIT License. Designed and developed by Adarsh & Dhanushya for smart municipal transit systems.
+MIT License. Engineered by Adarsh & Dhanushya for smart municipal transit systems.
